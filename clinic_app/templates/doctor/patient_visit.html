@@ -4,29 +4,29 @@
     <div class="col-md-12">
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="{{ url_for('doctor.dashboard') }}">لوحة تحكم الطبيب</a></li>
-                <li class="breadcrumb-item active" aria-current="page">زيارة المريض</li>
+                <li class="breadcrumb-item"><a href="{{ url_for('doctor.dashboard') }}">Tableau de bord médecin</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Consultation patient</li>
             </ol>
         </nav>
 
         <div class="card mb-4">
             <div class="card-header bg-info text-white">
-                <h3 class="mb-0">معلومات المريض</h3>
+                <h3 class="mb-0">Informations du patient</h3>
             </div>
             <div class="card-body">
                 <div class="row">
                     <div class="col-md-6">
-                        <p><strong>الاسم:</strong> {{ patient.full_name }}</p>
+                        <p><strong>Nom:</strong> {{ patient.full_name }}</p>
                     </div>
                     <div class="col-md-3">
-                        <p><strong>رقم الهاتف:</strong> {{ patient.phone }}</p>
+                        <p><strong>Numéro de téléphone:</strong> {{ patient.phone }}</p>
                     </div>
                     <div class="col-md-3">
-                        <p><strong>تاريخ الميلاد:</strong> 
+                        <p><strong>Date de naissance:</strong> 
                             {% if patient.birth_date %}
-                                {{ patient.birth_date.strftime('%Y-%m-%d') }}
+                                {{ patient.birth_date.strftime('%d/%m/%Y') }}
                             {% else %}
-                                غير محدد
+                                Non spécifié
                             {% endif %}
                         </p>
                     </div>
@@ -36,7 +36,7 @@
 
         <div class="card">
             <div class="card-header bg-primary text-white">
-                <h3 class="mb-0">تسجيل زيارة جديدة</h3>
+                <h3 class="mb-0">Enregistrer une nouvelle consultation</h3>
             </div>
             <div class="card-body">
                 <form method="POST" action="">
@@ -140,7 +140,8 @@
                         <div class="col-12">
                             <div class="alert alert-info">
                                 <h6><i class="fas fa-calendar-plus"></i> موعد المتابعة</h6>
-                                <p class="mb-0">سيتم إنشاء موعد متابعة تلقائياً للمريض</p>
+                                <p class="mb-0">سيتم إنشاء موعد متابعة تلقائياً للمريض عند حفظ الزيارة</p>
+                                <small class="text-muted">يمكنك تعديل التاريخ والوقت حسب الحاجة</small>
                             </div>
                         </div>
                         <div class="col-md-6">
@@ -240,7 +241,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const followUpDateInput = document.getElementById('follow_up_date');
     
     function toggleFollowUpFields() {
-        if (statusSelect.value === 'متابعة') {
+        if (statusSelect.value === 'suivi') {
             followUpFields.style.display = 'block';
             // تعيين قيمة افتراضية للموعد (أسبوع من الآن)
             if (!followUpDateInput.value) {

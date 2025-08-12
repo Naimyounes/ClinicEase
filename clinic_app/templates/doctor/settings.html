@@ -6,26 +6,187 @@
         <div class="col-md-8 mx-auto">
             <div class="card shadow">
                 <div class="card-header bg-primary text-white">
-                    <h3 class="mb-0">إعدادات الطبيب</h3>
+                    <h3 class="mb-0">Paramètres du médecin</h3>
                 </div>
                 <div class="card-body">
-                    <form method="POST" action="">
+                    <form method="POST" action="" enctype="multipart/form-data">
                         {{ form.hidden_tag() }}
 
+                        <!-- Paramètres de prix -->
                         <div class="mb-4">
+                            <h5 class="text-primary mb-3">
+                                <i class="fas fa-money-bill-wave me-2"></i>Paramètres des prix
+                            </h5>
                             <div class="form-group">
                                 {{ form.default_visit_price.label(class="form-label fw-bold") }}
                                 {% if form.default_visit_price.errors %}
-                                    {{ form.default_visit_price(class="form-control is-invalid", placeholder="أدخل السعر") }}
+                                    {{ form.default_visit_price(class="form-control is-invalid", placeholder="Entrer le prix") }}
                                     <div class="invalid-feedback">
                                         {% for error in form.default_visit_price.errors %}
                                             <span>{{ error }}</span>
                                         {% endfor %}
                                     </div>
                                 {% else %}
-                                    {{ form.default_visit_price(class="form-control", placeholder="أدخل السعر الافتراضي للزيارة") }}
+                                    {{ form.default_visit_price(class="form-control", placeholder="Entrer le prix par défaut de la consultation") }}
                                 {% endif %}
-                                <small class="form-text text-muted">هذا هو السعر الافتراضي الذي سيظهر عند إنشاء زيارة جديدة.</small>
+                                <small class="form-text text-muted">C'est le prix par défaut qui apparaîtra lors de la création d'une nouvelle consultation.</small>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <!-- Paramètres du médecin et de la clinique -->
+                        <div class="mb-4">
+                            <h5 class="text-primary mb-3">
+                                <i class="fas fa-user-md me-2"></i>Informations du médecin et de la clinique
+                            </h5>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        {{ form.doctor_name_arabic.label(class="form-label fw-bold") }}
+                                        {% if form.doctor_name_arabic.errors %}
+                                            {{ form.doctor_name_arabic(class="form-control is-invalid", placeholder="Dr. Ahmed Mohamed") }}
+                                            <div class="invalid-feedback">
+                                                {% for error in form.doctor_name_arabic.errors %}
+                                                    <span>{{ error }}</span>
+                                                {% endfor %}
+                                            </div>
+                                        {% else %}
+                                            {{ form.doctor_name_arabic(class="form-control", placeholder="د. أحمد محمد") }}
+                                        {% endif %}
+                                        <small class="form-text text-muted">اسم الطبيب كما سيظهر في الوصفات الطبية بالعربية.</small>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        {{ form.doctor_name_latin.label(class="form-label fw-bold") }}
+                                        {% if form.doctor_name_latin.errors %}
+                                            {{ form.doctor_name_latin(class="form-control is-invalid", placeholder="Dr. Ahmed Mohamed") }}
+                                            <div class="invalid-feedback">
+                                                {% for error in form.doctor_name_latin.errors %}
+                                                    <span>{{ error }}</span>
+                                                {% endfor %}
+                                            </div>
+                                        {% else %}
+                                            {{ form.doctor_name_latin(class="form-control", placeholder="Dr. Ahmed Mohamed") }}
+                                        {% endif %}
+                                        <small class="form-text text-muted">اسم الطبيب كما سيظهر في الوصفات الطبية باللاتينية.</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        {{ form.clinic_name.label(class="form-label fw-bold") }}
+                                        {% if form.clinic_name.errors %}
+                                            {{ form.clinic_name(class="form-control is-invalid", placeholder="عيادة الطب العام") }}
+                                            <div class="invalid-feedback">
+                                                {% for error in form.clinic_name.errors %}
+                                                    <span>{{ error }}</span>
+                                                {% endfor %}
+                                            </div>
+                                        {% else %}
+                                            {{ form.clinic_name(class="form-control", placeholder="عيادة الطب العام") }}
+                                        {% endif %}
+                                        <small class="form-text text-muted">اسم العيادة بالعربية كما سيظهر في الوصفات والتقارير.</small>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        {{ form.clinic_name_latin.label(class="form-label fw-bold") }}
+                                        {% if form.clinic_name_latin.errors %}
+                                            {{ form.clinic_name_latin(class="form-control is-invalid", placeholder="General Medicine Clinic") }}
+                                            <div class="invalid-feedback">
+                                                {% for error in form.clinic_name_latin.errors %}
+                                                    <span>{{ error }}</span>
+                                                {% endfor %}
+                                            </div>
+                                        {% else %}
+                                            {{ form.clinic_name_latin(class="form-control", placeholder="General Medicine Clinic") }}
+                                        {% endif %}
+                                        <small class="form-text text-muted">اسم العيادة باللاتينية كما سيظهر في الوصفات الطبية.</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        {{ form.doctor_specialty.label(class="form-label fw-bold") }}
+                                        {% if form.doctor_specialty.errors %}
+                                            {{ form.doctor_specialty(class="form-control is-invalid", placeholder="طب عام") }}
+                                            <div class="invalid-feedback">
+                                                {% for error in form.doctor_specialty.errors %}
+                                                    <span>{{ error }}</span>
+                                                {% endfor %}
+                                            </div>
+                                        {% else %}
+                                            {{ form.doctor_specialty(class="form-control", placeholder="طب عام") }}
+                                        {% endif %}
+                                        <small class="form-text text-muted">تخصص الطبيب بالعربية كما سيظهر في الوصفات الطبية.</small>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        {{ form.doctor_specialty_latin.label(class="form-label fw-bold") }}
+                                        {% if form.doctor_specialty_latin.errors %}
+                                            {{ form.doctor_specialty_latin(class="form-control is-invalid", placeholder="General Medicine") }}
+                                            <div class="invalid-feedback">
+                                                {% for error in form.doctor_specialty_latin.errors %}
+                                                    <span>{{ error }}</span>
+                                                {% endfor %}
+                                            </div>
+                                        {% else %}
+                                            {{ form.doctor_specialty_latin(class="form-control", placeholder="General Medicine") }}
+                                        {% endif %}
+                                        <small class="form-text text-muted">تخصص الطبيب باللاتينية كما سيظهر في الوصفات الطبية.</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <!-- شعار العيادة -->
+                        <div class="mb-4">
+                            <h5 class="text-primary mb-3">
+                                <i class="fas fa-image me-2"></i>شعار العيادة
+                            </h5>
+                            
+                            <!-- عرض الشعار الحالي إذا كان موجوداً -->
+                            {% if settings.clinic_logo %}
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">الشعار الحالي:</label>
+                                <div class="text-center">
+                                    <img src="{{ url_for('static', filename=settings.clinic_logo.replace('static/', '')) }}" 
+                                         alt="شعار العيادة" 
+                                         class="img-thumbnail" 
+                                         style="max-width: 200px; max-height: 200px;">
+                                </div>
+                            </div>
+                            {% endif %}
+                            
+                            <div class="form-group">
+                                {{ form.clinic_logo.label(class="form-label fw-bold") }}
+                                {% if form.clinic_logo.errors %}
+                                    {{ form.clinic_logo(class="form-control is-invalid", accept="image/*") }}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.clinic_logo.errors %}
+                                            <span>{{ error }}</span>
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    {{ form.clinic_logo(class="form-control", accept="image/*") }}
+                                {% endif %}
+                                <small class="form-text text-muted">
+                                    يُسمح بملفات الصور فقط (JPG, PNG, GIF). سيتم تحسين الصورة تلقائياً.
+                                    <br>الحد الأقصى للحجم المُوصى به: 300x300 بكسل.
+                                </small>
                             </div>
                         </div>
 

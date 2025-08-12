@@ -1,0 +1,339 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('doctor.dashboard') }}">Tableau de bord médecin</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Ordonnances prédéfinies (Debug)</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <!-- اختبار بسيط للزر -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-warning text-dark">
+                    <h3 class="mb-0">
+                        <i class="fas fa-bug me-2"></i>
+                        اختبار الزر - نسخة التشخيص
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <strong>تعليمات الاختبار:</strong>
+                        <ol>
+                            <li>افتح Developer Tools (F12)</li>
+                            <li>اذهب لتبويب Console</li>
+                            <li>أدخل اسم وصفة وانقر الزر</li>
+                            <li>راقب الرسائل في Console</li>
+                        </ol>
+                    </div>
+                    
+                    <form id="simple_test_form">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="form-group">
+                                    <label class="form-control-label mb-2">
+                                        <i class="fas fa-prescription-bottle me-1"></i>
+                                        اسم الوصفة:
+                                    </label>
+                                    <input type="text" 
+                                           id="simple_prescription_name" 
+                                           class="form-control" 
+                                           placeholder="أدخل اسم الوصفة..."
+                                           required>
+                                </div>
+                            </div>
+                            <div class="col-md-4 d-flex align-items-end">
+                                <button type="submit" class="btn btn-success w-100 btn-lg" id="simple_add_btn">
+                                    <i class="fas fa-plus"></i> اختبار الإضافة
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                    
+                    <hr>
+                    
+                    <!-- منطقة النتائج -->
+                    <div id="results_area">
+                        <h5>النتائج:</h5>
+                        <div id="results_content" class="border p-3 bg-light">
+                            <em>لم يتم تنفيذ أي اختبار بعد...</em>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- قائمة الوصفات الحالية -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h3 class="mb-0">
+                        <i class="fas fa-list me-2"></i>
+                        الوصفات الحالية
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div id="current_prescriptions">
+                        <div class="text-center">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">جاري التحميل...</span>
+                            </div>
+                            <p class="mt-2">جاري تحميل الوصفات...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+
+{% block scripts %}
+<script>
+console.log('🚀 بدء تحميل JavaScript للتشخيص');
+
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('📄 تم تحميل DOM - بدء التهيئة');
+    
+    // العناصر
+    const form = document.getElementById('simple_test_form');
+    const nameInput = document.getElementById('simple_prescription_name');
+    const addBtn = document.getElementById('simple_add_btn');
+    const resultsContent = document.getElementById('results_content');
+    const currentPrescriptions = document.getElementById('current_prescriptions');
+    
+    console.log('🔍 فحص العناصر:');
+    console.log('   Form:', form ? '✅' : '❌');
+    console.log('   Name Input:', nameInput ? '✅' : '❌');
+    console.log('   Add Button:', addBtn ? '✅' : '❌');
+    console.log('   Results:', resultsContent ? '✅' : '❌');
+    
+    // اختبار النقر على الزر
+    if (addBtn) {
+        addBtn.addEventListener('click', function(e) {
+            console.log('🖱️ تم النقر على الزر!');
+            e.preventDefault();
+            
+            const name = nameInput.value.trim();
+            console.log('📝 اسم الوصفة:', name);
+            
+            if (!name) {
+                console.log('⚠️ اسم الوصفة فارغ');
+                updateResults('❌ يرجى إدخال اسم الوصفة', 'danger');
+                return;
+            }
+            
+            console.log('✅ البيانات صحيحة - بدء الإرسال');
+            testAddPrescription(name);
+        });
+        
+        console.log('✅ تم إضافة event listener للزر');
+    } else {
+        console.log('❌ لم يتم العثور على الزر');
+    }
+    
+    // اختبار النموذج
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            console.log('📝 تم إرسال النموذج');
+            e.preventDefault();
+            
+            const name = nameInput.value.trim();
+            if (name) {
+                testAddPrescription(name);
+            }
+        });
+        
+        console.log('✅ تم إضافة event listener للنموذج');
+    }
+    
+    // تحميل الوصفات الحالية
+    loadCurrentPrescriptions();
+});
+
+// دالة اختبار إضافة الوصفة
+function testAddPrescription(name) {
+    console.log('🧪 بدء اختبار إضافة الوصفة:', name);
+    
+    // تعطيل الزر
+    const addBtn = document.getElementById('simple_add_btn');
+    const originalText = addBtn.innerHTML;
+    addBtn.disabled = true;
+    addBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الاختبار...';
+    
+    updateResults('🔄 جاري إرسال الطلب...', 'info');
+    
+    const data = { name: name };
+    console.log('📤 البيانات المرسلة:', data);
+    
+    fetch('/doctor/api/predefined_prescriptions', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => {
+        console.log('📡 استجابة الخادم:', response.status, response.statusText);
+        console.log('📡 Headers:', response.headers);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        return response.json();
+    })
+    .then(data => {
+        console.log('📥 البيانات المستلمة:', data);
+        
+        if (data.success) {
+            console.log('✅ نجح الإرسال!');
+            updateResults(`✅ ${data.message}`, 'success');
+            document.getElementById('simple_prescription_name').value = '';
+            loadCurrentPrescriptions(); // إعادة تحميل القائمة
+        } else {
+            console.log('❌ فشل الإرسال:', data.message);
+            updateResults(`❌ ${data.message}`, 'danger');
+        }
+    })
+    .catch(error => {
+        console.error('💥 خطأ في الطلب:', error);
+        updateResults(`💥 خطأ: ${error.message}`, 'danger');
+    })
+    .finally(() => {
+        // إعادة تفعيل الزر
+        addBtn.disabled = false;
+        addBtn.innerHTML = originalText;
+        console.log('🔄 تم إعادة تفعيل الزر');
+    });
+}
+
+// دالة تحديث النتائج
+function updateResults(message, type) {
+    const resultsContent = document.getElementById('results_content');
+    const alertClass = `alert alert-${type}`;
+    
+    resultsContent.innerHTML = `
+        <div class="${alertClass}">
+            ${message}
+        </div>
+        <small class="text-muted">الوقت: ${new Date().toLocaleTimeString()}</small>
+    `;
+    
+    console.log('📋 تحديث النتائج:', message);
+}
+
+// دالة تحميل الوصفات الحالية
+function loadCurrentPrescriptions() {
+    console.log('📥 جاري تحميل الوصفات الحالية...');
+    
+    fetch('/doctor/api/predefined_prescriptions')
+        .then(response => {
+            console.log('📡 استجابة تحميل الوصفات:', response.status);
+            return response.json();
+        })
+        .then(data => {
+            console.log('📊 الوصفات المحملة:', data.length);
+            
+            const container = document.getElementById('current_prescriptions');
+            
+            if (data.length === 0) {
+                container.innerHTML = `
+                    <div class="alert alert-info text-center">
+                        <i class="fas fa-info-circle fa-2x mb-3"></i>
+                        <h5>لا توجد وصفات</h5>
+                        <p class="mb-0">لم يتم إنشاء أي وصفات بعد</p>
+                    </div>
+                `;
+            } else {
+                let html = '<div class="row">';
+                data.forEach(prescription => {
+                    html += `
+                        <div class="col-md-4 mb-3">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h6 class="card-title">
+                                        <i class="fas fa-prescription-bottle me-2"></i>
+                                        ${prescription.name}
+                                    </h6>
+                                    <p class="card-text">
+                                        <small class="text-muted">
+                                            ID: ${prescription.id} | 
+                                            أدوية: ${prescription.medications.length}
+                                        </small>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+                container.innerHTML = html;
+            }
+        })
+        .catch(error => {
+            console.error('❌ خطأ في تحميل الوصفات:', error);
+            document.getElementById('current_prescriptions').innerHTML = `
+                <div class="alert alert-danger text-center">
+                    <i class="fas fa-exclamation-triangle fa-2x mb-3"></i>
+                    <h5>خطأ في التحميل</h5>
+                    <p class="mb-0">تعذر تحميل الوصفات: ${error.message}</p>
+                </div>
+            `;
+        });
+}
+
+console.log('✅ تم تحميل جميع دوال JavaScript');
+</script>
+{% endblock scripts %}
+
+{% block styles %}
+<style>
+.card {
+    border: none;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    transition: box-shadow 0.15s ease-in-out;
+}
+
+.card:hover {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+.card-header {
+    font-weight: 600;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+}
+
+.btn-lg {
+    font-size: 1.1rem;
+    font-weight: 500;
+}
+
+.alert {
+    border: none;
+    border-radius: 0.5rem;
+}
+
+#results_content {
+    min-height: 100px;
+    border-radius: 0.375rem;
+}
+
+.spinner-border {
+    width: 3rem;
+    height: 3rem;
+}
+
+.btn:disabled {
+    cursor: not-allowed;
+}
+</style>
+{% endblock styles %}

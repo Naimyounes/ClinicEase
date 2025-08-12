@@ -3,14 +3,14 @@
 {% block content %}
 <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1><i class="fas fa-globe"></i> المواعيد الأونلاين</h1>
+        <h1><i class="fas fa-globe"></i> Rendez-vous en ligne</h1>
         <div>
             <button class="btn btn-primary" onclick="location.reload()">
-                <i class="fas fa-sync-alt"></i> تحديث
+                <i class="fas fa-sync-alt"></i> Mettre à jour
             </button>
             {% if count is defined %}
             <span class="badge bg-info fs-6 ms-2">
-                إجمالي المواعيد: {{ count }}
+                Total des rendez-vous : {{ count }}
             </span>
             {% endif %}
         </div>
@@ -19,14 +19,14 @@
     <!-- فلاتر البحث -->
     <div class="card mb-4">
         <div class="card-header">
-            <h5><i class="fas fa-filter"></i> فلاتر البحث</h5>
+            <h5><i class="fas fa-filter"></i> Filtres de recherche</h5>
         </div>
         <div class="card-body">
             <form method="GET" action="{{ url_for('secretary.online_appointments') }}" class="row g-3">
                 <div class="col-md-4">
-                    <label for="status" class="form-label">فلترة حسب الحالة:</label>
+                    <label for="status" class="form-label">Filtrer par statut :</label>
                     <select class="form-select" id="status" name="status">
-                        <option value="">جميع الحالات</option>
+                        <option value="">Tous les statuts</option>
                         {% if available_statuses %}
                             {% for status in available_statuses %}
                                 <option value="{{ status }}" {% if current_status_filter == status %}selected{% endif %}>
@@ -37,16 +37,16 @@
                     </select>
                 </div>
                 <div class="col-md-4">
-                    <label for="date" class="form-label">فلترة حسب التاريخ:</label>
+                    <label for="date" class="form-label">Filtrer par date :</label>
                     <input type="date" class="form-control" id="date" name="date" 
                            value="{{ current_date_filter or '' }}">
                 </div>
                 <div class="col-md-4 d-flex align-items-end">
                     <button type="submit" class="btn btn-primary me-2">
-                        <i class="fas fa-search"></i> بحث
+                        <i class="fas fa-search"></i> Recherche
                     </button>
                     <a href="{{ url_for('secretary.online_appointments') }}" class="btn btn-outline-secondary">
-                        <i class="fas fa-times"></i> مسح الفلاتر
+                        <i class="fas fa-times"></i> Effacer les filtres
                     </a>
                 </div>
             </form>
@@ -60,7 +60,7 @@
         <div>
             <h5 class="mb-1">خدمة المواعيد غير متاحة</h5>
             <p class="mb-0">{{ error }}</p>
-            <small class="text-muted">يرجى التأكد من تشغيل خدمة المواعيد الأونلاين على http://localhost:4000</small>
+            <small class="text-muted">يرجى التأكد من تشغيل خدمة المواعيد الأونلاين و الاتصال بالانترنت</small>
         </div>
     </div>
     {% endif %}
@@ -117,7 +117,7 @@
             <div class="alert alert-primary d-flex align-items-center justify-content-center">
                 <i class="fas fa-calendar-alt fa-2x me-3"></i>
                 <div>
-                    <h5 class="mb-1">إجمالي المواعيد</h5>
+                    <h5 class="mb-1">Total des rendez-vous</h5>
                     <h3 class="mb-0"><strong>{{ count }}</strong></h3>
                 </div>
             </div>
@@ -130,7 +130,7 @@
     <div class="card">
         <div class="card-header bg-primary text-white">
             <h4 class="mb-0">
-                <i class="fas fa-list"></i> قائمة المواعيد الأونلاين
+                <i class="fas fa-list"></i> Liste des rendez-vous en ligne
             </h4>
         </div>
         <div class="card-body p-0">
@@ -139,14 +139,14 @@
                     <thead class="table-light">
                         <tr>
                             <th>#</th>
-                            <th>اسم المريض</th>
-                            <th>رقم الهاتف</th>
-                            <th>التاريخ</th>
-                            <th>الوقت</th>
-                            <th>الملاحظة</th>
-                            <th>الحالة</th>
-                            <th>تاريخ الحجز</th>
-                            <th>الإجراءات</th>
+                            <th>Nom du patient</th>
+                            <th>Téléphone</th>
+                            <th>Date</th>
+                            <th>Heure</th>
+                            <th>Note</th>
+                            <th>Statut</th>
+                            <th>Date de réservation</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>

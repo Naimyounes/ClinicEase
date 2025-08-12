@@ -5,8 +5,8 @@
         <div class="col-md-12">
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="{{ url_for('doctor.dashboard') }}">لوحة التحكم</a></li>
-                    <li class="breadcrumb-item active">المحاسبة</li>
+                    <li class="breadcrumb-item"><a href="{{ url_for('doctor.dashboard') }}">Tableau de bord</a></li>
+                    <li class="breadcrumb-item active">Comptabilité</li>
                 </ol>
             </nav>
         </div>
@@ -16,56 +16,78 @@
         <div class="col-md-12">
             <div class="card">
                 <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                    <h3>سجل المدفوعات</h3>
+                    <h3>Registre des paiements</h3>
                     <div>
-                        <span class="badge bg-light text-primary fs-5">إجمالي المدفوعات: {{ total_paid }} ريال</span>
+                        <span class="badge bg-light text-primary fs-5">Total des paiements: {{ total_paid }} DA</span>
                     </div>
                 </div>
                 <div class="card-body">
                     <div class="mb-3">
-                        <form class="row g-3" method="GET" action="{{ url_for('doctor.payments_list') }}">
+                        <form class="row g-3" method="GET" action="{{ url_for('doctor.doctor_payments') }}">
                             <div class="col-md-4">
-                                <label for="month" class="form-label">الشهر</label>
+                                <label for="month" class="form-label">Mois</label>
                                 <select name="month" id="month" class="form-select">
-                                    <option value="">جميع الأشهر</option>
-                                    <option value="1" {% if selected_month == 1 %}selected{% endif %}>يناير</option>
-                                    <option value="2" {% if selected_month == 2 %}selected{% endif %}>فبراير</option>
-                                    <option value="3" {% if selected_month == 3 %}selected{% endif %}>مارس</option>
-                                    <option value="4" {% if selected_month == 4 %}selected{% endif %}>أبريل</option>
-                                    <option value="5" {% if selected_month == 5 %}selected{% endif %}>مايو</option>
-                                    <option value="6" {% if selected_month == 6 %}selected{% endif %}>يونيو</option>
-                                    <option value="7" {% if selected_month == 7 %}selected{% endif %}>يوليو</option>
-                                    <option value="8" {% if selected_month == 8 %}selected{% endif %}>أغسطس</option>
-                                    <option value="9" {% if selected_month == 9 %}selected{% endif %}>سبتمبر</option>
-                                    <option value="10" {% if selected_month == 10 %}selected{% endif %}>أكتوبر</option>
-                                    <option value="11" {% if selected_month == 11 %}selected{% endif %}>نوفمبر</option>
-                                    <option value="12" {% if selected_month == 12 %}selected{% endif %}>ديسمبر</option>
+                                    <option value="">Tous les mois</option>
+                                    <option value="1" {% if selected_month == 1 %}selected{% endif %}>Janvier</option>
+                                    <option value="2" {% if selected_month == 2 %}selected{% endif %}>Février</option>
+                                    <option value="3" {% if selected_month == 3 %}selected{% endif %}>Mars</option>
+                                    <option value="4" {% if selected_month == 4 %}selected{% endif %}>Avril</option>
+                                    <option value="5" {% if selected_month == 5 %}selected{% endif %}>Mai</option>
+                                    <option value="6" {% if selected_month == 6 %}selected{% endif %}>Juin</option>
+                                    <option value="7" {% if selected_month == 7 %}selected{% endif %}>Juillet</option>
+                                    <option value="8" {% if selected_month == 8 %}selected{% endif %}>Août</option>
+                                    <option value="9" {% if selected_month == 9 %}selected{% endif %}>Septembre</option>
+                                    <option value="10" {% if selected_month == 10 %}selected{% endif %}>Octobre</option>
+                                    <option value="11" {% if selected_month == 11 %}selected{% endif %}>Novembre</option>
+                                    <option value="12" {% if selected_month == 12 %}selected{% endif %}>Décembre</option>
                                 </select>
                             </div>
                             <div class="col-md-4">
-                                <label for="year" class="form-label">السنة</label>
+                                <label for="year" class="form-label">Année</label>
                                 <select name="year" id="year" class="form-select">
-                                    <option value="">جميع السنوات</option>
+                                    <option value="">Toutes les années</option>
                                     {% for y in range(current_year, current_year-5, -1) %}
                                     <option value="{{ y }}" {% if selected_year == y %}selected{% endif %}>{{ y }}</option>
                                     {% endfor %}
                                 </select>
                             </div>
                             <div class="col-md-4">
-                                <label for="status" class="form-label">حالة الدفع</label>
+                                <label for="status" class="form-label">Statut de paiement</label>
                                 <select name="status" id="status" class="form-select">
-                                    <option value="">الكل</option>
-                                    <option value="مدفوع" {% if selected_status == "مدفوع" %}selected{% endif %}>مدفوع</option>
-                                    <option value="غير مدفوع" {% if selected_status == "غير مدفوع" %}selected{% endif %}>غير مدفوع</option>
-                                    <option value="مدفوع جزئياً" {% if selected_status == "مدفوع جزئياً" %}selected{% endif %}>مدفوع جزئياً</option>
+                                    <option value="">Tous</option>
+                                    <option value="مدفوع" {% if selected_status == "مدفوع" %}selected{% endif %}>Payé</option>
+                                    <option value="غير مدفوع" {% if selected_status == "غير مدفوع" %}selected{% endif %}>Non payé</option>
+                                    <option value="مدفوع جزئياً" {% if selected_status == "مدفوع جزئياً" %}selected{% endif %}>Partiellement payé</option>
                                 </select>
                             </div>
+                            
+                            <!-- فلتر التاريخ المخصص -->
+                            <div class="col-12 mt-3">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h6 class="mb-0">Filtrer par période personnalisée</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row g-3">
+                                            <div class="col-md-6">
+                                                <label for="start_date" class="form-label">Date de début</label>
+                                                <input type="date" name="start_date" id="start_date" class="form-control" value="{{ start_date }}">
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label for="end_date" class="form-label">Date de fin</label>
+                                                <input type="date" name="end_date" id="end_date" class="form-control" value="{{ end_date }}">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
                             <div class="col-12 mt-3">
                                 <button type="submit" class="btn btn-primary">
-                                    <i class="fas fa-filter"></i> تصفية
+                                    <i class="fas fa-filter"></i> Filtrer
                                 </button>
-                                <a href="{{ url_for('doctor.payments_list') }}" class="btn btn-secondary">
-                                    <i class="fas fa-sync-alt"></i> إعادة تعيين
+                                <a href="{{ url_for('doctor.doctor_payments') }}" class="btn btn-secondary">
+                                    <i class="fas fa-sync-alt"></i> Réinitialiser
                                 </a>
                             </div>
                         </form>
@@ -77,11 +99,11 @@
                             <thead class="table-dark">
                                 <tr>
                                     <th>#</th>
-                                    <th>اسم المريض</th>
-                                    <th>تاريخ الزيارة</th>
-                                    <th>التشخيص</th>
-                                    <th>المبلغ</th>
-                                    <th>حالة الدفع</th>
+                                    <th>Nom du patient</th>
+                                    <th>Date de la visite</th>
+                                    <th>Diagnostic</th>
+                                    <th>Montant</th>
+                                    <th>Statut de paiement</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -94,15 +116,17 @@
                                         </a>
                                     </td>
                                     <td>{{ visit.date.strftime('%Y-%m-%d') }}</td>
-                                    <td>{{ (visit.diagnosis[:30] + '...') if visit.diagnosis and visit.diagnosis|length > 30 else visit.diagnosis or 'غير محدد' }}</td>
-                                    <td>{{ visit.price or 'غير محدد' }} ريال</td>
+                                    <td>{{ (visit.diagnosis[:30] + '...') if visit.diagnosis and visit.diagnosis|length > 30 else visit.diagnosis or 'Non spécifié' }}</td>
+                                    <td>{{ visit.price or 'Non spécifié' }} DA</td>
                                     <td>
-                                        {% if visit.payment_status == "مدفوع" %}
-                                        <span class="badge bg-success">{{ visit.payment_status }}</span>
-                                        {% elif visit.payment_status == "مدفوع جزئياً" %}
-                                        <span class="badge bg-warning text-dark">{{ visit.payment_status }}</span>
+                                        {% if visit.payment_status == "payé" %}
+                                        <span class="badge bg-success">Payé</span>
+                                        {% elif visit.payment_status == "partiellement_payé" %}
+                                        <span class="badge bg-warning text-dark">Partiellement payé</span>
+                                        {% elif visit.payment_status == "non_payé" %}
+                                        <span class="badge bg-danger">Non payé</span>
                                         {% else %}
-                                        <span class="badge bg-danger">{{ visit.payment_status }}</span>
+                                        <span class="badge bg-secondary">{{ visit.payment_status }}</span>
                                         {% endif %}
                                     </td>
                                 </tr>
@@ -112,7 +136,7 @@
                     </div>
                     {% else %}
                     <div class="alert alert-info text-center">
-                        <i class="fas fa-info-circle fa-lg me-2"></i> لا توجد مدفوعات مسجلة حسب المعايير المحددة
+                        <i class="fas fa-info-circle fa-lg me-2"></i> Aucun paiement enregistré selon les critères spécifiés
                     </div>
                     {% endif %}
                 </div>
@@ -120,35 +144,322 @@
         </div>
     </div>
 
-    <!-- إحصائيات المدفوعات -->
+    <!-- Statistiques des paiements -->
     <div class="row">
         <div class="col-md-4 mb-3">
-            <div class="card bg-success text-white">
+            <div class="card bg-success text-white stats-card" data-status="payé">
                 <div class="card-body">
-                    <h5 class="card-title"><i class="fas fa-check-circle me-2"></i> المدفوعات المكتملة</h5>
-                    <h3 class="mt-3">{{ paid_count }} زيارة</h3>
-                    <p class="card-text fs-5">{{ paid_amount }} ريال</p>
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h5 class="card-title"><i class="fas fa-check-circle me-2"></i> Paiements complets</h5>
+                            <h3 class="mt-3 mb-1">{{ paid_count or 0 }}</h3>
+                            <small class="text-white-50">visite{{ 's' if (paid_count or 0) != 1 else '' }}</small>
+                        </div>
+                        <div class="text-end">
+                            <h4 class="mb-0">{{ paid_amount or 0 }}</h4>
+                            <small class="text-white-50">DA</small>
+                        </div>
+                    </div>
+                    {% if (paid_count or 0) > 0 %}
+                    <div class="mt-2">
+                        <small class="text-white-50">
+                            Moyenne: {{ "%.0f"|format((paid_amount or 0) / (paid_count or 1)) }} DA/visite
+                        </small>
+                    </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
         <div class="col-md-4 mb-3">
-            <div class="card bg-warning text-dark">
+            <div class="card bg-warning text-dark stats-card" data-status="partiellement_payé">
                 <div class="card-body">
-                    <h5 class="card-title"><i class="fas fa-clock me-2"></i> المدفوعات الجزئية</h5>
-                    <h3 class="mt-3">{{ partial_paid_count }} زيارة</h3>
-                    <p class="card-text fs-5">{{ partial_paid_amount }} ريال</p>
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h5 class="card-title"><i class="fas fa-clock me-2"></i> Paiements partiels</h5>
+                            <h3 class="mt-3 mb-1">{{ partial_paid_count or 0 }}</h3>
+                            <small class="text-dark-50">visite{{ 's' if (partial_paid_count or 0) != 1 else '' }}</small>
+                        </div>
+                        <div class="text-end">
+                            <h4 class="mb-0">{{ partial_paid_amount or 0 }}</h4>
+                            <small class="text-dark-50">DA</small>
+                        </div>
+                    </div>
+                    {% if (partial_paid_count or 0) > 0 %}
+                    <div class="mt-2">
+                        <small class="text-dark-50">
+                            Moyenne: {{ "%.0f"|format((partial_paid_amount or 0) / (partial_paid_count or 1)) }} DA/visite
+                        </small>
+                    </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
         <div class="col-md-4 mb-3">
-            <div class="card bg-danger text-white">
+            <div class="card bg-danger text-white stats-card" data-status="non_payé">
                 <div class="card-body">
-                    <h5 class="card-title"><i class="fas fa-times-circle me-2"></i> المدفوعات المستحقة</h5>
-                    <h3 class="mt-3">{{ unpaid_count }} زيارة</h3>
-                    <p class="card-text fs-5">{{ unpaid_amount }} ريال</p>
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h5 class="card-title"><i class="fas fa-times-circle me-2"></i> Paiements en attente</h5>
+                            <h3 class="mt-3 mb-1">{{ unpaid_count or 0 }}</h3>
+                            <small class="text-white-50">visite{{ 's' if (unpaid_count or 0) != 1 else '' }}</small>
+                        </div>
+                        <div class="text-end">
+                            <h4 class="mb-0">{{ unpaid_amount or 0 }}</h4>
+                            <small class="text-white-50">DA</small>
+                        </div>
+                    </div>
+                    {% if (unpaid_count or 0) > 0 %}
+                    <div class="mt-2">
+                        <small class="text-white-50">
+                            Moyenne: {{ "%.0f"|format((unpaid_amount or 0) / (unpaid_count or 1)) }} DA/visite
+                        </small>
+                    </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
     </div>
+    
+    <!-- Résumé total -->
+    {% set total_visits = (paid_count or 0) + (partial_paid_count or 0) + (unpaid_count or 0) %}
+    {% set total_amount = (paid_amount or 0) + (partial_paid_amount or 0) + (unpaid_amount or 0) %}
+    {% if total_visits > 0 %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-primary">
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-3">
+                            <h5 class="text-primary">{{ total_visits }}</h5>
+                            <small class="text-muted">Total des visites</small>
+                        </div>
+                        <div class="col-md-3">
+                            <h5 class="text-success">{{ total_amount }} DA</h5>
+                            <small class="text-muted">Chiffre d'affaires total</small>
+                        </div>
+                        <div class="col-md-3">
+                            <h5 class="text-info">{{ "%.0f"|format(total_amount / total_visits) }} DA</h5>
+                            <small class="text-muted">Prix moyen par visite</small>
+                        </div>
+                        <div class="col-md-3">
+                            <h5 class="text-warning">{{ "%.1f"|format(((paid_count or 0) + (partial_paid_count or 0)) / total_visits * 100) }}%</h5>
+                            <small class="text-muted">Taux de recouvrement</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // تحسين تجربة المستخدم مع فلتر التاريخ
+    const startDateInput = document.getElementById('start_date');
+    const endDateInput = document.getElementById('end_date');
+    
+    // التأكد من أن تاريخ النهاية لا يكون قبل تاريخ البداية
+    startDateInput.addEventListener('change', function() {
+        if (this.value && endDateInput.value && this.value > endDateInput.value) {
+            endDateInput.value = this.value;
+        }
+        endDateInput.min = this.value;
+    });
+    
+    endDateInput.addEventListener('change', function() {
+        if (this.value && startDateInput.value && this.value < startDateInput.value) {
+            startDateInput.value = this.value;
+        }
+        startDateInput.max = this.value;
+    });
+    
+    // إضافة تأثيرات بصرية للكروت
+    const cards = document.querySelectorAll('.card');
+    cards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-2px)';
+            this.style.transition = 'transform 0.2s ease-in-out';
+            this.style.boxShadow = '0 4px 8px rgba(0,0,0,0.2)';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+            this.style.boxShadow = '';
+        });
+    });
+    
+    // جعل كروت الإحصائيات قابلة للنقر لتطبيق فلتر سريع
+    const statsCards = document.querySelectorAll('.stats-card');
+    statsCards.forEach(card => {
+        card.style.cursor = 'pointer';
+        card.addEventListener('click', function() {
+            const status = this.getAttribute('data-status');
+            const statusSelect = document.getElementById('status');
+            
+            // تحديد القيمة المناسبة في select
+            const statusMapping = {
+                'payé': 'مدفوع',
+                'non_payé': 'غير مدفوع',
+                'partiellement_payé': 'مدفوع جزئياً'
+            };
+            
+            if (statusSelect && statusMapping[status]) {
+                statusSelect.value = statusMapping[status];
+                // تطبيق الفلتر تلقائياً
+                document.querySelector('form').submit();
+            }
+        });
+        
+        // إضافة tooltip
+        card.setAttribute('title', 'Cliquer pour filtrer par ce statut');
+    });
+    
+    // تحديث الإحصائيات عند تغيير الفلتر
+    const form = document.querySelector('form');
+    const inputs = form.querySelectorAll('select, input[type="date"]');
+    
+    inputs.forEach(input => {
+        input.addEventListener('change', function() {
+            // يمكن إضافة تحديث تلقائي للإحصائيات هنا إذا لزم الأمر
+        });
+    });
+});
+</script>
+
+<style>
+.stats-card {
+    transition: all 0.3s ease;
+    border: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.stats-card:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2) !important;
+}
+
+.stats-card .card-body {
+    padding: 1.5rem;
+}
+
+.text-dark-50 {
+    opacity: 0.7;
+}
+
+.text-white-50 {
+    opacity: 0.8;
+}
+
+/* تحسين مظهر الجدول */
+.table th {
+    border-top: none;
+    font-weight: 600;
+    background-color: #343a40;
+    color: white;
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+    background-color: rgba(0,0,0,.02);
+}
+
+/* تحسين مظهر الفلاتر */
+.form-select, .form-control {
+    border: 1px solid #ced4da;
+    border-radius: 0.375rem;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.form-select:focus, .form-control:focus {
+    border-color: #86b7fe;
+    outline: 0;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+/* تحسين مظهر الأزرار */
+.btn {
+    border-radius: 0.375rem;
+    font-weight: 500;
+    transition: all 0.15s ease-in-out;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+}
+
+/* تحسين مظهر البطاقات */
+.card {
+    border-radius: 0.5rem;
+    border: 1px solid rgba(0,0,0,.125);
+}
+
+.card-header {
+    border-radius: 0.5rem 0.5rem 0 0 !important;
+    font-weight: 600;
+}
+
+/* تحسين مظهر الـ badges */
+.badge {
+    font-size: 0.75em;
+    font-weight: 500;
+    padding: 0.375rem 0.75rem;
+    border-radius: 0.375rem;
+}
+
+/* تحسين الألوان */
+.bg-gradient-success {
+    background: linear-gradient(45deg, #28a745, #20c997);
+}
+
+.bg-gradient-warning {
+    background: linear-gradient(45deg, #ffc107, #fd7e14);
+}
+
+.bg-gradient-danger {
+    background: linear-gradient(45deg, #dc3545, #e83e8c);
+}
+
+/* تحسين responsive */
+@media (max-width: 768px) {
+    .stats-card .card-body {
+        padding: 1rem;
+    }
+    
+    .stats-card h3 {
+        font-size: 1.5rem;
+    }
+    
+    .stats-card h4 {
+        font-size: 1.25rem;
+    }
+}
+
+/* إضافة animation للأرقام */
+@keyframes countUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.stats-card h3, .stats-card h4 {
+    animation: countUp 0.6s ease-out;
+}
+
+/* تحسين مظهر الجدول على الموبايل */
+@media (max-width: 768px) {
+    .table-responsive {
+        border: none;
+    }
+    
+    .table {
+        font-size: 0.875rem;
+    }
+}
+</style>
+
 {% endblock content %}

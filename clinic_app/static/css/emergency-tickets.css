@@ -1,0 +1,453 @@
+/* ===== STYLES POUR LES TICKETS D'URGENCE ET CRITIQUES ===== */
+
+/* Styles de base pour les tickets critiques (priority = 2) */
+.critical-item-highlight {
+    background: linear-gradient(90deg, rgba(220, 53, 69, 0.15) 0%, rgba(255, 255, 255, 1) 100%);
+    border-left: 5px solid #dc3545 !important;
+    animation: critical-glow 1.5s ease-in-out infinite alternate;
+    position: relative;
+    box-shadow: 0 2px 10px rgba(220, 53, 69, 0.2);
+}
+
+.critical-item-highlight::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, rgba(220, 53, 69, 0.08) 0%, transparent 60%);
+    pointer-events: none;
+    border-radius: inherit;
+}
+
+/* Styles pour les badges critiques */
+.critical-badge-pulse {
+    animation: critical-pulse 1s ease-in-out infinite;
+    box-shadow: 0 0 15px rgba(220, 53, 69, 0.7);
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.critical-badge-inline {
+    animation: critical-flash 1.5s ease-in-out infinite;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border: 2px solid #dc3545;
+}
+
+.critical-badge-small {
+    animation: critical-pulse-small 1s ease-in-out infinite;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Indicateurs critiques */
+.critical-indicators {
+    animation: critical-attention 1.5s ease-in-out infinite;
+}
+
+.critical-icon {
+    animation: critical-shake 1s ease-in-out infinite;
+    filter: drop-shadow(0 0 8px rgba(220, 53, 69, 0.8));
+}
+
+.critical-pulse-dot {
+    width: 8px;
+    height: 8px;
+    background: #dc3545;
+    border-radius: 50%;
+    animation: critical-dot-pulse 1s ease-in-out infinite;
+}
+
+/* Styles pour les tickets prioritaires (priority = 1) */
+.emergency-item-dashboard {
+    background: linear-gradient(90deg, rgba(255, 193, 7, 0.1) 0%, rgba(255, 255, 255, 1) 100%);
+    border-left: 4px solid #ffc107 !important;
+    animation: priority-glow-dashboard 2s ease-in-out infinite alternate;
+    box-shadow: 0 2px 8px rgba(255, 193, 7, 0.2);
+}
+
+.priority-indicators {
+    animation: priority-attention 2s ease-in-out infinite;
+}
+
+.priority-icon {
+    animation: priority-twinkle 2s ease-in-out infinite;
+    filter: drop-shadow(0 0 5px rgba(255, 193, 7, 0.8));
+}
+
+.priority-badge-small {
+    animation: priority-pulse-small 2s ease-in-out infinite;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.urgent-badge-inline {
+    animation: urgent-flash-dashboard 2s ease-in-out infinite;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    border: 2px solid #ffc107;
+}
+
+/* ===== ANIMATIONS ===== */
+
+/* Animations pour les tickets critiques */
+@keyframes critical-glow {
+    0% {
+        box-shadow: 0 2px 10px rgba(220, 53, 69, 0.2), 0 0 15px rgba(220, 53, 69, 0.3);
+    }
+    100% {
+        box-shadow: 0 4px 20px rgba(220, 53, 69, 0.4), 0 0 25px rgba(220, 53, 69, 0.6);
+    }
+}
+
+@keyframes critical-pulse {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 0 15px rgba(220, 53, 69, 0.7);
+    }
+    50% {
+        transform: scale(1.1);
+        box-shadow: 0 0 25px rgba(220, 53, 69, 1);
+    }
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 15px rgba(220, 53, 69, 0.7);
+    }
+}
+
+@keyframes critical-flash {
+    0%, 50% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    25% {
+        opacity: 0.7;
+        transform: scale(1.1);
+    }
+    75% {
+        opacity: 0.9;
+        transform: scale(0.95);
+    }
+}
+
+@keyframes critical-attention {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+}
+
+@keyframes critical-shake {
+    0%, 100% {
+        transform: translateX(0) rotate(0deg);
+    }
+    25% {
+        transform: translateX(-3px) rotate(-5deg);
+    }
+    75% {
+        transform: translateX(3px) rotate(5deg);
+    }
+}
+
+@keyframes critical-pulse-small {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.2);
+        opacity: 0.7;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes critical-dot-pulse {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.5);
+        opacity: 0.5;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* Animations pour les tickets prioritaires */
+@keyframes priority-glow-dashboard {
+    0% {
+        box-shadow: 0 2px 8px rgba(255, 193, 7, 0.2), 0 0 10px rgba(255, 193, 7, 0.3);
+    }
+    100% {
+        box-shadow: 0 4px 15px rgba(255, 193, 7, 0.4), 0 0 20px rgba(255, 193, 7, 0.5);
+    }
+}
+
+@keyframes priority-attention {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+}
+
+@keyframes priority-twinkle {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1) rotate(0deg);
+    }
+    50% {
+        opacity: 0.8;
+        transform: scale(1.2) rotate(180deg);
+    }
+}
+
+@keyframes priority-pulse-small {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.1);
+        opacity: 0.8;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes urgent-flash-dashboard {
+    0%, 50% {
+        opacity: 1;
+    }
+    25% {
+        opacity: 0.8;
+        transform: scale(1.05);
+    }
+    75% {
+        opacity: 0.9;
+        transform: scale(0.98);
+    }
+}
+
+/* ===== STYLES POUR LES CARTES ===== */
+
+/* Cartes critiques */
+.critical-card {
+    border: 2px solid #dc3545;
+    box-shadow: 0 0 20px rgba(220, 53, 69, 0.3);
+    animation: critical-card-glow 2s ease-in-out infinite alternate;
+}
+
+@keyframes critical-card-glow {
+    0% {
+        box-shadow: 0 0 20px rgba(220, 53, 69, 0.3);
+    }
+    100% {
+        box-shadow: 0 0 30px rgba(220, 53, 69, 0.6);
+    }
+}
+
+/* Cartes prioritaires */
+.priority-card {
+    border: 2px solid #ffc107;
+    box-shadow: 0 0 15px rgba(255, 193, 7, 0.3);
+    animation: priority-card-glow 2s ease-in-out infinite alternate;
+}
+
+@keyframes priority-card-glow {
+    0% {
+        box-shadow: 0 0 15px rgba(255, 193, 7, 0.3);
+    }
+    100% {
+        box-shadow: 0 0 25px rgba(255, 193, 7, 0.5);
+    }
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+
+@media (max-width: 768px) {
+    .critical-item-highlight {
+        border-left: 3px solid #dc3545 !important;
+    }
+    
+    .emergency-item-dashboard {
+        border-left: 3px solid #ffc107 !important;
+    }
+    
+    .badge.bg-warning.text-dark.px-2.py-1.small,
+    .badge.bg-danger.text-white.px-2.py-1.small {
+        font-size: 0.7rem;
+    }
+    
+    .priority-indicators, .critical-indicators {
+        flex-direction: row;
+        gap: 0.5rem;
+    }
+    
+    .priority-badge-small, .critical-badge-small {
+        font-size: 0.6rem;
+    }
+    
+    .critical-icon, .priority-icon {
+        font-size: 1.2rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .critical-item-highlight, .emergency-item-dashboard {
+        padding: 0.75rem;
+    }
+    
+    .badge {
+        font-size: 0.65rem;
+        padding: 0.25rem 0.5rem;
+    }
+    
+    .critical-pulse-dot {
+        width: 6px;
+        height: 6px;
+    }
+}
+
+/* ===== STYLES POUR LES AVATARS ===== */
+
+.avatar-overlay {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    border: 2px solid white;
+}
+
+.critical-overlay {
+    background: #dc3545;
+    color: white;
+    animation: critical-overlay-pulse 1s ease-in-out infinite;
+}
+
+.priority-overlay {
+    background: #ffc107;
+    color: #212529;
+    animation: priority-overlay-pulse 2s ease-in-out infinite;
+}
+
+@keyframes critical-overlay-pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.2);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+@keyframes priority-overlay-pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* ===== EFFETS SPÉCIAUX ===== */
+
+/* Effet de brillance pour les tickets critiques */
+.critical-item-highlight::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    animation: critical-shine 3s ease-in-out infinite;
+}
+
+@keyframes critical-shine {
+    0% {
+        left: -100%;
+    }
+    50% {
+        left: 100%;
+    }
+    100% {
+        left: 100%;
+    }
+}
+
+/* Effet de pulsation pour les indicateurs */
+.critical-indicator {
+    width: 12px;
+    height: 12px;
+    background: #dc3545;
+    border-radius: 50%;
+    animation: critical-indicator-pulse 1s ease-in-out infinite;
+}
+
+.priority-indicator {
+    width: 10px;
+    height: 10px;
+    background: #ffc107;
+    border-radius: 50%;
+    animation: priority-indicator-pulse 2s ease-in-out infinite;
+}
+
+@keyframes critical-indicator-pulse {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.5);
+        opacity: 0.7;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes priority-indicator-pulse {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.3);
+        opacity: 0.8;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}

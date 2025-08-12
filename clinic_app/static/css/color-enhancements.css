@@ -1,0 +1,785 @@
+/* تحسينات إضافية للألوان والتصميم */
+
+/* تحسين الألوان الأساسية */
+:root {
+    /* ألوان أساسية محسنة */
+    --clinic-primary: #2563eb;
+    --clinic-primary-light: #3b82f6;
+    --clinic-primary-dark: #1d4ed8;
+    --clinic-success: #059669;
+    --clinic-warning: #d97706;
+    --clinic-danger: #dc2626;
+    --clinic-info: #0891b2;
+    
+    /* ألوان الخلفية */
+    --clinic-bg-main: #ffffff;
+    --clinic-bg-light: #f8fafc;
+    --clinic-bg-card: #ffffff;
+    
+    /* ألوان النصوص */
+    --clinic-text-primary: #1e293b;
+    --clinic-text-secondary: #64748b;
+    --clinic-text-muted: #94a3b8;
+    
+    /* ألوان الحدود */
+    --clinic-border: #e2e8f0;
+    --clinic-border-light: #f1f5f9;
+}
+
+/* تحسين خاص للكروت الملونة في dashboard */
+.bg-gradient-primary {
+    background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%) !important;
+    border: none !important;
+    box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.3) !important;
+}
+
+.bg-gradient-success {
+    background: linear-gradient(135deg, #10b981 0%, #047857 100%) !important;
+    border: none !important;
+    box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.3) !important;
+}
+
+.bg-gradient-warning {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
+    border: none !important;
+    box-shadow: 0 4px 6px -1px rgba(245, 158, 11, 0.3) !important;
+}
+
+.bg-gradient-info {
+    background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%) !important;
+    border: none !important;
+    box-shadow: 0 4px 6px -1px rgba(6, 182, 212, 0.3) !important;
+}
+
+.bg-gradient-danger {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
+    border: none !important;
+    box-shadow: 0 4px 6px -1px rgba(239, 68, 68, 0.3) !important;
+}
+
+.bg-gradient-secondary {
+    background: linear-gradient(135deg, #64748b 0%, #475569 100%) !important;
+    border: none !important;
+    box-shadow: 0 4px 6px -1px rgba(100, 116, 139, 0.3) !important;
+}
+
+/* تحسين الكروت العادية */
+.card {
+    background: var(--clinic-bg-card) !important;
+    border: 1px solid var(--clinic-border) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06) !important;
+    transition: all 0.2s ease-in-out !important;
+}
+
+.card:hover {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+    transform: translateY(-2px) !important;
+}
+
+.card-header {
+    background: var(--clinic-bg-light) !important;
+    border-bottom: 1px solid var(--clinic-border) !important;
+    border-radius: 12px 12px 0 0 !important;
+    color: var(--clinic-text-primary) !important;
+    font-weight: 600 !important;
+    padding: 1rem 1.5rem !important;
+}
+
+.card-body {
+    padding: 1.5rem !important;
+    color: var(--clinic-text-primary) !important;
+}
+
+/* تحسين navbar */
+.navbar {
+    background: var(--clinic-bg-card) !important;
+    border-bottom: 1px solid var(--clinic-border) !important;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06) !important;
+    padding: 1rem 0 !important;
+}
+
+.navbar-brand {
+    color: var(--clinic-bg-main) !important;
+    font-weight: 700 !important;
+    font-size: 1.5rem !important;
+}
+
+.navbar-brand:hover {
+    color: var(--clinic-bg-main) !important;
+}
+
+.navbar-nav .nav-link {
+    color: var(--clinic-text-secondary) !important;
+    font-weight: 500 !important;
+    padding: 0.5rem 1rem !important;
+    border-radius: 8px !important;
+    transition: all 0.2s ease-in-out !important;
+}
+
+.navbar-nav .nav-link:hover {
+    color: var(--clinic-primary) !important;
+    background: var(--clinic-bg-light) !important;
+}
+
+.navbar-nav .nav-link.active {
+    color: var(--clinic-primary) !important;
+    background: rgba(37, 99, 235, 0.1) !important;
+}
+
+/* تحسين الأزرار */
+.btn {
+    border-radius: 8px !important;
+    font-weight: 500 !important;
+    padding: 0.5rem 1rem !important;
+    transition: all 0.2s ease-in-out !important;
+    border: none !important;
+}
+
+.btn-primary {
+    background: var(--clinic-primary) !important;
+    color: white !important;
+    box-shadow: 0 1px 2px 0 rgba(37, 99, 235, 0.3) !important;
+}
+
+.btn-primary:hover {
+    background: var(--clinic-primary-dark) !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.4) !important;
+}
+
+.btn-success {
+    background: var(--clinic-success) !important;
+    color: white !important;
+    box-shadow: 0 1px 2px 0 rgba(5, 150, 105, 0.3) !important;
+}
+
+.btn-success:hover {
+    background: #047857 !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 6px -1px rgba(5, 150, 105, 0.4) !important;
+}
+
+.btn-warning {
+    background: var(--clinic-warning) !important;
+    color: white !important;
+    box-shadow: 0 1px 2px 0 rgba(217, 119, 6, 0.3) !important;
+}
+
+.btn-warning:hover {
+    background: #b45309 !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 6px -1px rgba(217, 119, 6, 0.4) !important;
+}
+
+.btn-danger {
+    background: var(--clinic-danger) !important;
+    color: white !important;
+    box-shadow: 0 1px 2px 0 rgba(220, 38, 38, 0.3) !important;
+}
+
+.btn-danger:hover {
+    background: #b91c1c !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 6px -1px rgba(220, 38, 38, 0.4) !important;
+}
+
+.btn-info {
+    background: var(--clinic-info) !important;
+    color: white !important;
+    box-shadow: 0 1px 2px 0 rgba(8, 145, 178, 0.3) !important;
+}
+
+.btn-info:hover {
+    background: #0e7490 !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 6px -1px rgba(8, 145, 178, 0.4) !important;
+}
+
+.btn-secondary {
+    background: var(--clinic-text-secondary) !important;
+    color: white !important;
+    box-shadow: 0 1px 2px 0 rgba(100, 116, 139, 0.3) !important;
+}
+
+.btn-secondary:hover {
+    background: #475569 !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 6px -1px rgba(100, 116, 139, 0.4) !important;
+}
+
+/* أزرار outline */
+.btn-outline-primary {
+    border: 2px solid var(--clinic-primary) !important;
+    color: var(--clinic-primary) !important;
+    background: transparent !important;
+}
+
+.btn-outline-primary:hover {
+    background: var(--clinic-primary) !important;
+    color: white !important;
+    transform: translateY(-1px) !important;
+}
+
+.btn-outline-success {
+    border: 2px solid var(--clinic-success) !important;
+    color: var(--clinic-success) !important;
+    background: transparent !important;
+}
+
+.btn-outline-success:hover {
+    background: var(--clinic-success) !important;
+    color: white !important;
+    transform: translateY(-1px) !important;
+}
+
+.btn-outline-warning {
+    border: 2px solid var(--clinic-warning) !important;
+    color: var(--clinic-warning) !important;
+    background: transparent !important;
+}
+
+.btn-outline-warning:hover {
+    background: var(--clinic-warning) !important;
+    color: white !important;
+    transform: translateY(-1px) !important;
+}
+
+.btn-outline-danger {
+    border: 2px solid var(--clinic-danger) !important;
+    color: var(--clinic-danger) !important;
+    background: transparent !important;
+}
+
+.btn-outline-danger:hover {
+    background: var(--clinic-danger) !important;
+    color: white !important;
+    transform: translateY(-1px) !important;
+}
+
+.btn-outline-info {
+    border: 2px solid var(--clinic-info) !important;
+    color: var(--clinic-info) !important;
+    background: transparent !important;
+}
+
+.btn-outline-info:hover {
+    background: var(--clinic-info) !important;
+    color: white !important;
+    transform: translateY(-1px) !important;
+}
+
+.btn-outline-secondary {
+    border: 2px solid var(--clinic-text-secondary) !important;
+    color: var(--clinic-text-secondary) !important;
+    background: transparent !important;
+}
+
+.btn-outline-secondary:hover {
+    background: var(--clinic-text-secondary) !important;
+    color: white !important;
+    transform: translateY(-1px) !important;
+}
+
+.btn-outline-dark {
+    border: 2px solid var(--clinic-text-primary) !important;
+    color: var(--clinic-text-primary) !important;
+    background: transparent !important;
+}
+
+.btn-outline-dark:hover {
+    background: var(--clinic-text-primary) !important;
+    color: white !important;
+    transform: translateY(-1px) !important;
+}
+
+/* تحسين الجداول */
+.table {
+    background: var(--clinic-bg-card) !important;
+    border-radius: 12px !important;
+    overflow: hidden !important;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06) !important;
+}
+
+.table th {
+    background: var(--clinic-bg-light) !important;
+    color: var(--clinic-text-primary) !important;
+    font-weight: 600 !important;
+    border-bottom: 2px solid var(--clinic-border) !important;
+    padding: 1rem !important;
+}
+
+.table td {
+    border-bottom: 1px solid var(--clinic-border-light) !important;
+    color: var(--clinic-text-secondary) !important;
+    padding: 1rem !important;
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+    background: var(--clinic-bg-light) !important;
+}
+
+.table tbody tr:hover {
+    background: rgba(37, 99, 235, 0.05) !important;
+}
+
+/* تحسين النماذج */
+.form-control, .form-select {
+    border: 2px solid var(--clinic-border) !important;
+    border-radius: 8px !important;
+    background: var(--clinic-bg-card) !important;
+    color: var(--clinic-text-primary) !important;
+    padding: 0.75rem 1rem !important;
+    transition: all 0.2s ease-in-out !important;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--clinic-primary) !important;
+    box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.25) !important;
+    background: var(--clinic-bg-card) !important;
+}
+
+.form-label {
+    color: var(--clinic-text-primary) !important;
+    font-weight: 500 !important;
+    margin-bottom: 0.5rem !important;
+}
+
+/* تحسين الـ badges */
+.badge {
+    border-radius: 6px !important;
+    font-weight: 500 !important;
+    padding: 0.375rem 0.75rem !important;
+    font-size: 0.75rem !important;
+}
+
+.badge.bg-primary {
+    background: var(--clinic-primary) !important;
+    color: white !important;
+}
+
+.badge.bg-success {
+    background: var(--clinic-success) !important;
+    color: white !important;
+}
+
+.badge.bg-warning {
+    background: var(--clinic-warning) !important;
+    color: white !important;
+}
+
+.badge.bg-danger {
+    background: var(--clinic-danger) !important;
+    color: white !important;
+}
+
+.badge.bg-info {
+    background: var(--clinic-info) !important;
+    color: white !important;
+}
+
+.badge.bg-secondary {
+    background: var(--clinic-text-secondary) !important;
+    color: white !important;
+}
+
+.badge.bg-dark {
+    background: var(--clinic-text-primary) !important;
+    color: white !important;
+}
+
+/* تحسين الـ alerts */
+.alert {
+    border-radius: 12px !important;
+    border: none !important;
+    padding: 1rem 1.5rem !important;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06) !important;
+}
+
+.alert-primary {
+    background: rgba(37, 99, 235, 0.1) !important;
+    color: var(--clinic-primary-dark) !important;
+    border-left: 4px solid var(--clinic-primary) !important;
+}
+
+.alert-success {
+    background: rgba(5, 150, 105, 0.1) !important;
+    color: #047857 !important;
+    border-left: 4px solid var(--clinic-success) !important;
+}
+
+.alert-warning {
+    background: rgba(217, 119, 6, 0.1) !important;
+    color: #b45309 !important;
+    border-left: 4px solid var(--clinic-warning) !important;
+}
+
+.alert-danger {
+    background: rgba(220, 38, 38, 0.1) !important;
+    color: #b91c1c !important;
+    border-left: 4px solid var(--clinic-danger) !important;
+}
+
+.alert-info {
+    background: rgba(8, 145, 178, 0.1) !important;
+    color: #0e7490 !important;
+    border-left: 4px solid var(--clinic-info) !important;
+}
+
+/* تحسين القوائم المنسدلة */
+.dropdown-menu {
+    background: var(--clinic-bg-card) !important;
+    border: 1px solid var(--clinic-border) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+    padding: 0.5rem !important;
+}
+
+.dropdown-item {
+    color: var(--clinic-text-secondary) !important;
+    border-radius: 8px !important;
+    padding: 0.5rem 1rem !important;
+    transition: all 0.2s ease-in-out !important;
+}
+
+.dropdown-item:hover {
+    background: var(--clinic-bg-light) !important;
+    color: var(--clinic-primary) !important;
+}
+
+.dropdown-header {
+    color: var(--clinic-text-primary) !important;
+    font-weight: 600 !important;
+    background: var(--clinic-bg-light) !important;
+    border-radius: 8px !important;
+    padding: 0.5rem 1rem !important;
+    margin-bottom: 0.25rem !important;
+}
+
+.dropdown-divider {
+    border-top: 1px solid var(--clinic-border) !important;
+    margin: 0.5rem 0 !important;
+}
+
+/* تحسين الـ list groups */
+.list-group-item {
+    background: var(--clinic-bg-card) !important;
+    border: 1px solid var(--clinic-border) !important;
+    color: var(--clinic-text-secondary) !important;
+    padding: 1rem !important;
+    transition: all 0.2s ease-in-out !important;
+}
+
+.list-group-item:hover {
+    background: var(--clinic-bg-light) !important;
+    color: var(--clinic-text-primary) !important;
+}
+
+.list-group-item.active {
+    background: var(--clinic-primary) !important;
+    border-color: var(--clinic-primary) !important;
+    color: white !important;
+}
+
+/* تحسين الـ pagination */
+.pagination .page-link {
+    background: var(--clinic-bg-card) !important;
+    border: 1px solid var(--clinic-border) !important;
+    color: var(--clinic-text-secondary) !important;
+    padding: 0.5rem 0.75rem !important;
+    border-radius: 8px !important;
+    margin: 0 0.125rem !important;
+    transition: all 0.2s ease-in-out !important;
+}
+
+.pagination .page-link:hover {
+    background: var(--clinic-primary) !important;
+    border-color: var(--clinic-primary) !important;
+    color: white !important;
+    transform: translateY(-1px) !important;
+}
+
+.pagination .page-item.active .page-link {
+    background: var(--clinic-primary) !important;
+    border-color: var(--clinic-primary) !important;
+    color: white !important;
+}
+
+/* تحسين الـ modals */
+.modal-content {
+    background: var(--clinic-bg-card) !important;
+    border: none !important;
+    border-radius: 16px !important;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
+}
+
+.modal-header {
+    background: var(--clinic-bg-light) !important;
+    border-bottom: 1px solid var(--clinic-border) !important;
+    border-radius: 16px 16px 0 0 !important;
+    padding: 1.5rem !important;
+}
+
+.modal-body {
+    padding: 1.5rem !important;
+}
+
+.modal-footer {
+    background: var(--clinic-bg-light) !important;
+    border-top: 1px solid var(--clinic-border) !important;
+    border-radius: 0 0 16px 16px !important;
+    padding: 1.5rem !important;
+}
+
+/* تحسين الـ progress bars */
+.progress {
+    background: var(--clinic-border-light) !important;
+    border-radius: 8px !important;
+    height: 8px !important;
+}
+
+.progress-bar {
+    background: var(--clinic-primary) !important;
+    border-radius: 8px !important;
+}
+
+/* تحسين الـ breadcrumbs */
+.breadcrumb {
+    background: var(--clinic-bg-light) !important;
+    border-radius: 8px !important;
+    padding: 0.75rem 1rem !important;
+}
+
+.breadcrumb-item a {
+    color: var(--clinic-primary) !important;
+    text-decoration: none !important;
+}
+
+.breadcrumb-item.active {
+    color: var(--clinic-text-secondary) !important;
+}
+
+/* تحسين الـ text colors */
+.text-primary {
+    color: var(--clinic-primary) !important;
+}
+
+.text-success {
+    color: var(--clinic-success) !important;
+}
+
+.text-warning {
+    color: var(--clinic-warning) !important;
+}
+
+.text-danger {
+    color: var(--clinic-danger) !important;
+}
+
+.text-info {
+    color: var(--clinic-info) !important;
+}
+
+.text-secondary {
+    color: var(--clinic-text-secondary) !important;
+}
+
+.text-muted {
+    color: var(--clinic-text-muted) !important;
+}
+
+.text-dark {
+    color: var(--clinic-text-primary) !important;
+}
+
+/* تحسين الـ borders */
+.border {
+    border: 1px solid var(--clinic-border) !important;
+}
+
+.border-primary {
+    border-color: var(--clinic-primary) !important;
+}
+
+.border-success {
+    border-color: var(--clinic-success) !important;
+}
+
+.border-warning {
+    border-color: var(--clinic-warning) !important;
+}
+
+.border-danger {
+    border-color: var(--clinic-danger) !important;
+}
+
+.border-info {
+    border-color: var(--clinic-info) !important;
+}
+
+/* تحسين الـ container */
+.container,
+.container-fluid {
+    background: transparent !important;
+}
+
+/* تحسين responsive */
+@media (max-width: 768px) {
+    .card {
+        margin-bottom: 1rem !important;
+        border-radius: 8px !important;
+    }
+    
+    .card-header {
+        border-radius: 8px 8px 0 0 !important;
+        padding: 0.75rem 1rem !important;
+    }
+    
+    .card-body {
+        padding: 1rem !important;
+    }
+    
+    .btn {
+        width: 100% !important;
+        margin-bottom: 0.5rem !important;
+    }
+    
+    .table-responsive {
+        border-radius: 8px !important;
+    }
+    
+    .navbar {
+        padding: 0.5rem 0 !important;
+    }
+    
+    .navbar-brand {
+        font-size: 1.25rem !important;
+    }
+}
+
+/* تحسين الـ scrollbars */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--clinic-bg-light);
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--clinic-text-muted);
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--clinic-text-secondary);
+}
+
+/* تحسين الـ selection */
+::selection {
+    background: rgba(37, 99, 235, 0.2);
+    color: var(--clinic-text-primary);
+}
+
+/* تحسين الـ focus */
+*:focus {
+    outline: 2px solid var(--clinic-primary);
+    outline-offset: 2px;
+}
+
+/* تحسين الـ animations */
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.slide-in-up {
+    animation: slideInUp 0.3s ease-out;
+}
+
+@keyframes fadeInScale {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.fade-in-scale {
+    animation: fadeInScale 0.2s ease-out;
+}
+
+/* تحسين الـ shadows للعناصر التفاعلية */
+.card:hover,
+.btn:hover,
+.form-control:focus,
+.form-select:focus,
+.dropdown-menu {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* تحسين خاص للكروت في dashboard */
+.dashboard-card {
+    border-radius: 16px !important;
+    overflow: hidden !important;
+    transition: all 0.3s ease !important;
+}
+
+.dashboard-card:hover {
+    transform: translateY(-4px) !important;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
+}
+
+/* تحسين الأيقونات */
+.fas, .far, .fab {
+    transition: all 0.2s ease-in-out !important;
+}
+
+/* تحسين الروابط */
+a {
+    color: var(--clinic-primary) !important;
+    text-decoration: none !important;
+    transition: all 0.2s ease-in-out !important;
+}
+
+a:hover {
+    color: var(--clinic-primary-dark) !important;
+}
+
+/* تحسين الـ tooltips */
+.tooltip .tooltip-inner {
+    background: var(--clinic-text-primary) !important;
+    color: white !important;
+    border-radius: 6px !important;
+    font-size: 0.875rem !important;
+}
+
+/* تحسين الـ popovers */
+.popover {
+    background: var(--clinic-bg-card) !important;
+    border: 1px solid var(--clinic-border) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+}
+
+.popover-header {
+    background: var(--clinic-bg-light) !important;
+    border-bottom: 1px solid var(--clinic-border) !important;
+    color: var(--clinic-text-primary) !important;
+    border-radius: 12px 12px 0 0 !important;
+}
+
+.popover-body {
+    color: var(--clinic-text-secondary) !important;
+}

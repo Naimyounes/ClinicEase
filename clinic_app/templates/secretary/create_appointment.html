@@ -7,7 +7,7 @@
             <div class="card">
                 <div class="card-header bg-primary text-white">
                     <h3 class="mb-0">
-                        <i class="fas fa-calendar-plus"></i> حجز موعد جديد
+                        <i class="fas fa-calendar-plus"></i> Nouveau rendez-vous
                     </h3>
                 </div>
                 <div class="card-body">
@@ -15,9 +15,12 @@
                         {{ form.hidden_tag() }}
                         
                         <div class="row mb-3">
-                            <div class="col-md-6">
-                                {{ form.patient_id.label(class="form-label") }}
-                                {{ form.patient_id(class="form-select") }}
+                            <div class="col-md-6 position-relative">
+                                <label class="form-label">Patient</label>
+                                <!-- hidden field that WTForms will read as patient_id -->
+                                <input type="hidden" name="patient_id" id="patient_id" value="{{ form.patient_id.data or '' }}">
+                                <input type="text" id="patient_search" class="form-control" placeholder="اكتب اسم المريض أو الهاتف..." autocomplete="off">
+                                <div id="patient_suggestions" class="list-group position-absolute w-100" style="z-index:1000; max-height: 220px; overflow:auto; display:none;"></div>
                                 {% if form.patient_id.errors %}
                                     <div class="text-danger">
                                         {% for error in form.patient_id.errors %}
@@ -28,7 +31,7 @@
                             </div>
                             <div class="col-md-6">
                                 {{ form.doctor_id.label(class="form-label") }}
-                                {{ form.doctor_id(class="form-select") }}
+                                {{ form.doctor_id(class="form-select", id="doctor_id") }}
                                 {% if form.doctor_id.errors %}
                                     <div class="text-danger">
                                         {% for error in form.doctor_id.errors %}
@@ -96,6 +99,79 @@ document.addEventListener('DOMContentLoaded', function() {
         tomorrow.setDate(tomorrow.getDate() + 1);
         tomorrow.setHours(9, 0, 0, 0);
         appointmentDateInput.value = tomorrow.toISOString().slice(0, 16);
+    }
+
+    // ===== Autocomplete للمريض =====
+    const searchInput = document.getElementById('patient_search');
+    const hiddenId = document.getElementById('patient_id');
+    const sugBox = document.getElementById('patient_suggestions');
+    let lastTerm = '';
+    let hideTimeout = null;
+
+    function renderSuggestions(items){
+        sugBox.innerHTML = '';
+        if(!items || items.length === 0){
+            sugBox.style.display = 'none';
+            return;
+        }
+        items.forEach(it => {
+            const a = document.createElement('a');
+            a.href = '#';
+            a.className = 'list-group-item list-group-item-action';
+            a.textContent = `${it.full_name} - ${it.phone || ''}`;
+            a.addEventListener('click', (e)=>{
+                e.preventDefault();
+                hiddenId.value = it.id;
+                searchInput.value = it.full_name;
+                sugBox.style.display = 'none';
+            });
+            sugBox.appendChild(a);
+        });
+        sugBox.style.display = 'block';
+    }
+
+    async function fetchPatients(term){
+        try{
+            const url = `{{ url_for('secretary.search_patients_api_french') }}?term=${encodeURIComponent(term)}`;
+            const res = await fetch(url);
+            if(!res.ok) return renderSuggestions([]);
+            const data = await res.json();
+            renderSuggestions(data);
+        }catch(err){
+            renderSuggestions([]);
+        }
+    }
+
+    searchInput.addEventListener('input', (e)=>{
+        const term = e.target.value.trim();
+        hiddenId.value = '';
+        if(term.length < 1){
+            sugBox.style.display = 'none';
+            return;
+        }
+        if(term !== lastTerm){
+            lastTerm = term;
+            fetchPatients(term);
+        }
+    });
+
+    searchInput.addEventListener('blur', ()=>{
+        hideTimeout = setTimeout(()=>{ sugBox.style.display='none'; }, 200);
+    });
+    searchInput.addEventListener('focus', ()=>{
+        clearTimeout(hideTimeout);
+        if(sugBox.innerHTML.trim() !== '') sugBox.style.display='block';
+    });
+
+    // ===== تعيين الطبيب الافتراضي إلى 'doctor' إذا وُجد =====
+    const doctorSelect = document.getElementById('doctor_id');
+    if(doctorSelect){
+        for(const opt of doctorSelect.options){
+            if(opt.text.trim().toLowerCase() === 'doctor' || opt.value === 'doctor'){
+                doctorSelect.value = opt.value;
+                break;
+            }
+        }
     }
 });
 </script>

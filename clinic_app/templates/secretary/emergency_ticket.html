@@ -1,0 +1,1342 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="emergency-container">
+    <!-- Header principal avec animation de pulsation -->
+    <div class="emergency-header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-8">
+                    <div class="header-content">
+                        <div class="emergency-badge">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            Urgences médicales
+                        </div>
+                        <h1 class="h2 fw-bold text-white mb-2">
+                            🚨 Système de tickets d'urgence
+                        </h1>
+                        <p class="text-white-50 mb-0 fs-6">
+                            Priorité absolue • Traitement immédiat • Passage en premier
+                        </p>
+                    </div>
+                </div>
+                <div class="col-lg-4 text-center">
+                    <div class="emergency-icon">
+                        <i class="fas fa-ambulance"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section de recherche principale (moved to top) -->
+    <div class="search-section">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <div class="search-card">
+                        <div class="search-header">
+                            <div class="search-title">
+                                <i class="fas fa-search me-3"></i>
+                                <span>Rechercher le patient</span>
+                            </div>
+                            <div class="search-subtitle">
+                                Tapez le nom complet ou le numéro de téléphone
+                            </div>
+                        </div>
+                        
+                        <div class="search-body">
+                            <form method="POST" id="emergencyForm" class="needs-validation" novalidate>
+                                {{ csrf_token() }}
+                                <div class="search-input-container">
+                                    <div class="input-group">
+                                        <span class="input-group-text search-icon">
+                                            <i class="fas fa-user-injured"></i>
+                                        </span>
+                                        <input type="text" 
+                                               class="form-control search-input" 
+                                               id="patientSearch" 
+                                               name="patient_search" 
+                                               placeholder="Nom du patient ou numéro de téléphone..."
+                                               autocomplete="off"
+                                               required>
+                                        <div class="search-loader">
+                                            <div class="spinner-border spinner-border-sm text-danger" role="status">
+                                                <span class="visually-hidden">Recherche...</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Dropdown des résultats de recherche -->
+                                    <div class="search-dropdown" id="searchDropdown">
+                                        <!-- Les résultats s'afficheront ici -->
+                                    </div>
+                                    
+                                    <div class="invalid-feedback">
+                                        Veuillez saisir le nom du patient ou le numéro de téléphone
+                                    </div>
+                                </div>
+                                
+                                <div class="search-help">
+                                    <i class="fas fa-lightbulb text-warning me-2"></i>
+                                    La recherche commence dès la première lettre tapée
+                                </div>
+                                
+                                <div class="search-actions">
+                                    <button type="submit" class="btn btn-emergency" id="createTicketBtn">
+                                        <i class="fas fa-exclamation-triangle me-2"></i>
+                                        Créer ticket d'urgence
+                                    </button>
+                                    <a href="{{ url_for('secretary.dashboard') }}" class="btn btn-outline-secondary">
+                                        <i class="fas fa-arrow-left me-2"></i>
+                                        Retour au tableau de bord
+                                    </a>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistiques compactes -->
+    <div class="compact-stats-section">
+        <div class="container">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <div class="compact-stat-card compact-stat-danger">
+                        <div class="compact-stat-icon">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <div class="compact-stat-content">
+                            <div class="compact-stat-number">{{ emergency_tickets_today or 0 }}</div>
+                            <div class="compact-stat-label">Urgences aujourd'hui</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="compact-stat-card compact-stat-warning">
+                        <div class="compact-stat-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="compact-stat-content">
+                            <div class="compact-stat-number">{{ total_waiting or 0 }}</div>
+                            <div class="compact-stat-label">En attente</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="compact-stat-card compact-stat-priority">
+                        <div class="compact-stat-icon">
+                            <i class="fas fa-tachometer-alt"></i>
+                        </div>
+                        <div class="compact-stat-content">
+                            <div class="compact-stat-number priority-text">Priorité</div>
+                            <div class="compact-stat-label">Niveau de priorité</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
+
+
+<style>
+/* Variables CSS pour la cohérence des couleurs */
+:root {
+    --emergency-primary: #dc3545;
+    --emergency-secondary: #c82333;
+    --emergency-dark: #a71e2a;
+    --emergency-light: #f8d7da;
+    --warning-color: #ffc107;
+    --success-color: #198754;
+    --info-color: #0dcaf0;
+    --gradient-emergency: linear-gradient(135deg, #dc3545 0%, #c82333 50%, #a71e2a 100%);
+    --gradient-warning: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
+    --gradient-success: linear-gradient(135deg, #198754 0%, #145a32 100%);
+    --gradient-info: linear-gradient(135deg, #0dcaf0 0%, #0aa2c0 100%);
+    --shadow-emergency: 0 10px 40px rgba(220, 53, 69, 0.3);
+    --shadow-light: 0 6px 20px rgba(0, 0, 0, 0.15);
+    --shadow-card: 0 8px 25px rgba(0, 0, 0, 0.1);
+    --border-radius: 15px;
+    --border-radius-lg: 20px;
+}
+
+/* Conteneur principal */
+.emergency-container {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 50%, #dee2e6 100%);
+    position: relative;
+    overflow-x: hidden;
+}
+
+.emergency-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: 
+        radial-gradient(circle at 20% 80%, rgba(220, 53, 69, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(255, 193, 7, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 40% 40%, rgba(25, 135, 84, 0.05) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+.emergency-container > * {
+    position: relative;
+    z-index: 1;
+}
+
+/* Header avec animation - plus compact */
+.emergency-header {
+    background: var(--gradient-emergency);
+    padding: 3rem 0 2rem;
+    position: relative;
+    overflow: hidden;
+    box-shadow: var(--shadow-emergency);
+}
+
+.emergency-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 20"><defs><pattern id="emergency-pattern" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="10" cy="10" r="1" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="20" fill="url(%23emergency-pattern)"/></svg>');
+    animation: backgroundMove 20s linear infinite;
+}
+
+@keyframes backgroundMove {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(20px); }
+}
+
+.header-content {
+    position: relative;
+    z-index: 2;
+}
+
+.emergency-badge {
+    display: inline-flex;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.25);
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 50px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    margin-bottom: 1.5rem;
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    animation: pulse 2s infinite;
+    text-transform: uppercase;
+}
+
+.emergency-badge i {
+    margin-right: 0.5rem;
+    animation: bounce 1s infinite alternate;
+}
+
+@keyframes bounce {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(-3px); }
+}
+
+.emergency-icon {
+    font-size: 3.5rem;
+    color: rgba(255, 255, 255, 0.3);
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+/* Section des statistiques compactes */
+.compact-stats-section {
+    padding: 2rem 0;
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.compact-stat-card {
+    background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    box-shadow: var(--shadow-card);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+}
+
+.compact-stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    transition: height 0.3s ease;
+}
+
+.compact-stat-danger::before { background: var(--emergency-primary); }
+.compact-stat-warning::before { background: var(--warning-color); }
+.compact-stat-priority::before { background: linear-gradient(45deg, #ff6b6b, #ff8e8e); }
+
+.compact-stat-card:hover {
+    transform: translateY(-6px) scale(1.02);
+    box-shadow: 0 15px 35px rgba(220, 53, 69, 0.2);
+}
+
+.compact-stat-card:hover::before {
+    height: 100%;
+    opacity: 0.03;
+}
+
+.compact-stat-icon {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+}
+
+.compact-stat-danger .compact-stat-icon {
+    background: linear-gradient(135deg, var(--emergency-light), #f5c6cb);
+    color: var(--emergency-primary);
+}
+
+.compact-stat-warning .compact-stat-icon {
+    background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+    color: #856404;
+}
+
+.compact-stat-priority .compact-stat-icon {
+    background: linear-gradient(135deg, #d1ecf1, #b8e6f1);
+    color: var(--info-color);
+}
+
+.compact-stat-card:hover .compact-stat-icon {
+    transform: scale(1.05) rotate(3deg);
+}
+
+.compact-stat-content {
+    flex-grow: 1;
+}
+
+.compact-stat-number {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #2c3e50;
+    margin-bottom: 0.25rem;
+    line-height: 1;
+}
+
+.compact-stat-label {
+    color: #6c757d;
+    font-weight: 500;
+    font-size: 0.85rem;
+    margin: 0;
+}
+
+/* Section des statistiques (legacy) */
+.stats-section {
+    padding: 2rem 0;
+    margin-top: -2rem;
+    position: relative;
+    z-index: 3;
+}
+
+.stat-card {
+    background: white;
+    border-radius: 16px;
+    padding: 2rem;
+    border: none;
+    box-shadow: var(--shadow-light);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    height: 100%;
+}
+
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    transition: height 0.3s ease;
+}
+
+.stat-card-danger::before { background: var(--emergency-primary); }
+.stat-card-warning::before { background: var(--warning-color); }
+.stat-card-priority::before { background: linear-gradient(45deg, #ff6b6b, #ff8e8e); }
+
+.stat-card:hover {
+    transform: translateY(-8px);
+    box-shadow: var(--shadow-emergency);
+}
+
+.stat-card:hover::before {
+    height: 100%;
+    opacity: 0.05;
+}
+
+.stat-icon {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    transition: all 0.3s ease;
+}
+
+.stat-card-danger .stat-icon {
+    background: linear-gradient(135deg, var(--emergency-light), #f5c6cb);
+    color: var(--emergency-primary);
+}
+
+.stat-card-warning .stat-icon {
+    background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+    color: #856404;
+}
+
+.stat-card-priority .stat-icon {
+    background: linear-gradient(135deg, #d1ecf1, #b8e6f1);
+    color: var(--info-color);
+}
+
+.stat-card:hover .stat-icon {
+    transform: scale(1.1) rotate(5deg);
+}
+
+.stat-number {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #2c3e50;
+    margin-bottom: 0.5rem;
+}
+
+.priority-text {
+    background: linear-gradient(45deg, #ff6b6b, #ff8e8e);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.stat-label {
+    color: #6c757d;
+    font-weight: 500;
+    font-size: 1rem;
+}
+
+/* Section de recherche - plus proéminente */
+.search-section {
+    padding: 2rem 0 3rem 0;
+    margin-top: -1rem;
+    position: relative;
+    z-index: 4;
+}
+
+.search-card {
+    background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-card);
+    overflow: hidden;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+}
+
+.search-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+}
+
+.search-header {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    padding: 2rem 2rem 1rem;
+    text-align: center;
+}
+
+.search-title {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 0.5rem;
+}
+
+.search-subtitle {
+    color: #6c757d;
+    font-size: 1rem;
+}
+
+.search-body {
+    padding: 2rem;
+}
+
+.search-input-container {
+    position: relative;
+    margin-bottom: 1.5rem;
+}
+
+.input-group {
+    box-shadow: var(--shadow-light);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.search-icon {
+    background: var(--gradient-emergency);
+    color: white;
+    border: none;
+    width: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+}
+
+.search-input {
+    border: none;
+    padding: 1rem 1.5rem;
+    font-size: 1.1rem;
+    background: white;
+    transition: all 0.3s ease;
+}
+
+.search-input:focus {
+    box-shadow: none;
+    border: none;
+    outline: none;
+}
+
+.search-input::placeholder {
+    color: #adb5bd;
+    font-style: italic;
+}
+
+.search-loader {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: none;
+}
+
+/* Dropdown de recherche */
+.search-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 1px solid #e9ecef;
+    border-top: none;
+    border-radius: 0 0 12px 12px;
+    max-height: 400px;
+    overflow-y: auto;
+    z-index: 1000;
+    display: none;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+}
+
+.search-result-item {
+    display: flex;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #f8f9fa;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.search-result-item:last-child {
+    border-bottom: none;
+}
+
+.search-result-item:hover,
+.search-result-item.selected {
+    background: linear-gradient(135deg, #fff5f5 0%, #ffe6e6 100%);
+    transform: translateX(5px);
+}
+
+.search-result-item:hover::before,
+.search-result-item.selected::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: var(--gradient-emergency);
+}
+
+.result-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: var(--gradient-emergency);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 600;
+    font-size: 1.1rem;
+    margin-right: 1rem;
+    flex-shrink: 0;
+}
+
+.result-info {
+    flex-grow: 1;
+}
+
+.result-name {
+    font-weight: 600;
+    color: #2c3e50;
+    font-size: 1rem;
+    margin-bottom: 0.25rem;
+}
+
+.result-phone {
+    color: #6c757d;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.result-arrow {
+    color: var(--emergency-primary);
+    font-size: 1.2rem;
+    transform: translateX(0);
+    transition: transform 0.3s ease;
+}
+
+.search-result-item:hover .result-arrow {
+    transform: translateX(5px);
+}
+
+.no-results {
+    padding: 2rem;
+    text-align: center;
+    color: #6c757d;
+    font-style: italic;
+}
+
+.no-results i {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+/* Aide de recherche */
+.search-help {
+    background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    color: #856404;
+    margin-bottom: 2rem;
+    border-left: 4px solid var(--warning-color);
+}
+
+/* Actions de recherche */
+.search-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.btn-emergency {
+    background: var(--gradient-emergency);
+    color: white;
+    border: none;
+    padding: 1rem 2.5rem;
+    border-radius: 50px;
+    font-weight: 700;
+    font-size: 1.1rem;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: var(--shadow-emergency);
+    position: relative;
+    overflow: hidden;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.btn-emergency::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+}
+
+.btn-emergency:hover::before {
+    left: 100%;
+}
+
+.btn-emergency:hover {
+    background: linear-gradient(135deg, var(--emergency-secondary) 0%, var(--emergency-dark) 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 12px 40px rgba(220, 53, 69, 0.3);
+    color: white;
+}
+
+.btn-emergency:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.btn-outline-secondary {
+    border: 2px solid #6c757d;
+    color: #6c757d;
+    padding: 0.875rem 2rem;
+    border-radius: 50px;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    transition: all 0.3s ease;
+}
+
+.btn-outline-secondary:hover {
+    background: #6c757d;
+    color: white;
+    transform: translateY(-2px);
+}
+
+/* Section des instructions */
+.instructions-section {
+    padding: 3rem 0;
+    background: white;
+}
+
+.instructions-card {
+    background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
+    border-radius: var(--border-radius-lg);
+    padding: 2.5rem;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    box-shadow: var(--shadow-card);
+    transition: all 0.3s ease;
+}
+
+.instructions-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+}
+
+.instructions-header {
+    display: flex;
+    align-items: center;
+    padding-bottom: 1.5rem;
+    border-bottom: 3px solid var(--emergency-primary);
+    margin-bottom: 2rem;
+    position: relative;
+}
+
+.instructions-header::after {
+    content: '';
+    position: absolute;
+    bottom: -3px;
+    left: 0;
+    width: 60px;
+    height: 3px;
+    background: var(--gradient-emergency);
+    border-radius: 2px;
+}
+
+.instruction-list h6 {
+    border-bottom: 2px solid #e9ecef;
+    padding-bottom: 1rem;
+    margin-bottom: 1.5rem;
+    position: relative;
+}
+
+.instruction-list h6::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 40px;
+    height: 2px;
+    border-radius: 1px;
+}
+
+.text-success h6::after {
+    background: var(--gradient-success);
+}
+
+.text-danger h6::after {
+    background: var(--gradient-emergency);
+}
+
+.instruction-item {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 1.25rem;
+    padding: 0.75rem;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: var(--border-radius);
+    position: relative;
+}
+
+.instruction-item:hover {
+    background: linear-gradient(135deg, rgba(248, 249, 250, 0.8) 0%, rgba(233, 236, 239, 0.6) 100%);
+    transform: translateX(8px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+.instruction-item::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: transparent;
+    border-radius: 2px;
+    transition: all 0.3s ease;
+}
+
+.instruction-item:hover::before {
+    background: var(--gradient-emergency);
+}
+
+.instruction-item i {
+    margin-top: 0.25rem;
+    flex-shrink: 0;
+}
+
+
+
+/* Animations de chargement */
+.loading-pulse {
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+/* Responsive Design */
+
+
+@media (max-width: 768px) {
+    .emergency-header {
+        padding: 1.5rem 0 1rem;
+    }
+    
+    .emergency-header h1 {
+        font-size: 1.5rem;
+    }
+    
+    .emergency-icon {
+        font-size: 2.5rem;
+        margin-top: 1rem;
+    }
+    
+    .compact-stat-card {
+        margin-bottom: 1rem;
+    }
+    
+    .search-actions {
+        flex-direction: column;
+    }
+    
+    .btn-emergency,
+    .btn-outline-secondary {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .instructions-card {
+        padding: 1.5rem;
+    }
+    
+    .instruction-item {
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .search-card,
+    .instructions-card {
+        margin: 0 1rem;
+    }
+    
+    .search-header,
+    .search-body {
+        padding: 1.5rem;
+    }
+    
+    .search-input {
+        font-size: 1rem;
+    }
+}
+
+/* Accessibilité */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* Impression */
+@media print {
+    .emergency-container {
+        background: white;
+    }
+    
+    .emergency-header {
+        background: white;
+        color: black;
+    }
+    
+    .search-actions,
+    .instructions-section {
+        display: none;
+    }
+}
+</style>
+
+<script>
+// Configuration et variables globales
+const CONFIG = {
+    searchDelay: 300,
+    minSearchLength: 1,
+    maxResults: 8,
+    apiEndpoint: '{{ url_for("secretary.search_patients_api") }}'
+};
+
+class EmergencyTicketManager {
+    constructor() {
+        this.searchTimeout = null;
+        this.currentSearchTerm = '';
+        this.searchResults = [];
+        this.selectedIndex = -1;
+        this.selectedPatient = null;
+        
+        this.initializeElements();
+        this.bindEvents();
+        this.focusSearchInput();
+    }
+    
+    initializeElements() {
+        this.elements = {
+            searchInput: document.getElementById('patientSearch'),
+            searchDropdown: document.getElementById('searchDropdown'),
+            searchLoader: document.querySelector('.search-loader'),
+            createBtn: document.getElementById('createTicketBtn'),
+            form: document.getElementById('emergencyForm')
+        };
+    }
+    
+    bindEvents() {
+        // Événements de recherche
+        this.elements.searchInput.addEventListener('input', (e) => {
+            this.handleSearchInput(e.target.value);
+        });
+        
+        this.elements.searchInput.addEventListener('keydown', (e) => {
+            this.handleKeyboardNavigation(e);
+        });
+        
+        this.elements.searchInput.addEventListener('focus', () => {
+            this.showSearchResults();
+        });
+        
+        // Événements de formulaire
+        this.elements.form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            this.handleFormSubmit();
+        });
+        
+        // Clic en dehors pour fermer le dropdown
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.search-input-container')) {
+                this.hideSearchResults();
+            }
+        });
+        
+        // Validation en temps réel
+        this.elements.searchInput.addEventListener('input', () => {
+            this.validateInput();
+        });
+    }
+    
+    handleSearchInput(value) {
+        clearTimeout(this.searchTimeout);
+        this.currentSearchTerm = value.trim();
+        
+        if (this.currentSearchTerm.length < CONFIG.minSearchLength) {
+            this.hideSearchResults();
+            this.selectedPatient = null;
+            return;
+        }
+        
+        this.showLoader();
+        
+        this.searchTimeout = setTimeout(() => {
+            this.performSearch(this.currentSearchTerm);
+        }, CONFIG.searchDelay);
+    }
+    
+    async performSearch(term) {
+        try {
+            const response = await fetch(`${CONFIG.apiEndpoint}?term=${encodeURIComponent(term)}`);
+            
+            if (!response.ok) {
+                throw new Error(`Erreur HTTP: ${response.status}`);
+            }
+            
+            const patients = await response.json();
+            
+            // Vérifier que c'est toujours la recherche actuelle
+            if (term === this.currentSearchTerm) {
+                this.displaySearchResults(patients);
+            }
+        } catch (error) {
+            console.error('Erreur de recherche:', error);
+            this.displayError(error.message);
+        } finally {
+            this.hideLoader();
+        }
+    }
+    
+    displaySearchResults(patients) {
+        this.searchResults = patients;
+        this.selectedIndex = -1;
+        
+        if (patients.length === 0) {
+            this.displayNoResults();
+            return;
+        }
+        
+        const html = patients.map((patient, index) => 
+            this.createResultItem(patient, index)
+        ).join('');
+        
+        this.elements.searchDropdown.innerHTML = html;
+        this.showSearchResults();
+        
+        // Ajouter les événements de clic
+        this.bindResultEvents();
+    }
+    
+    createResultItem(patient, index) {
+        const initials = this.getPatientInitials(patient.full_name);
+        const displayPhone = patient.phone || 'Non défini';
+        
+        return `
+            <div class="search-result-item" data-index="${index}">
+                <div class="result-avatar">${initials}</div>
+                <div class="result-info">
+                    <div class="result-name">${patient.full_name || 'Nom non défini'}</div>
+                    <div class="result-phone">
+                        <i class="fas fa-phone"></i>
+                        ${displayPhone}
+                    </div>
+                </div>
+                <div class="result-arrow">
+                    <i class="fas fa-arrow-right"></i>
+                </div>
+            </div>
+        `;
+    }
+    
+    displayNoResults() {
+        this.elements.searchDropdown.innerHTML = `
+            <div class="no-results">
+                <i class="fas fa-user-slash"></i>
+                <div>Aucun patient trouvé</div>
+                <small>Essayez un autre nom ou numéro</small>
+            </div>
+        `;
+        this.showSearchResults();
+    }
+    
+    displayError(message) {
+        this.elements.searchDropdown.innerHTML = `
+            <div class="no-results">
+                <i class="fas fa-exclamation-triangle text-warning"></i>
+                <div>Erreur de recherche</div>
+                <small>${message}</small>
+            </div>
+        `;
+        this.showSearchResults();
+    }
+    
+    bindResultEvents() {
+        const items = this.elements.searchDropdown.querySelectorAll('.search-result-item');
+        items.forEach((item, index) => {
+            item.addEventListener('click', () => {
+                this.selectPatient(index);
+            });
+            
+            item.addEventListener('mouseenter', () => {
+                this.highlightItem(index);
+            });
+        });
+    }
+    
+    handleKeyboardNavigation(event) {
+        const items = this.elements.searchDropdown.querySelectorAll('.search-result-item');
+        
+        if (items.length === 0) return;
+        
+        switch (event.key) {
+            case 'ArrowDown':
+                event.preventDefault();
+                this.selectedIndex = Math.min(this.selectedIndex + 1, items.length - 1);
+                this.highlightItem(this.selectedIndex);
+                break;
+                
+            case 'ArrowUp':
+                event.preventDefault();
+                this.selectedIndex = Math.max(this.selectedIndex - 1, -1);
+                this.highlightItem(this.selectedIndex);
+                break;
+                
+            case 'Enter':
+                event.preventDefault();
+                if (this.selectedIndex >= 0 && this.selectedIndex < this.searchResults.length) {
+                    this.selectPatient(this.selectedIndex);
+                }
+                break;
+                
+            case 'Escape':
+                this.hideSearchResults();
+                break;
+        }
+    }
+    
+    highlightItem(index) {
+        const items = this.elements.searchDropdown.querySelectorAll('.search-result-item');
+        items.forEach((item, i) => {
+            item.classList.toggle('selected', i === index);
+        });
+        this.selectedIndex = index;
+    }
+    
+    selectPatient(index) {
+        if (index >= 0 && index < this.searchResults.length) {
+            const patient = this.searchResults[index];
+            this.selectedPatient = patient;
+            
+            // Remplir le champ de recherche
+            this.elements.searchInput.value = patient.full_name;
+            
+            // Masquer les résultats
+            this.hideSearchResults();
+            
+            // Mettre à jour le bouton
+            this.updateCreateButton(patient);
+            
+            // Valider l'entrée
+            this.validateInput();
+        }
+    }
+    
+    updateCreateButton(patient) {
+        this.elements.createBtn.innerHTML = `
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            Créer ticket pour ${patient.full_name}
+        `;
+        this.elements.createBtn.classList.remove('btn-outline-danger');
+        this.elements.createBtn.classList.add('btn-emergency');
+    }
+    
+    handleFormSubmit() {
+        if (!this.selectedPatient) {
+            this.showAlert('Veuillez sélectionner un patient de la liste.', 'warning');
+            return;
+        }
+        
+        // إنشاء التذكرة مباشرة بدون تأكيد
+        this.createEmergencyTicketDirectly();
+    }
+    
+    createEmergencyTicketDirectly() {
+        if (!this.selectedPatient) return;
+        
+        try {
+            // إظهار حالة التحميل
+            this.setLoadingStateForCreateButton(true);
+            
+            // إنشاء URL لإنشاء التذكرة
+            const createUrl = `{{ url_for('secretary.create_emergency_ticket', patient_id=0) }}`.replace('0', this.selectedPatient.id);
+            
+            // إظهار رسالة نجاح
+            this.showAlert('Création du ticket d\'urgence en cours...', 'info');
+            
+            // التوجه مباشرة لإنشاء التذكرة
+            setTimeout(() => {
+                window.location.href = createUrl;
+            }, 500);
+            
+        } catch (error) {
+            console.error('Erreur:', error);
+            this.showAlert('Erreur lors de la création du ticket d\'urgence.', 'error');
+            this.setLoadingStateForCreateButton(false);
+        }
+    }
+    
+    setLoadingStateForCreateButton(loading) {
+        this.elements.createBtn.disabled = loading;
+        this.elements.createBtn.innerHTML = loading ? 
+            '<i class="fas fa-spinner fa-spin me-2"></i>Création en cours...' : 
+            (this.selectedPatient ? 
+                `<i class="fas fa-exclamation-triangle me-2"></i>Créer ticket pour ${this.selectedPatient.full_name}` : 
+                '<i class="fas fa-exclamation-triangle me-2"></i>Créer ticket d\'urgence'
+            );
+    }
+    
+    // Méthodes utilitaires
+    getPatientInitials(name) {
+        if (!name) return 'P';
+        return name.split(' ').map(n => n.charAt(0)).join('').toUpperCase().slice(0, 2);
+    }
+    
+    getCSRFToken() {
+        return document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+    }
+    
+    showLoader() {
+        this.elements.searchLoader.style.display = 'block';
+    }
+    
+    hideLoader() {
+        this.elements.searchLoader.style.display = 'none';
+    }
+    
+    showSearchResults() {
+        if (this.elements.searchDropdown.innerHTML.trim()) {
+            this.elements.searchDropdown.style.display = 'block';
+        }
+    }
+    
+    hideSearchResults() {
+        this.elements.searchDropdown.style.display = 'none';
+        this.selectedIndex = -1;
+    }
+    
+    validateInput() {
+        const input = this.elements.searchInput;
+        const isValid = this.selectedPatient && input.value.trim().length > 0;
+        
+        if (isValid) {
+            input.classList.remove('is-invalid');
+            input.classList.add('is-valid');
+        } else {
+            input.classList.remove('is-valid');
+            if (input.value.trim().length > 0) {
+                input.classList.add('is-invalid');
+            }
+        }
+    }
+
+    
+    focusSearchInput() {
+        setTimeout(() => {
+            if (this.elements.searchInput) {
+                this.elements.searchInput.focus();
+            }
+        }, 500);
+    }
+    
+    showAlert(message, type = 'info') {
+        // Créer un toast ou utiliser SweetAlert si disponible
+        const alertClass = {
+            'success': 'alert-success',
+            'error': 'alert-danger',
+            'warning': 'alert-warning',
+            'info': 'alert-info'
+        }[type] || 'alert-info';
+        
+        const alertHTML = `
+            <div class="alert ${alertClass} alert-dismissible fade show position-fixed" 
+                 style="top: 20px; right: 20px; z-index: 10999; min-width: 300px; direction: ltr;">
+                <strong>${type === 'error' ? 'Erreur!' : type === 'success' ? 'Succès!' : type === 'warning' ? 'Attention!' : 'Info!'}</strong> ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        `;
+        
+        document.body.insertAdjacentHTML('beforeend', alertHTML);
+        
+        // Supprimer automatiquement après 5 secondes
+        setTimeout(() => {
+            const alert = document.querySelector('.alert');
+            if (alert) alert.remove();
+        }, 5000);
+    }
+}
+
+
+
+
+
+// Initialisation
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Page chargée');
+    new EmergencyTicketManager();
+});
+
+// Validation Bootstrap
+(function() {
+    'use strict';
+    window.addEventListener('load', function() {
+        var forms = document.getElementsByClassName('needs-validation');
+        Array.prototype.filter.call(forms, function(form) {
+            form.addEventListener('submit', function(event) {
+                if (form.checkValidity() === false) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    }, false);
+})();
+</script>
+{% endblock %}

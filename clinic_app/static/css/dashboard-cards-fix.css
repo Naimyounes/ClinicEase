@@ -1,0 +1,415 @@
+/* إصلاح كروت الداشبورد - أولوية عالية */
+
+/* تقليل المسافات بين الكروت بشكل كبير وتقليل العرض */
+.dashboard-stats-row [class*="col-"] {
+    padding-left: 3px !important;
+    padding-right: 3px !important;
+    margin-bottom: 4px !important;
+}
+
+/* تقليل العرض الداخلي للكروت */
+.dashboard-stats-row .col-xl-2,
+.dashboard-stats-row .col-lg-3,
+.dashboard-stats-row .col-md-4,
+.dashboard-stats-row .col-6 {
+    flex: 0 0 auto !important;
+    max-width: calc(16.66666667% - 6px) !important; /* تقليل العرض قليلاً */
+}
+
+/* إعادة تعيين الألوان لكروت الداشبورد */
+.dashboard-card {
+    background: none !important;
+    background-color: transparent !important;
+    background-image: none !important;
+    border: none !important;
+    border-radius: 15px !important;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12) !important;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+    overflow: hidden !important;
+    height: 170px !important;
+    min-height: 170px !important;
+    max-height: 170px !important;
+    position: relative !important;
+}
+
+/* الألوان المحددة لكل نوع من الكروت */
+.dashboard-card.card-consultations {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+}
+
+.dashboard-card.card-revenue {
+    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%) !important;
+}
+
+.dashboard-card.card-waiting {
+    background: linear-gradient(135deg, #fdcb6e 0%, #e17055 100%) !important;
+}
+
+.dashboard-card.card-patients {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%) !important;
+}
+
+.dashboard-card.card-appointments {
+    background: linear-gradient(135deg, #6c5ce7 0%, #a29bfe 100%) !important;
+}
+
+.dashboard-card.card-pending-payments {
+    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%) !important;
+}
+
+.dashboard-card.card-visits {
+    background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%) !important;
+}
+
+.dashboard-card.card-payments {
+    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%) !important;
+}
+
+.dashboard-card.card-unpaid {
+    background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%) !important;
+}
+
+.dashboard-card.card-new-patients {
+    background: linear-gradient(135deg, #ff8a80 0%, #ea80fc 100%) !important;
+}
+
+.dashboard-card.card-today-appointments {
+    background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%) !important;
+}
+
+.dashboard-card.card-upcoming-appointments {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+}
+
+/* تأثير الإضاءة الداخلية */
+.dashboard-card::after {
+    content: '' !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.05) 50%, rgba(255,255,255,0.1) 100%) !important;
+    pointer-events: none !important;
+    border-radius: 15px !important;
+}
+
+/* تحسين تأثيرات الحوم */
+.dashboard-card:hover {
+    transform: translateY(-8px) scale(1.02) !important;
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.18) !important;
+}
+
+/* إعادة تعيين محتوى الكروت */
+.dashboard-card .card-body {
+    background: transparent !important;
+    background-color: transparent !important;
+    background-image: none !important;
+    padding: 24px 18px !important; /* زيادة الـ padding العمودي وتقليل الأفقي */
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    height: 100% !important;
+    position: relative !important;
+    z-index: 2 !important;
+}
+
+/* تحسين النصوص */
+.dashboard-card .card-title {
+    font-size: 0.95rem !important;
+    font-weight: 600 !important;
+    margin-bottom: 10px !important;
+    opacity: 0.95 !important;
+    line-height: 1.4 !important;
+    color: white !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) !important;
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: unset !important;
+}
+
+.dashboard-card h4, 
+.dashboard-card h2 {
+    font-size: 2rem !important;
+    font-weight: 700 !important;
+    margin-bottom: 5px !important;
+    line-height: 1.2 !important;
+    color: white !important;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+}
+
+.dashboard-card small {
+    font-size: 0.8rem !important;
+    opacity: 0.9 !important;
+    line-height: 1.4 !important;
+    color: white !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) !important;
+    white-space: normal !important;
+    overflow: visible !important;
+}
+
+/* تحسين الأيقونات */
+.dashboard-card i {
+    font-size: 1.5rem !important;
+    opacity: 0.9 !important;
+    color: white !important;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1)) !important;
+}
+
+/* ضمان أن جميع النصوص بيضاء */
+.dashboard-card,
+.dashboard-card * {
+    color: white !important;
+}
+
+/* تحسين الاستجابة */
+@media (max-width: 1200px) {
+    .dashboard-card {
+        height: 165px !important;
+        min-height: 165px !important;
+        max-height: 165px !important;
+    }
+    
+    .dashboard-card .card-body {
+        padding: 22px 16px !important;
+    }
+    
+    .dashboard-card h4, 
+    .dashboard-card h2 {
+        font-size: 1.8rem !important;
+    }
+    
+    .dashboard-stats-row [class*="col-"] {
+        padding-left: 2px !important;
+        padding-right: 2px !important;
+        margin-bottom: 3px !important;
+    }
+    
+    .dashboard-stats-row .col-xl-2,
+    .dashboard-stats-row .col-lg-3,
+    .dashboard-stats-row .col-md-4,
+    .dashboard-stats-row .col-6 {
+        max-width: calc(25% - 4px) !important;
+    }
+}
+
+@media (max-width: 992px) {
+    .dashboard-card {
+        height: 160px !important;
+        min-height: 160px !important;
+        max-height: 160px !important;
+    }
+    
+    .dashboard-card .card-body {
+        padding: 20px 14px !important;
+    }
+    
+    .dashboard-card .card-title {
+        font-size: 0.9rem !important;
+        margin-bottom: 8px !important;
+    }
+    
+    .dashboard-card h4, 
+    .dashboard-card h2 {
+        font-size: 1.7rem !important;
+    }
+    
+    .dashboard-stats-row [class*="col-"] {
+        padding-left: 1px !important;
+        padding-right: 1px !important;
+        margin-bottom: 2px !important;
+    }
+    
+    .dashboard-stats-row .col-xl-2,
+    .dashboard-stats-row .col-lg-3,
+    .dashboard-stats-row .col-md-4,
+    .dashboard-stats-row .col-6 {
+        max-width: calc(33.33333333% - 2px) !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .dashboard-card {
+        height: 155px !important;
+        min-height: 155px !important;
+        max-height: 155px !important;
+    }
+    
+    .dashboard-card .card-body {
+        padding: 18px 12px !important;
+    }
+    
+    .dashboard-card .card-title {
+        font-size: 0.85rem !important;
+        margin-bottom: 6px !important;
+    }
+    
+    .dashboard-card h4, 
+    .dashboard-card h2 {
+        font-size: 1.5rem !important;
+    }
+    
+    .dashboard-card i {
+        font-size: 1.4rem !important;
+    }
+    
+    .dashboard-stats-row [class*="col-"] {
+        padding-left: 1px !important;
+        padding-right: 1px !important;
+        margin-bottom: 2px !important;
+    }
+    
+    .dashboard-stats-row .col-xl-2,
+    .dashboard-stats-row .col-lg-3,
+    .dashboard-stats-row .col-md-4,
+    .dashboard-stats-row .col-6 {
+        max-width: calc(50% - 2px) !important;
+    }
+}
+
+@media (max-width: 576px) {
+    .dashboard-card {
+        height: 150px !important;
+        min-height: 150px !important;
+        max-height: 150px !important;
+    }
+    
+    .dashboard-card .card-body {
+        padding: 16px 10px !important;
+    }
+    
+    .dashboard-card .card-title {
+        font-size: 0.8rem !important;
+        margin-bottom: 5px !important;
+    }
+    
+    .dashboard-card h4, 
+    .dashboard-card h2 {
+        font-size: 1.4rem !important;
+    }
+    
+    .dashboard-card i {
+        font-size: 1.2rem !important;
+    }
+    
+    .dashboard-stats-row [class*="col-"] {
+        padding-left: 0px !important;
+        padding-right: 0px !important;
+        margin-bottom: 1px !important;
+    }
+    
+    .dashboard-stats-row .col-xl-2,
+    .dashboard-stats-row .col-lg-3,
+    .dashboard-stats-row .col-md-4,
+    .dashboard-stats-row .col-6 {
+        max-width: calc(50% - 0px) !important;
+    }
+}
+
+/* تأثيرات إضافية للكروت القابلة للنقر */
+.dashboard-card.clickable-card {
+    cursor: pointer !important;
+}
+
+.dashboard-card.clickable-card:hover {
+    transform: translateY(-10px) scale(1.03) !important;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2) !important;
+}
+
+.dashboard-card.clickable-card:active {
+    transform: translateY(-5px) scale(1.01) !important;
+}
+
+/* تحسين المحتوى المتمركز */
+.dashboard-card .text-center {
+    text-align: left !important;
+}
+
+.dashboard-card .text-center .card-title {
+    text-align: left !important;
+}
+
+/* ضمان ظهور النصوص الطويلة */
+.dashboard-card .card-body > div:first-child {
+    flex: 1 !important;
+    min-width: 0 !important;
+    overflow: visible !important;
+}
+
+.dashboard-card .card-title,
+.dashboard-card h4,
+.dashboard-card h2,
+.dashboard-card small {
+    word-wrap: break-word !important;
+    overflow-wrap: break-word !important;
+    hyphens: auto !important;
+}
+
+/* إزالة أي تأثيرات من ملفات CSS أخرى */
+.dashboard-card.text-white {
+    color: white !important;
+}
+
+.dashboard-card.text-white * {
+    color: white !important;
+}
+
+/* تحسين المسافات العامة - تقليل أكثر */
+.row.dashboard-stats-row {
+    margin-left: -2px !important;
+    margin-right: -2px !important;
+    row-gap: 2px !important;
+}
+
+/* إزالة المسافات الإضافية من Bootstrap */
+.dashboard-stats-row {
+    --bs-gutter-x: 4px !important;
+    --bs-gutter-y: 2px !important;
+}
+
+/* تحسين المسافات للحاوي الرئيسي */
+.container .row.dashboard-stats-row,
+.container-fluid .row.dashboard-stats-row {
+    margin-bottom: 0 !important;
+}
+
+/* تحسين الشاشات الكبيرة جداً */
+@media (min-width: 1400px) {
+    .dashboard-card {
+        height: 185px !important;
+        min-height: 185px !important;
+        max-height: 185px !important;
+    }
+    
+    .dashboard-card .card-body {
+        padding: 28px 20px !important;
+    }
+    
+    .dashboard-card .card-title {
+        font-size: 1rem !important;
+        margin-bottom: 12px !important;
+    }
+    
+    .dashboard-card h4, 
+    .dashboard-card h2 {
+        font-size: 2.2rem !important;
+    }
+    
+    .dashboard-card i {
+        font-size: 1.8rem !important;
+    }
+    
+    .dashboard-stats-row [class*="col-"] {
+        padding-left: 4px !important;
+        padding-right: 4px !important;
+        margin-bottom: 6px !important;
+    }
+    
+    .dashboard-stats-row .col-xl-2,
+    .dashboard-stats-row .col-lg-3,
+    .dashboard-stats-row .col-md-4,
+    .dashboard-stats-row .col-6 {
+        max-width: calc(16.66666667% - 8px) !important;
+    }
+}

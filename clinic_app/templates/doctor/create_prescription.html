@@ -1,13 +1,18 @@
 {% extends "layout.html" %}
 {% block content %}
+<!-- Container منفصل للقوائم المنسدلة -->
+<div id="dropdown-container" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10000;">
+    <!-- ستتم إضافة القوائم المنسدلة هنا ديناميكياً -->
+</div>
+
 <div class="container">
     <div class="row mb-4">
         <div class="col-md-12">
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="{{ url_for('doctor.dashboard') }}">لوحة تحكم الطبيب</a></li>
-                    <li class="breadcrumb-item"><a href="{{ url_for('doctor.patient_visit', patient_id=visit.patient.id) }}">زيارة المريض</a></li>
-                    <li class="breadcrumb-item active" aria-current="page">إنشاء وصفة طبية</li>
+                    <li class="breadcrumb-item"><a href="{{ url_for('doctor.dashboard') }}">Tableau de bord médecin</a></li>
+                    <li class="breadcrumb-item"><a href="{{ url_for('doctor.patient_visit', patient_id=visit.patient.id) }}">Consultation patient</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Créer une ordonnance</li>
                 </ol>
             </nav>
         </div>
@@ -17,22 +22,22 @@
         <div class="col-md-12">
             <div class="card mb-4">
                 <div class="card-header bg-info text-white">
-                    <h3 class="mb-0">معلومات المريض</h3>
+                    <h3 class="mb-0">Informations du patient</h3>
                 </div>
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-6">
-                            <p><strong>الاسم:</strong> {{ visit.patient.full_name }}</p>
+                            <p><strong>Nom:</strong> {{ visit.patient.full_name }}</p>
                         </div>
                         <div class="col-md-3">
-                            <p><strong>رقم الهاتف:</strong> {{ visit.patient.phone }}</p>
+                            <p><strong>Numéro de téléphone:</strong> {{ visit.patient.phone }}</p>
                         </div>
                         <div class="col-md-3">
-                            <p><strong>تاريخ الميلاد:</strong> 
+                            <p><strong>Date de naissance:</strong> 
                                 {% if visit.patient.birth_date %}
-                                    {{ visit.patient.birth_date.strftime('%Y-%m-%d') }}
+                                    {{ visit.patient.birth_date.strftime('%d/%m/%Y') }}
                                 {% else %}
-                                    غير محدد
+                                    Non spécifié
                                 {% endif %}
                             </p>
                         </div>
@@ -41,28 +46,28 @@
             </div>
 
             <div class="card mb-4">
-                <div class="card-header bg-primary text-white">
-                    <h3 class="mb-0">تفاصيل الزيارة</h3>
+                <div class="card-header bg-secondary text-white">
+                    <h3 class="mb-0">Détails de la consultation</h3>
                 </div>
                 <div class="card-body">
                     <div class="row mb-2">
-                        <div class="col-md-2"><strong>التاريخ:</strong></div>
-                        <div class="col-md-10">{{ visit.date.strftime('%Y-%m-%d %H:%M') }}</div>
+                        <div class="col-md-2"><strong>Date:</strong></div>
+                        <div class="col-md-10">{{ visit.date.strftime('%d/%m/%Y %H:%M') }}</div>
                     </div>
                     <div class="row mb-2">
-                        <div class="col-md-2"><strong>الأعراض:</strong></div>
-                        <div class="col-md-10">{{ visit.symptoms or 'غير محدد' }}</div>
+                        <div class="col-md-2"><strong>Symptômes:</strong></div>
+                        <div class="col-md-10">{{ visit.symptoms or 'Non spécifié' }}</div>
                     </div>
                     <div class="row mb-2">
-                        <div class="col-md-2"><strong>التشخيص:</strong></div>
-                        <div class="col-md-10">{{ visit.diagnosis or 'غير محدد' }}</div>
+                        <div class="col-md-2"><strong>Diagnostic:</strong></div>
+                        <div class="col-md-10">{{ visit.diagnosis or 'Non spécifié' }}</div>
                     </div>
                     <div class="row mb-2">
-                        <div class="col-md-2"><strong>العلاج:</strong></div>
-                        <div class="col-md-10">{{ visit.treatment or 'غير محدد' }}</div>
+                        <div class="col-md-2"><strong>Traitement:</strong></div>
+                        <div class="col-md-10">{{ visit.treatment or 'Non spécifié' }}</div>
                     </div>
                     <div class="row mb-2">
-                        <div class="col-md-2"><strong>الحالة:</strong></div>
+                        <div class="col-md-2"><strong>Statut:</strong></div>
                         <div class="col-md-10">{{ visit.status }}</div>
                     </div>
                 </div>
@@ -70,50 +75,99 @@
 
             <div class="card">
                 <div class="card-header bg-success text-white">
-                    <h3 class="mb-0">إنشاء الوصفة الطبية</h3>
+                    <h3 class="mb-0">Créer une ordonnance</h3>
                 </div>
                 <div class="card-body">
-                    <form method="POST" action="">
-                        {{ form.hidden_tag() }}
+                    <!-- Sélection d'une ordonnance prédéfinie -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="form-group">
+                                <label class="form-control-label mb-2">
+                                    <i class="fas fa-clipboard-list me-1"></i>
+                                    Ordonnance prédéfinie (optionnel)
+                                </label>
+                                <select id="predefined_prescription" class="form-select">
+                                    <option value="">Choisir une ordonnance prédéfinie...</option>
+                                    {% for prescription in predefined_prescriptions %}
+                                    <option value="{{ prescription.id }}">{{ prescription.name }}</option>
+                                    {% endfor %}
+                                </select>
+                                <small class="form-text text-muted">Vous pouvez choisir une ordonnance prédéfinie pour remplir automatiquement les médicaments.</small>
+                            </div>
+                        </div>
+                    </div>
 
-                        <div class="row mb-3">
-                            <div class="col-12">
-                                <div class="form-group">
-                                    {{ form.predefined_prescription.label(class="form-control-label mb-1") }}
-                                    {{ form.predefined_prescription(class="form-select") }}
-                                    {% if form.predefined_prescription.errors %}
-                                        <div class="invalid-feedback d-block">
-                                            {% for error in form.predefined_prescription.errors %}
-                                                <span>{{ error }}</span>
-                                            {% endfor %}
+                    <!-- Liste des médicaments -->
+                    <div class="card">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">
+                                <i class="fas fa-pills me-2"></i>
+                                Médicaments de l'ordonnance
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="medications-list">
+                                <!-- Les médicaments seront ajoutés ici -->
+                            </div>
+                            
+                            <!-- Formulaire d'ajout de médicament -->
+                            <div class="border-top pt-3 mt-3">
+                                <h6>Ajouter un médicament:</h6>
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="medication-search-wrapper">
+                                            <input type="text" 
+                                                   id="medication_search" 
+                                                   class="form-control" 
+                                                   placeholder="Rechercher un médicament..."
+                                                   autocomplete="off">
+                                            <select id="medication_select" class="form-select d-none">
+                                                <option value="">Choisir un médicament</option>
+                                                {% for medication in medications %}
+                                                <option value="{{ medication.id }}" data-name="{{ medication.name }}" data-dosage="{{ medication.dosage }}">
+                                                    {{ medication.name }} {% if medication.dosage %}({{ medication.dosage }}){% endif %}
+                                                </option>
+                                                {% endfor %}
+                                            </select>
+                                            <div id="selected_medication" class="selected-medication mt-1" style="display: none;">
+                                                <small class="text-muted">Sélectionné: </small>
+                                                <span class="badge bg-primary" id="selected_med_name"></span>
+                                                <button type="button" class="btn btn-sm btn-outline-secondary ms-1" id="clear_selection">
+                                                    <i class="fas fa-times"></i>
+                                                </button>
+                                            </div>
                                         </div>
-                                    {% endif %}
-                                    <small class="form-text text-muted mb-2 d-block">يمكنك اختيار وصفة طبية محددة مسبقًا لملء حقول الأدوية تلقائيًا.</small>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <input type="text" id="quantity_input" class="form-control" placeholder="Quantité/Durée">
+                                    </div>
+                                    <div class="col-md-3">
+                                        <input type="text" id="instructions_input" class="form-control" placeholder="Instructions">
+                                    </div>
+                                    <div class="col-md-2">
+                                        <button type="button" id="add_medication_btn" class="btn btn-success w-100">
+                                            <i class="fas fa-plus"></i> Ajouter
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
+                    </div>
 
-                        <div class="row mb-3">
-                            <div class="col-12">
-                                <label class="form-control-label mb-1">الأدوية</label>
-                                <div id="medications-container">
-                                    <!-- سيتم إضافة الأدوية هنا ديناميكياً -->
-                                </div>
-                                <button type="button" id="add-medication-btn" class="btn btn-info mt-2">
-                                    <i class="fas fa-plus"></i> إضافة دواء
-                                </button>
-                            </div>
-                        </div>
-
-                        <div class="text-center">
-                            <button type="submit" class="btn btn-success px-5 py-2">
-                                <i class="fas fa-prescription-bottle"></i> إنشاء الوصفة الطبية
+                    <!-- Boutons d'action -->
+                    <div class="text-center mt-4">
+                        <form method="POST" action="" id="prescription_form">
+                            {{ form.hidden_tag() }}
+                            <input type="hidden" name="medications_data" id="medications_data">
+                            
+                            <button type="submit" class="btn btn-success btn-lg px-5 py-2 me-3">
+                                <i class="fas fa-prescription-bottle"></i> Créer l'ordonnance
                             </button>
-                            <a href="{{ url_for('doctor.patient_visit', patient_id=visit.patient.id) }}" class="btn btn-secondary px-5 py-2">
-                                <i class="fas fa-arrow-left"></i> العودة
+                            <a href="{{ url_for('doctor.patient_visit', patient_id=visit.patient.id) }}" class="btn btn-secondary btn-lg px-5 py-2">
+                                <i class="fas fa-arrow-left"></i> Retour
                             </a>
-                        </div>
-                    </form>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
@@ -123,152 +177,485 @@
 
 {% block scripts %}
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const addMedicationBtn = document.getElementById('add-medication-btn');
-        const medicationsContainer = document.getElementById('medications-container');
-        const predefinedPrescriptionSelect = document.getElementById('predefined_prescription');
+document.addEventListener('DOMContentLoaded', function() {
+    // Variables globales
+    const medicationsList = document.getElementById('medications-list');
+    const medicationSelect = document.getElementById('medication_select');
+    const medicationSearch = document.getElementById('medication_search');
+    const selectedMedication = document.getElementById('selected_medication');
+    const selectedMedName = document.getElementById('selected_med_name');
+    const clearSelection = document.getElementById('clear_selection');
+    const quantityInput = document.getElementById('quantity_input');
+    const instructionsInput = document.getElementById('instructions_input');
+    const addMedicationBtn = document.getElementById('add_medication_btn');
+    const predefinedSelect = document.getElementById('predefined_prescription');
+    const prescriptionForm = document.getElementById('prescription_form');
+    const medicationsDataInput = document.getElementById('medications_data');
+    
+    // إنشاء القائمة المنسدلة في الـ container المنفصل
+    const dropdownContainer = document.getElementById('dropdown-container');
+    const medicationDropdown = document.createElement('div');
+    medicationDropdown.id = 'medication_dropdown';
+    medicationDropdown.className = 'medication-dropdown';
+    medicationDropdown.style.display = 'none';
+    dropdownContainer.appendChild(medicationDropdown);
+    
+    let medications = [];
+    let selectedMedicationData = null;
+    
+    // Données des médicaments disponibles
+    const availableMedications = [
+        {% for medication in medications %}
+        {
+            id: {{ medication.id }},
+            name: "{{ medication.name }}",
+            dosage: "{{ medication.dosage or '' }}"
+        }{% if not loop.last %},{% endif %}
+        {% endfor %}
+    ];
 
-        let medicationCount = 0;
+    // Fonction de recherche des médicaments
+    function searchMedications() {
+        const searchTerm = medicationSearch.value.toLowerCase().trim();
         
-        // قائمة الأدوية المتاحة
-        const medications = [
-            {% for medication in medications %}
-            {
-                id: {{ medication.id }},
-                name: "{{ medication.name }}",
-                dosage: "{{ medication.dosage or '' }}"
-            }{% if not loop.last %},{% endif %}
-            {% endfor %}
-        ];
-
-        function createMedicationOptions() {
-            let options = '<option value="">اختر الدواء</option>';
-            medications.forEach(med => {
-                const displayName = med.dosage ? `${med.name} (${med.dosage})` : med.name;
-                options += `<option value="${med.id}">${displayName}</option>`;
-            });
-            return options;
+        if (searchTerm.length < 2) {
+            medicationDropdown.style.display = 'none';
+            medicationDropdown.style.pointerEvents = 'none';
+            return;
         }
 
-        function addMedicationEntry(medicationId = '', quantity = '', instructions = '') {
-            const newEntry = document.createElement('div');
-            newEntry.classList.add('medication-entry', 'card', 'mb-2');
-            
-            newEntry.innerHTML = `
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                <label for="medications-${medicationCount}-medication_id" class="form-control-label">الدواء</label>
-                                <select id="medications-${medicationCount}-medication_id" name="medications-${medicationCount}-medication_id" class="form-select" required>
-                                    ${createMedicationOptions()}
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="form-group">
-                                <label for="medications-${medicationCount}-quantity" class="form-control-label">الكمية/المدة</label>
-                                <input type="text" id="medications-${medicationCount}-quantity" name="medications-${medicationCount}-quantity" class="form-control" value="${quantity}" placeholder="مثال: علبة واحدة، 7 أيام">
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="form-group">
-                                <label for="medications-${medicationCount}-instructions" class="form-control-label">التعليمات</label>
-                                <input type="text" id="medications-${medicationCount}-instructions" name="medications-${medicationCount}-instructions" class="form-control" value="${instructions}" placeholder="مثال: حبة كل 8 ساعات" required>
-                            </div>
-                        </div>
-                        <div class="col-md-2 d-flex align-items-end">
-                            <button type="button" class="btn btn-danger remove-medication-btn w-100">
-                                <i class="fas fa-trash"></i> إزالة
-                            </button>
-                        </div>
+        // إظهار القائمة عند البحث
+        medicationDropdown.style.pointerEvents = 'auto';
+
+        const filteredMeds = availableMedications.filter(med => 
+            med.name.toLowerCase().includes(searchTerm) || 
+            (med.dosage && med.dosage.toLowerCase().includes(searchTerm))
+        );
+
+        if (filteredMeds.length > 0) {
+            let dropdownHTML = '';
+            filteredMeds.slice(0, 10).forEach(med => {
+                const displayName = med.dosage ? `${med.name} (${med.dosage})` : med.name;
+                dropdownHTML += `
+                    <div class="dropdown-item medication-option p-2 border-bottom" 
+                         data-id="${med.id}" 
+                         data-name="${med.name}"
+                         data-dosage="${med.dosage || ''}"
+                         style="cursor: pointer;">
+                        <div class="fw-bold">${med.name}</div>
+                        ${med.dosage ? `<small class="text-muted">${med.dosage}</small>` : ''}
                     </div>
+                `;
+            });
+            
+            if (filteredMeds.length > 10) {
+                dropdownHTML += `
+                    <div class="p-2 text-center text-muted">
+                        <small>... et ${filteredMeds.length - 10} autres résultats</small>
+                    </div>
+                `;
+            }
+            
+            medicationDropdown.innerHTML = dropdownHTML;
+            
+            // حساب موضع القائمة بدقة
+            const inputRect = medicationSearch.getBoundingClientRect();
+            medicationDropdown.style.position = 'fixed';
+            medicationDropdown.style.top = inputRect.bottom + 'px';
+            medicationDropdown.style.left = inputRect.left + 'px';
+            medicationDropdown.style.width = inputRect.width + 'px';
+            medicationDropdown.style.zIndex = '10001';
+            medicationDropdown.style.display = 'block';
+
+            // Ajouter les événements de clic
+            medicationDropdown.querySelectorAll('.medication-option').forEach(option => {
+                option.addEventListener('click', function() {
+                    selectMedication(this);
+                });
+                
+                option.addEventListener('mouseenter', function() {
+                    this.style.backgroundColor = '#f8f9fa';
+                });
+                
+                option.addEventListener('mouseleave', function() {
+                    this.style.backgroundColor = '';
+                });
+            });
+        } else {
+            medicationDropdown.innerHTML = `
+                <div class="p-3 text-center text-muted">
+                    <i class="fas fa-search me-2"></i>
+                    Aucun médicament trouvé pour "${searchTerm}"
                 </div>
             `;
-            medicationsContainer.appendChild(newEntry);
-            
-            // Set the selected medication if provided
-            if (medicationId) {
-                const select = newEntry.querySelector('select');
-                select.value = medicationId;
-            }
-            
-            medicationCount++;
-            attachRemoveListeners();
+            // حساب موضع القائمة حتى لو لم توجد نتائج
+            const inputRect = medicationSearch.getBoundingClientRect();
+            medicationDropdown.style.position = 'fixed';
+            medicationDropdown.style.top = inputRect.bottom + 'px';
+            medicationDropdown.style.left = inputRect.left + 'px';
+            medicationDropdown.style.width = inputRect.width + 'px';
+            medicationDropdown.style.zIndex = '10001';
+            medicationDropdown.style.display = 'block';
+        }
+    }
+
+    // Sélectionner un médicament
+    function selectMedication(option) {
+        selectedMedicationData = {
+            id: option.getAttribute('data-id'),
+            name: option.getAttribute('data-name'),
+            dosage: option.getAttribute('data-dosage')
+        };
+        
+        const displayName = selectedMedicationData.dosage ? 
+            `${selectedMedicationData.name} (${selectedMedicationData.dosage})` : 
+            selectedMedicationData.name;
+        
+        selectedMedName.textContent = displayName;
+        selectedMedication.style.display = 'block';
+        medicationSearch.style.display = 'none';
+        medicationDropdown.style.display = 'none';
+        medicationDropdown.style.pointerEvents = 'none';
+        medicationSearch.value = '';
+    }
+
+    // Ajouter un médicament à la liste
+    function addMedication() {
+        if (!selectedMedicationData) {
+            alert('Veuillez sélectionner un médicament');
+            return;
         }
 
-        function attachRemoveListeners() {
-            document.querySelectorAll('.remove-medication-btn').forEach(button => {
-                button.onclick = function() {
-                    if (medicationsContainer.children.length > 1) {
-                        this.closest('.medication-entry').remove();
-                    } else {
-                        alert('يجب أن تحتوي الوصفة على دواء واحد على الأقل');
+        const quantity = quantityInput.value.trim();
+        const instructions = instructionsInput.value.trim();
+
+        if (!instructions) {
+            alert('Veuillez saisir les instructions');
+            return;
+        }
+
+        // Vérifier si le médicament n'est pas déjà ajouté
+        if (medications.find(med => med.id == selectedMedicationData.id)) {
+            alert('Ce médicament est déjà ajouté');
+            return;
+        }
+
+        // Ajouter le médicament
+        const medication = {
+            id: selectedMedicationData.id,
+            name: selectedMedicationData.name,
+            dosage: selectedMedicationData.dosage,
+            quantity: quantity,
+            instructions: instructions
+        };
+
+        medications.push(medication);
+        renderMedications();
+        clearInputs();
+    }
+
+    // Afficher la liste des médicaments
+    function renderMedications() {
+        if (medications.length === 0) {
+            medicationsList.innerHTML = '<div class="alert alert-info text-center"><i class="fas fa-info-circle me-2"></i>Aucun médicament ajouté</div>';
+            return;
+        }
+
+        let html = '<div class="table-responsive"><table class="table table-bordered table-hover"><thead class="table-light"><tr><th>Médicament</th><th>Dosage</th><th>Quantité/Durée</th><th>Instructions</th><th>Actions</th></tr></thead><tbody>';
+        
+        medications.forEach((med, index) => {
+            html += `
+                <tr>
+                    <td><strong>${med.name}</strong></td>
+                    <td>${med.dosage || 'Non spécifié'}</td>
+                    <td>${med.quantity || 'Non spécifié'}</td>
+                    <td>${med.instructions}</td>
+                    <td>
+                        <button type="button" class="btn btn-sm btn-danger" onclick="removeMedication(${index})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `;
+        });
+        
+        html += '</tbody></table></div>';
+        medicationsList.innerHTML = html;
+    }
+
+    // Supprimer un médicament
+    window.removeMedication = function(index) {
+        if (confirm('Êtes-vous sûr de vouloir supprimer ce médicament ?')) {
+            medications.splice(index, 1);
+            renderMedications();
+        }
+    };
+
+    // Vider les champs de saisie
+    function clearInputs() {
+        selectedMedicationData = null;
+        selectedMedication.style.display = 'none';
+        medicationSearch.style.display = 'block';
+        medicationSearch.value = '';
+        medicationDropdown.style.display = 'none';
+        medicationDropdown.style.pointerEvents = 'none';
+        quantityInput.value = '';
+        instructionsInput.value = '';
+    }
+
+    // Effacer la sélection
+    function clearMedicationSelection() {
+        selectedMedicationData = null;
+        selectedMedication.style.display = 'none';
+        medicationSearch.style.display = 'block';
+        medicationSearch.value = '';
+        medicationDropdown.style.display = 'none';
+        medicationDropdown.style.pointerEvents = 'none';
+        medicationSearch.focus();
+    }
+
+    // Charger une ordonnance prédéfinie
+    function loadPredefinedPrescription() {
+        const prescriptionId = predefinedSelect.value;
+        if (!prescriptionId) {
+            return;
+        }
+
+        fetch(`/doctor/get_predefined_prescription_meds/${prescriptionId}`)
+            .then(response => response.json())
+            .then(data => {
+                medications = [];
+                data.forEach(med => {
+                    const availableMed = availableMedications.find(am => am.id == med.id);
+                    if (availableMed) {
+                        medications.push({
+                            id: med.id,
+                            name: availableMed.name,
+                            dosage: availableMed.dosage,
+                            quantity: '',
+                            instructions: med.instructions || ''
+                        });
                     }
-                };
+                });
+                renderMedications();
+            })
+            .catch(error => {
+                console.error('Erreur:', error);
+                alert('Erreur lors du chargement de l\'ordonnance prédéfinie');
             });
+    }
+
+    // Soumettre le formulaire
+    function submitForm(e) {
+        if (medications.length === 0) {
+            e.preventDefault();
+            alert('Vous devez ajouter au moins un médicament');
+            return false;
         }
 
-        // إضافة دواء عند النقر على الزر
-        addMedicationBtn.addEventListener('click', () => addMedicationEntry());
+        // Vérifier que tous les médicaments ont des instructions
+        const invalidMeds = medications.filter(med => !med.instructions.trim());
+        if (invalidMeds.length > 0) {
+            e.preventDefault();
+            alert('Tous les médicaments doivent avoir des instructions');
+            return false;
+        }
 
-        // التعامل مع الوصفات المحددة مسبقاً
-        predefinedPrescriptionSelect.addEventListener('change', function() {
-            const prescriptionId = this.value;
-            if (prescriptionId && prescriptionId !== '0') {
-                fetch(`/doctor/get_predefined_prescription_meds/${prescriptionId}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        // مسح الأدوية الموجودة
-                        medicationsContainer.innerHTML = '';
-                        medicationCount = 0;
+        // Préparer les données pour l'envoi
+        medicationsDataInput.value = JSON.stringify(medications);
+        return true;
+    }
 
-                        // إضافة الأدوية من الوصفة المحددة مسبقاً
-                        if (data.length > 0) {
-                            data.forEach(med => {
-                                addMedicationEntry(med.id, '', med.instructions);
-                            });
-                        } else {
-                            // إضافة دواء فارغ إذا لم توجد أدوية
-                            addMedicationEntry();
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error fetching predefined prescription:', error);
-                        alert('حدث خطأ في تحميل الوصفة المحددة مسبقاً');
-                    });
-            } else {
-                // مسح الأدوية وإضافة دواء فارغ
-                medicationsContainer.innerHTML = '';
-                medicationCount = 0;
-                addMedicationEntry();
-            }
-        });
-
-        // إضافة دواء واحد في البداية
-        addMedicationEntry();
-
-        // التحقق من صحة النموذج قبل الإرسال
-        const form = document.querySelector('form');
-        form.addEventListener('submit', function(e) {
-            const medicationSelects = document.querySelectorAll('select[name*="medication_id"]');
-            const instructionInputs = document.querySelectorAll('input[name*="instructions"]');
-            
-            let hasValidMedication = false;
-            
-            for (let i = 0; i < medicationSelects.length; i++) {
-                if (medicationSelects[i].value && instructionInputs[i].value.trim()) {
-                    hasValidMedication = true;
-                    break;
-                }
-            }
-            
-            if (!hasValidMedication) {
-                e.preventDefault();
-                alert('يجب إضافة دواء واحد على الأقل مع التعليمات');
-                return false;
-            }
-        });
+    // Event listeners
+    addMedicationBtn.addEventListener('click', addMedication);
+    predefinedSelect.addEventListener('change', loadPredefinedPrescription);
+    prescriptionForm.addEventListener('submit', submitForm);
+    
+    // Event listeners pour la recherche
+    medicationSearch.addEventListener('input', searchMedications);
+    medicationSearch.addEventListener('focus', function() {
+        if (this.value.length >= 2) {
+            searchMedications();
+        }
     });
+    
+    // إعادة حساب موضع القائمة عند التمرير أو تغيير حجم النافذة
+    function repositionDropdown() {
+        if (medicationDropdown.style.display === 'block') {
+            const inputRect = medicationSearch.getBoundingClientRect();
+            medicationDropdown.style.top = inputRect.bottom + 'px';
+            medicationDropdown.style.left = inputRect.left + 'px';
+            medicationDropdown.style.width = inputRect.width + 'px';
+        }
+    }
+    
+    window.addEventListener('scroll', repositionDropdown);
+    window.addEventListener('resize', repositionDropdown);
+    
+    clearSelection.addEventListener('click', clearMedicationSelection);
+    
+    // Fermer la dropdown en cliquant ailleurs
+    document.addEventListener('click', function(e) {
+        if (!medicationSearch.contains(e.target) && !medicationDropdown.contains(e.target)) {
+            medicationDropdown.style.display = 'none';
+            medicationDropdown.style.pointerEvents = 'none';
+        }
+    });
+
+    // Permettre l'ajout avec Enter
+    instructionsInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            addMedication();
+        }
+    });
+    
+    // Navigation au clavier dans la dropdown
+    medicationSearch.addEventListener('keydown', function(e) {
+        const options = medicationDropdown.querySelectorAll('.medication-option');
+        let currentIndex = -1;
+        
+        // Trouver l'élément actuellement sélectionné
+        options.forEach((option, index) => {
+            if (option.classList.contains('active')) {
+                currentIndex = index;
+            }
+        });
+        
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            currentIndex = currentIndex < options.length - 1 ? currentIndex + 1 : 0;
+            updateActiveOption(options, currentIndex);
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            currentIndex = currentIndex > 0 ? currentIndex - 1 : options.length - 1;
+            updateActiveOption(options, currentIndex);
+        } else if (e.key === 'Enter') {
+            e.preventDefault();
+            if (currentIndex >= 0 && options[currentIndex]) {
+                selectMedication(options[currentIndex]);
+            }
+        } else if (e.key === 'Escape') {
+            medicationDropdown.style.display = 'none';
+            medicationDropdown.style.pointerEvents = 'none';
+        }
+    });
+    
+    function updateActiveOption(options, activeIndex) {
+        options.forEach((option, index) => {
+            if (index === activeIndex) {
+                option.classList.add('active');
+                option.style.backgroundColor = '#e9ecef';
+            } else {
+                option.classList.remove('active');
+                option.style.backgroundColor = '';
+            }
+        });
+    }
+
+    // Initialiser l'affichage
+    renderMedications();
+});
 </script>
 {% endblock scripts %}
+
+{% block styles %}
+<style>
+.table th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+}
+
+.table td {
+    vertical-align: middle;
+}
+
+.card-header {
+    font-weight: 600;
+}
+
+.btn-lg {
+    font-size: 1.1rem;
+    font-weight: 500;
+}
+
+.alert {
+    border: none;
+    border-radius: 0.5rem;
+}
+
+.table-responsive {
+    border-radius: 0.375rem;
+    overflow: hidden;
+}
+
+.form-select:focus,
+.form-control:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+.breadcrumb-item a {
+    text-decoration: none;
+}
+
+.breadcrumb-item a:hover {
+    text-decoration: underline;
+}
+
+/* Styles pour la recherche de médicaments */
+.medication-search-wrapper {
+    position: relative;
+}
+
+.medication-dropdown {
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    background-color: white;
+    max-height: 200px;
+    overflow-y: auto;
+    position: fixed;
+    z-index: 10001;
+    pointer-events: none; /* منع التفاعل افتراضياً */
+}
+
+.medication-option {
+    transition: background-color 0.15s ease-in-out;
+    border-bottom: 1px solid #f8f9fa;
+}
+
+.medication-option:hover {
+    background-color: #f8f9fa !important;
+}
+
+.medication-option:last-child {
+    border-bottom: none;
+}
+
+.medication-option.active {
+    background-color: #e9ecef !important;
+}
+
+.selected-medication {
+    margin-top: 0.5rem;
+}
+
+.selected-medication .badge {
+    font-size: 0.875rem;
+    padding: 0.5rem 0.75rem;
+}
+
+#medication_search {
+    border: 2px solid #e9ecef;
+    border-radius: 0.375rem;
+    transition: all 0.2s ease-in-out;
+}
+
+#medication_search:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+    outline: none;
+}
+</style>
+{% endblock styles %}

@@ -3,32 +3,33 @@ from flask_login import login_required, current_user
 from clinic_app import db
 from clinic_app.models import User, Patient, Ticket, Visit, Prescription, DoctorSettings, Medication, PrescriptionMedication, PredefinedPrescription, PredefinedPrescriptionMedication, Appointment
 from clinic_app.doctor.forms import VisitForm, PrescriptionForm, DoctorSettingsForm, MedicationForm, PredefinedPrescriptionForm, AppointmentForm
+from clinic_app.secretary.forms import PatientFormFrench
 from clinic_app.doctor.utils import generate_prescription_pdf
 from datetime import datetime
 import os
 import calendar
 from functools import wraps
 
-# إنشاء بلوبرينت للطبيب
+# Création du blueprint pour le médecin
 doctor = Blueprint("doctor", __name__)
 
 
 def doctor_required(f):
-    """تأكد أن المستخدم هو طبيب"""
+    """S'assurer que l'utilisateur est un médecin"""
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if current_user.role != "doctor":
-            flash("غير مسموح لك بالوصول إلى هذه الصفحة", "danger")
+            flash("Vous n'êtes pas autorisé à accéder à cette page", "danger")
             return redirect(url_for("auth.login"))
         return f(*args, **kwargs)
     return decorated_function
 
 
-@doctor.route("/dashboard/doctor")
+@doctor.route("/dashboard")
 @login_required
 @doctor_required
 def dashboard():
-    """لوحة تحكم الطبيب"""
+    """Tableau de bord du médecin"""
     # الحصول على قائمة الانتظار الحالية مرتبة حسب الأولوية
     today = datetime.now().date()
     waiting_tickets = Ticket.query.filter(
@@ -97,6 +98,9 @@ def dashboard():
     )
 
 
+
+
+
 @doctor.route("/doctor/next-patient")
 @login_required
 @doctor_required
@@ -115,9 +119,9 @@ def next_patient():
     if next_ticket:
         next_ticket.status = "called"
         db.session.commit()
-        flash(f"تم استدعاء المريض: {next_ticket.patient.full_name}", "success")
+        flash(f"Patient appelé: {next_ticket.patient.full_name}", "success")
     else:
-        flash("لا يوجد مرضى في قائمة الانتظار", "info")
+        flash("Aucun patient en liste d'attente", "info")
 
     return redirect(url_for("doctor.dashboard"))
 
@@ -156,8 +160,8 @@ def patient_visit(patient_id):
         db.session.add(visit)
         db.session.commit()
 
-        # إنشاء موعد تلقائياً إذا كانت الحالة "متابعة" وتم تحديد تاريخ الموعد
-        if form.status.data == "متابعة" and form.follow_up_date.data:
+        # إنشاء موعد تلقائياً إذا كانت الحالة "suivi" وتم تحديد تاريخ الموعد
+        if form.status.data == "suivi" and form.follow_up_date.data:
             appointment = Appointment(
                 patient_id=patient.id,
                 doctor_id=current_user.id,
@@ -189,81 +193,94 @@ def patient_visit(patient_id):
 
 @doctor.route("/doctor/medications", methods=["GET", "POST"])
 @login_required
+@doctor_required
 def medications():
+    from flask import request
+    
     form = MedicationForm()
     if form.validate_on_submit():
-        medication = Medication(name=form.name.data, dosage=form.dosage.data)
-        db.session.add(medication)
-        db.session.commit()
-        flash('تم إضافة الدواء بنجاح!', 'success')
-        return redirect(url_for('doctor.medications'))
-    medications = Medication.query.all()
-    return render_template('doctor/medications.html', title='إدارة الأدوية', form=form, medications=medications)
+        try:
+            # التحقق من عدم وجود دواء بنفس الاسم والجرعة
+            existing_medication = Medication.query.filter_by(
+                name=form.name.data.strip(),
+                dosage=form.dosage.data.strip()
+            ).first()
+            
+            if existing_medication:
+                flash(f'Le médicament "{form.name.data}" avec le dosage "{form.dosage.data}" existe déjà!', 'warning')
+            else:
+                medication = Medication(
+                    name=form.name.data.strip(),
+                    dosage=form.dosage.data.strip()
+                )
+                db.session.add(medication)
+                db.session.commit()
+                flash(f'Le médicament "{form.name.data}" a été ajouté avec succès!', 'success')
+                return redirect(url_for('doctor.medications'))
+        except Exception as e:
+            db.session.rollback()
+            flash('Erreur lors de l\'ajout du médicament. Veuillez réessayer.', 'error')
+    
+    # معاملات البحث والصفحات
+    page = request.args.get('page', 1, type=int)
+    search = request.args.get('search', '', type=str)
+    per_page = request.args.get('per_page', 50, type=int)  # عدد الأدوية في كل صفحة
+    
+    # التأكد من أن per_page في نطاق معقول
+    if per_page not in [25, 50, 100, 200]:
+        per_page = 50
+    
+    # بناء الاستعلام
+    query = Medication.query
+    
+    # إضافة البحث إذا كان موجوداً
+    if search:
+        search_filter = f"%{search}%"
+        query = query.filter(
+            db.or_(
+                Medication.name.like(search_filter),
+                Medication.dosage.like(search_filter)
+            )
+        )
+    
+    # ترتيب الأدوية أبجدياً وتطبيق الـ pagination
+    medications = query.order_by(Medication.name.asc()).paginate(
+        page=page,
+        per_page=per_page,
+        error_out=False
+    )
+    
+    return render_template(
+        'doctor/medications.html', 
+        title='Gestion des médicaments', 
+        form=form, 
+        medications=medications,
+        search=search,
+        per_page=per_page
+    )
 
 
 @doctor.route("/doctor/medication/<int:medication_id>/delete", methods=["POST"])
 @login_required
+@doctor_required
 def delete_medication(medication_id):
-    medication = Medication.query.get_or_404(medication_id)
-    db.session.delete(medication)
-    db.session.commit()
-    flash('تم حذف الدواء بنجاح!', 'success')
+    try:
+        medication = Medication.query.get_or_404(medication_id)
+        medication_name = medication.name
+        medication_dosage = medication.dosage
+        
+        db.session.delete(medication)
+        db.session.commit()
+        
+        flash(f'Le médicament "{medication_name}" ({medication_dosage or "Dosage non spécifié"}) a été supprimé avec succès!', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash('Erreur lors de la suppression du médicament. Veuillez réessayer.', 'error')
+    
     return redirect(url_for('doctor.medications'))
 
 
-@doctor.route("/doctor/predefined_prescriptions", methods=["GET", "POST"])
-@login_required
-def predefined_prescriptions():
-    form = PredefinedPrescriptionForm()
-    if form.validate_on_submit():
-        predefined_prescription = PredefinedPrescription(name=form.name.data)
-        db.session.add(predefined_prescription)
-        db.session.commit()
-        flash('تم إضافة الوصفة المحددة مسبقًا بنجاح!', 'success')
-        return redirect(url_for('doctor.predefined_prescriptions'))
-    predefined_prescriptions = PredefinedPrescription.query.all()
-    return render_template('doctor/predefined_prescriptions.html', title='الوصفات المحددة مسبقًا', form=form, predefined_prescriptions=predefined_prescriptions)
-
-
-@doctor.route("/doctor/predefined_prescription/<int:predefined_prescription_id>/delete", methods=["POST"])
-@login_required
-def delete_predefined_prescription(predefined_prescription_id):
-    predefined_prescription = PredefinedPrescription.query.get_or_404(predefined_prescription_id)
-    db.session.delete(predefined_prescription)
-    db.session.commit()
-    flash('تم حذف الوصفة المحددة مسبقًا بنجاح!', 'success')
-    return redirect(url_for('doctor.predefined_prescriptions'))
-
-
-@doctor.route("/doctor/predefined_prescription/<int:predefined_prescription_id>/add_medication", methods=["POST"])
-@login_required
-def add_medication_to_predefined(predefined_prescription_id):
-    predefined_prescription = PredefinedPrescription.query.get_or_404(predefined_prescription_id)
-    medication_id = request.form.get('medication_id')
-    instructions = request.form.get('instructions')
-    if medication_id:
-        predefined_prescription_medication = PredefinedPrescriptionMedication(
-            predefined_prescription_id=predefined_prescription.id,
-            medication_id=medication_id,
-            instructions=instructions
-        )
-        db.session.add(predefined_prescription_medication)
-        db.session.commit()
-        flash('تم إضافة الدواء إلى الوصفة المحددة مسبقًا بنجاح!', 'success')
-    return redirect(url_for('doctor.predefined_prescriptions'))
-
-
-@doctor.route("/doctor/predefined_prescription/<int:predefined_prescription_id>/remove_medication/<int:medication_id>", methods=["POST"])
-@login_required
-def remove_medication_from_predefined(predefined_prescription_id, medication_id):
-    predefined_prescription_medication = PredefinedPrescriptionMedication.query.filter_by(
-        predefined_prescription_id=predefined_prescription_id,
-        medication_id=medication_id
-    ).first_or_404()
-    db.session.delete(predefined_prescription_medication)
-    db.session.commit()
-    flash('تم حذف الدواء من الوصفة المحددة مسبقًا بنجاح!', 'success')
-    return redirect(url_for('doctor.predefined_prescriptions'))
+# Routes القديمة محذوفة - تم استبدالها بـ API routes جديدة
 
 
 @doctor.route("/doctor/prescription/<int:visit_id>", methods=["GET", "POST"])
@@ -289,19 +306,30 @@ def create_prescription(visit_id):
     if request.method == 'POST':
         # التحقق من وجود أدوية في الطلب
         medications_data = []
-        for key, value in request.form.items():
-            if key.startswith('medications-') and key.endswith('-medication_id') and value:
-                index = key.split('-')[1]
-                instructions_key = f'medications-{index}-instructions'
-                quantity_key = f'medications-{index}-quantity'
-                instructions = request.form.get(instructions_key, '')
-                quantity = request.form.get(quantity_key, '')
-                if instructions:
-                    medications_data.append({
-                        'medication_id': int(value),
-                        'instructions': instructions,
-                        'quantity': quantity
-                    })
+        
+        # التحقق من البيانات الجديدة (JSON format)
+        medications_json = request.form.get('medications_data')
+        if medications_json:
+            try:
+                import json
+                medications_data = json.loads(medications_json)
+            except:
+                flash("خطأ في تنسيق بيانات الأدوية", "danger")
+        else:
+            # التحقق من التنسيق القديم للتوافق مع الإصدارات السابقة
+            for key, value in request.form.items():
+                if key.startswith('medications-') and key.endswith('-medication_id') and value:
+                    index = key.split('-')[1]
+                    instructions_key = f'medications-{index}-instructions'
+                    quantity_key = f'medications-{index}-quantity'
+                    instructions = request.form.get(instructions_key, '')
+                    quantity = request.form.get(quantity_key, '')
+                    if instructions:
+                        medications_data.append({
+                            'medication_id': int(value),
+                            'instructions': instructions,
+                            'quantity': quantity
+                        })
         
         if not medications_data:
             flash("يجب إضافة دواء واحد على الأقل للوصفة", "danger")
@@ -314,11 +342,16 @@ def create_prescription(visit_id):
                 
                 # إضافة الأدوية
                 for med_data in medications_data:
+                    # التعامل مع التنسيق الجديد والقديم
+                    medication_id = med_data.get('id') or med_data.get('medication_id')
+                    instructions = med_data.get('instructions', '')
+                    quantity = med_data.get('quantity', '')
+                    
                     prescription_medication = PrescriptionMedication(
                         prescription_id=prescription.id,
-                        medication_id=med_data['medication_id'],
-                        instructions=med_data['instructions'],
-                        quantity=med_data['quantity']
+                        medication_id=int(medication_id),
+                        instructions=instructions,
+                        quantity=quantity
                     )
                     db.session.add(prescription_medication)
                 
@@ -348,7 +381,13 @@ def create_prescription(visit_id):
                 flash(f"حدث خطأ في إنشاء الوصفة: {str(e)}", "danger")
 
     medications = Medication.query.all()
-    return render_template("doctor/create_prescription.html", title="إنشاء وصفة طبية", form=form, visit=visit, medications=medications)
+    predefined_prescriptions = PredefinedPrescription.query.all()
+    return render_template("doctor/create_prescription.html", 
+                         title="إنشاء وصفة طبية", 
+                         form=form, 
+                         visit=visit, 
+                         medications=medications,
+                         predefined_prescriptions=predefined_prescriptions)
 
 
 @doctor.route("/doctor/prescription/<int:prescription_id>/view")
@@ -491,19 +530,7 @@ def regenerate_prescription_pdf(prescription_id):
         return redirect(url_for("doctor.view_visit", visit_id=visit.id))
 
 
-@doctor.route("/doctor/get_predefined_prescription_meds/<int:predefined_id>")
-@login_required
-def get_predefined_prescription_meds(predefined_id):
-    predefined_prescription = PredefinedPrescription.query.get_or_404(predefined_id)
-    meds_data = []
-    for ppm in predefined_prescription.medications:
-        meds_data.append({
-            'id': ppm.medication.id,
-            'name': ppm.medication.name,
-            'dosage': ppm.medication.dosage,
-            'instructions': ppm.instructions
-        })
-    return jsonify(meds_data)
+# Route محذوف - مكرر مع الـ API الجديد
 
 
 @doctor.route("/doctor/visit-history")
@@ -563,6 +590,203 @@ def edit_visit(visit_id):
     return render_template("doctor/edit_visit.html", title="تعديل الزيارة", form=form, visit=visit)
 
 
+# ==================== Predefined Prescriptions Routes ====================
+
+@doctor.route("/doctor/predefined_prescriptions")
+@login_required
+@doctor_required
+def predefined_prescriptions():
+    """صفحة الوصفات المحددة مسبقاً"""
+    medications = Medication.query.all()
+    return render_template("doctor/predefined_prescriptions.html", 
+                         title="الوصفات المحددة مسبقاً", 
+                         medications=medications)
+
+
+@doctor.route("/doctor/predefined_prescriptions_debug")
+@login_required
+@doctor_required
+def predefined_prescriptions_debug():
+    """صفحة تشخيص الوصفات المحددة مسبقاً"""
+    medications = Medication.query.all()
+    return render_template("doctor/predefined_prescriptions_debug.html", 
+                         title="تشخيص الوصفات المحددة مسبقاً", 
+                         medications=medications)
+
+
+@doctor.route("/doctor/api/predefined_prescriptions", methods=["GET"])
+@login_required
+@doctor_required
+def api_get_predefined_prescriptions():
+    """API للحصول على الوصفات المحددة مسبقاً"""
+    try:
+        prescriptions = PredefinedPrescription.query.all()
+        result = []
+        
+        for prescription in prescriptions:
+            medications = []
+            for ppm in prescription.medications:
+                medications.append({
+                    'medication': {
+                        'id': ppm.medication.id,
+                        'name': ppm.medication.name,
+                        'dosage': ppm.medication.dosage
+                    },
+                    'quantity': ppm.quantity,
+                    'instructions': ppm.instructions
+                })
+            
+            result.append({
+                'id': prescription.id,
+                'name': prescription.name,
+                'medications': medications
+            })
+        
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+
+@doctor.route("/doctor/api/predefined_prescriptions", methods=["POST"])
+@login_required
+@doctor_required
+def api_add_predefined_prescription():
+    """API لإضافة وصفة محددة مسبقاً"""
+    try:
+        data = request.get_json()
+        name = data.get('name', '').strip()
+        
+        if not name:
+            return jsonify({'success': False, 'message': 'اسم الوصفة مطلوب'})
+        
+        # التحقق من عدم وجود وصفة بنفس الاسم
+        existing = PredefinedPrescription.query.filter_by(name=name).first()
+        if existing:
+            return jsonify({'success': False, 'message': 'يوجد وصفة بهذا الاسم مسبقاً'})
+        
+        prescription = PredefinedPrescription(name=name)
+        db.session.add(prescription)
+        db.session.commit()
+        
+        return jsonify({'success': True, 'message': 'تم إضافة الوصفة بنجاح'})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+
+@doctor.route("/doctor/api/predefined_prescriptions/<int:prescription_id>", methods=["DELETE"])
+@login_required
+@doctor_required
+def api_delete_predefined_prescription(prescription_id):
+    """API لحذف وصفة محددة مسبقاً"""
+    try:
+        prescription = PredefinedPrescription.query.get_or_404(prescription_id)
+        
+        # حذف جميع الأدوية المرتبطة بالوصفة
+        PredefinedPrescriptionMedication.query.filter_by(predefined_prescription_id=prescription_id).delete()
+        
+        # حذف الوصفة
+        db.session.delete(prescription)
+        db.session.commit()
+        
+        return jsonify({'success': True, 'message': 'تم حذف الوصفة بنجاح'})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+
+@doctor.route("/doctor/api/predefined_prescriptions/<int:prescription_id>/medications", methods=["POST"])
+@login_required
+@doctor_required
+def api_add_medication_to_predefined(prescription_id):
+    """API لإضافة دواء لوصفة محددة مسبقاً"""
+    try:
+        prescription = PredefinedPrescription.query.get_or_404(prescription_id)
+        data = request.get_json()
+        
+        medication_id = data.get('medication_id')
+        quantity = data.get('quantity', '').strip()
+        instructions = data.get('instructions', '').strip()
+        
+        if not medication_id:
+            return jsonify({'success': False, 'message': 'يرجى اختيار دواء'})
+        
+        if not instructions:
+            return jsonify({'success': False, 'message': 'التعليمات مطلوبة'})
+        
+        # التحقق من وجود الدواء
+        medication = Medication.query.get(medication_id)
+        if not medication:
+            return jsonify({'success': False, 'message': 'الدواء غير موجود'})
+        
+        # التحقق من عدم إضافة نفس الدواء مرتين
+        existing = PredefinedPrescriptionMedication.query.filter_by(
+            predefined_prescription_id=prescription_id,
+            medication_id=medication_id
+        ).first()
+        
+        if existing:
+            return jsonify({'success': False, 'message': 'هذا الدواء مضاف مسبقاً لهذه الوصفة'})
+        
+        # إضافة الدواء
+        ppm = PredefinedPrescriptionMedication(
+            predefined_prescription_id=prescription_id,
+            medication_id=medication_id,
+            quantity=quantity,
+            instructions=instructions
+        )
+        db.session.add(ppm)
+        db.session.commit()
+        
+        return jsonify({'success': True, 'message': 'تم إضافة الدواء بنجاح'})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+
+@doctor.route("/doctor/api/predefined_prescriptions/<int:prescription_id>/medications/<int:medication_id>", methods=["DELETE"])
+@login_required
+@doctor_required
+def api_remove_medication_from_predefined(prescription_id, medication_id):
+    """API لحذف دواء من وصفة محددة مسبقاً"""
+    try:
+        ppm = PredefinedPrescriptionMedication.query.filter_by(
+            predefined_prescription_id=prescription_id,
+            medication_id=medication_id
+        ).first_or_404()
+        
+        db.session.delete(ppm)
+        db.session.commit()
+        
+        return jsonify({'success': True, 'message': 'تم حذف الدواء بنجاح'})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+
+@doctor.route("/doctor/get_predefined_prescription_meds/<int:prescription_id>")
+@login_required
+@doctor_required
+def get_predefined_prescription_meds(prescription_id):
+    """API للحصول على أدوية وصفة محددة مسبقاً"""
+    try:
+        prescription = PredefinedPrescription.query.get_or_404(prescription_id)
+        medications = []
+        
+        for ppm in prescription.medications:
+            medications.append({
+                'id': ppm.medication.id,
+                'name': ppm.medication.name,
+                'dosage': ppm.medication.dosage,
+                'quantity': ppm.quantity,
+                'instructions': ppm.instructions
+            })
+        
+        return jsonify(medications)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
 @doctor.route("/doctor/delete-visit/<int:visit_id>", methods=["POST"])
 @login_required
 @doctor_required
@@ -581,6 +805,9 @@ def delete_visit(visit_id):
 @login_required
 @doctor_required
 def doctor_settings():
+    import secrets
+    from PIL import Image
+    
     settings = DoctorSettings.query.filter_by(user_id=current_user.id).first()
     if not settings:
         settings = DoctorSettings(user_id=current_user.id)
@@ -590,7 +817,63 @@ def doctor_settings():
     form = DoctorSettingsForm(obj=settings)
 
     if form.validate_on_submit():
-        form.populate_obj(settings)
+        # معالجة رفع شعار العيادة
+        if form.clinic_logo.data:
+            # إنشاء مجلد الشعارات إذا لم يكن موجوداً
+            logos_dir = os.path.join(current_app.root_path, 'static', 'logos')
+            os.makedirs(logos_dir, exist_ok=True)
+            
+            # حذف الشعار القديم إذا كان موجوداً
+            if settings.clinic_logo:
+                old_logo_path = os.path.join(current_app.root_path, settings.clinic_logo.lstrip('/'))
+                if os.path.exists(old_logo_path):
+                    try:
+                        os.remove(old_logo_path)
+                    except:
+                        pass
+            
+            # إنشاء اسم فريد للملف
+            random_hex = secrets.token_hex(8)
+            file_ext = form.clinic_logo.data.filename.split('.')[-1].lower()
+            logo_filename = f"logo_{current_user.id}_{random_hex}.{file_ext}"
+            logo_path = os.path.join(logos_dir, logo_filename)
+            
+            # حفظ وتحسين الصورة
+            try:
+                # فتح الصورة وتحسينها
+                img = Image.open(form.clinic_logo.data)
+                
+                # تحويل إلى RGB إذا كانت PNG مع شفافية
+                if img.mode in ('RGBA', 'LA', 'P'):
+                    background = Image.new('RGB', img.size, (255, 255, 255))
+                    if img.mode == 'P':
+                        img = img.convert('RGBA')
+                    background.paste(img, mask=img.split()[-1] if img.mode == 'RGBA' else None)
+                    img = background
+                
+                # تغيير حجم الصورة إذا كانت كبيرة جداً
+                max_size = (300, 300)
+                img.thumbnail(max_size, Image.Resampling.LANCZOS)
+                
+                # حفظ الصورة
+                img.save(logo_path, quality=85, optimize=True)
+                
+                # حفظ المسار النسبي في قاعدة البيانات
+                settings.clinic_logo = f"static/logos/{logo_filename}"
+                
+            except Exception as e:
+                flash(f'حدث خطأ في رفع الشعار: {str(e)}', 'danger')
+                return redirect(url_for('doctor.doctor_settings'))
+        
+        # حفظ باقي الإعدادات
+        settings.default_visit_price = form.default_visit_price.data
+        settings.doctor_name_arabic = form.doctor_name_arabic.data
+        settings.doctor_name_latin = form.doctor_name_latin.data
+        settings.clinic_name = form.clinic_name.data
+        settings.clinic_name_latin = form.clinic_name_latin.data
+        settings.doctor_specialty = form.doctor_specialty.data
+        settings.doctor_specialty_latin = form.doctor_specialty_latin.data
+        
         db.session.commit()
         flash('تم حفظ الإعدادات بنجاح!', 'success')
         return redirect(url_for('doctor.doctor_settings'))
@@ -674,7 +957,7 @@ def payments_list():
     )
 
 
-@doctor.route("/doctor/patient-details/<int:patient_id>")
+@doctor.route("/patient-details/<int:patient_id>")
 @login_required
 @doctor_required
 def patient_details(patient_id):
@@ -695,7 +978,7 @@ def patient_details(patient_id):
     )
 
 
-@doctor.route("/doctor/patients")
+@doctor.route("/patients")
 @login_required
 @doctor_required
 def list_patients():
@@ -711,6 +994,145 @@ def list_patients():
         patients = Patient.query.order_by(Patient.created_at.desc()).paginate(page=page, per_page=10)
 
     return render_template("doctor/patients.html", title="قائمة المرضى", patients=patients, search=search)
+
+# تعديل بيانات المريض من واجهة الطبيب
+@doctor.route('/patient/<int:patient_id>/edit', methods=['GET', 'POST'])
+@login_required
+@doctor_required
+def edit_patient_from_doctor(patient_id):
+    patient = Patient.query.get_or_404(patient_id)
+    form = PatientFormFrench()
+
+    if form.validate_on_submit():
+        patient.full_name = form.full_name.data
+        patient.phone = form.phone.data
+        patient.birth_date = form.birth_date.data
+        patient.gender = form.gender.data or None
+        patient.blood_group = form.blood_group.data or None
+        patient.address = form.address.data or None
+        db.session.commit()
+        flash('تم تحديث بيانات المريض بنجاح', 'success')
+        return redirect(url_for('doctor.list_patients'))
+
+    # تعبئة النموذج عند GET
+    if request.method == 'GET':
+        form.full_name.data = patient.full_name
+        form.phone.data = patient.phone
+        form.birth_date.data = patient.birth_date
+        form.gender.data = patient.gender or ''
+        form.blood_group.data = patient.blood_group or ''
+        form.address.data = patient.address or ''
+
+    return render_template('doctor/patient_form_edit.html', title='Modifier le patient', form=form, patient=patient)
+
+# إضافة مريض جديد من واجهة الطبيب
+@doctor.route('/patient/new', methods=['GET', 'POST'])
+@login_required
+@doctor_required
+def new_patient_doctor():
+    form = PatientFormFrench()
+    # Adapter les libellés en FR pour une expérience uniforme (déjà FR dans PatientFormFrench)
+    if form.validate_on_submit():
+        patient = Patient(
+            full_name=form.full_name.data,
+            phone=form.phone.data,
+            birth_date=form.birth_date.data,
+            gender=form.gender.data or None,
+            blood_group=form.blood_group.data or None,
+            address=form.address.data or None
+        )
+        db.session.add(patient)
+        db.session.commit()
+        flash('تم تسجيل المريض بنجاح', 'success')
+        return redirect(url_for('doctor.patient_details', patient_id=patient.id))
+    return render_template('doctor/patient_form_new.html', title='Ajouter un patient', form=form)
+
+# المواعيد الأونلاين من واجهة الطبيب
+@doctor.route('/online-appointments')
+@login_required
+@doctor_required
+def online_appointments_doctor():
+    import requests
+    from datetime import datetime
+
+    status_filter = request.args.get('status', '')
+    date_filter = request.args.get('date', '')
+
+    try:
+        api_url = 'https://appointment-010t.onrender.com/api/appointments/all?token=123456'
+        if status_filter:
+            api_url += f'&status={status_filter}'
+        if date_filter:
+            api_url += f'&date={date_filter}'
+
+        response = requests.get(api_url, timeout=15)
+        if response.status_code == 200:
+            data = response.json()
+            appointments = data.get('appointments', [])
+            count = data.get('count', 0)
+            for appointment in appointments:
+                try:
+                    date_str = appointment.get('date', '')
+                    time_str = appointment.get('time', '')
+                    if date_str and time_str:
+                        datetime_str = f"{date_str} {time_str}"
+                        appointment['datetime_obj'] = datetime.strptime(datetime_str, '%Y-%m-%d %H:%M')
+                    created_at = appointment.get('created_at', '')
+                    if created_at:
+                        appointment['created_at_obj'] = datetime.strptime(created_at, '%Y-%m-%d %H:%M:%S')
+                except Exception:
+                    pass
+            available_statuses = ['قيد التأكيد', 'مؤكد', 'ملغي', 'مكتمل']
+            return render_template('secretary/online_appointments.html',
+                                   appointments=appointments,
+                                   count=count,
+                                   title='المواعيد الأونلاين',
+                                   available_statuses=available_statuses,
+                                   current_status_filter=status_filter,
+                                   current_date_filter=date_filter)
+        else:
+            flash('فشل في جلب المواعيد الأونلاين', 'danger')
+            return render_template('secretary/online_appointments.html',
+                                   appointments=[], count=0, error='فشل في الاتصال بخدمة المواعيد',
+                                   title='المواعيد الأونلاين', available_statuses=['قيد التأكيد', 'مؤكد', 'ملغي', 'مكتمل'],
+                                   current_status_filter=status_filter, current_date_filter=date_filter)
+    except requests.RequestException:
+        flash('لا يمكن الاتصال بخدمة المواعيد الأونلاين. تأكد من اتصالك بالإنترنت.', 'warning')
+        return render_template('secretary/online_appointments.html',
+                               appointments=[], count=0, error='خدمة المواعيد غير متاحة حالياً',
+                               title='المواعيد الأونلاين', available_statuses=['قيد التأكيد', 'مؤكد', 'ملغي', 'مكتمل'],
+                               current_status_filter=status_filter, current_date_filter=date_filter)
+
+
+@doctor.route("/api/search-patients")
+@login_required
+@doctor_required
+def api_search_patients():
+    """API للبحث التلقائي عن المرضى (واجهة الطبيب)"""
+    term = request.args.get("term", "").trim() if hasattr(str, 'trim') else request.args.get("term", "").strip()
+    term = term.strip()
+    if not term or len(term) < 1:
+        return jsonify([])
+    try:
+        patients = Patient.query.filter(
+            db.or_(
+                Patient.full_name.ilike(f"%{term}%"),
+                Patient.phone.ilike(f"%{term}%"),
+                Patient.address.ilike(f"%{term}%")
+            )
+        ).order_by(Patient.full_name.asc()).limit(8).all()
+        results = []
+        for patient in patients:
+            results.append({
+                "id": patient.id,
+                "full_name": patient.full_name or "",
+                "phone": patient.phone or "",
+                "view_url": url_for("doctor.patient_details", patient_id=patient.id)
+            })
+        return jsonify(results)
+    except Exception as e:
+        current_app.logger.exception("Doctor search patients error: %s", e)
+        return jsonify([]), 200
 
 
 @doctor.route("/doctor/api/calendar-visits")
@@ -1051,12 +1473,225 @@ def waiting_queue_status():
         Ticket.status == "called"
     ).first()
     
-    # تصنيف التذاكر
-    priority_tickets = [t for t in waiting_tickets if t.priority == 1]
-    regular_tickets = [t for t in waiting_tickets if t.priority == 0]
+    # تصنيف التذاكر حسب الأولوية
+    priority_tickets = [t for t in waiting_tickets if t.priority >= 1]  # أولوية 1 و 2
+    regular_tickets = [t for t in waiting_tickets if t.priority == 0]   # عادي
     
     return render_template('doctor/waiting_queue_status.html',
                          waiting_tickets=waiting_tickets,
                          called_ticket=called_ticket,
                          priority_tickets=priority_tickets,
                          regular_tickets=regular_tickets)
+
+
+@doctor.route("/api/emergency-tickets-count")
+@login_required
+@doctor_required
+def emergency_tickets_count():
+    """API endpoint لإرجاع عدد التذاكر الطارئة"""
+    from datetime import datetime
+    
+    today = datetime.now().date()
+    
+    # عدد التذاكر الحرجة
+    critical_count = Ticket.query.filter(
+        db.func.date(Ticket.created_at) == today,
+        Ticket.status == "waiting",
+        Ticket.priority == 2
+    ).count()
+    
+    # عدد التذاكر ذات الأولوية
+    priority_count = Ticket.query.filter(
+        db.func.date(Ticket.created_at) == today,
+        Ticket.status == "waiting",
+        Ticket.priority == 1
+    ).count()
+    
+    return jsonify({
+        'critical': critical_count,
+        'priority': priority_count,
+        'total': critical_count + priority_count
+    })
+
+
+@doctor.route("/create_test_emergency_ticket")
+@login_required
+@doctor_required
+def create_test_emergency_ticket():
+    """إنشاء تذكرة طارئة للاختبار"""
+    from datetime import datetime
+    
+    # البحث عن أول مريض
+    patient = Patient.query.first()
+    if not patient:
+        flash("لا يوجد مرضى في النظام", "error")
+        return redirect(url_for('doctor.dashboard'))
+    
+    today = datetime.now().date()
+    
+    # الحصول على آخر رقم تذكرة اليوم
+    last_ticket = Ticket.query.filter(
+        db.func.date(Ticket.created_at) == today
+    ).order_by(Ticket.number.desc()).first()
+    
+    next_number = (last_ticket.number + 1) if last_ticket else 1
+    
+    # إنشاء تذكرة طارئة
+    emergency_ticket = Ticket(
+        patient_id=patient.id,
+        number=next_number,
+        status="waiting",
+        ticket_type="emergency",
+        priority=2,  # أولوية عالية جداً
+        notes="حالة طارئة - اختبار",
+        created_at=datetime.now()
+    )
+    
+    db.session.add(emergency_ticket)
+    
+    # إنشاء تذكرة أولوية عادية
+    priority_ticket = Ticket(
+        patient_id=patient.id,
+        number=next_number + 1,
+        status="waiting",
+        ticket_type="reservation",
+        priority=1,  # أولوية عادية
+        notes="موعد محجوز - اختبار",
+        created_at=datetime.now()
+    )
+    
+    db.session.add(priority_ticket)
+    db.session.commit()
+    
+    flash("تم إنشاء تذاكر الاختبار بنجاح!", "success")
+    return redirect(url_for('doctor.dashboard'))
+
+
+@doctor.route("/payments")
+@login_required
+@doctor_required
+def doctor_payments():
+    """قائمة المدفوعات للطبيب مع فلتر التاريخ"""
+    from datetime import date, timedelta
+    
+    # الحصول على المعاملات من الطلب
+    selected_month = request.args.get('month', type=int)
+    selected_year = request.args.get('year', type=int)
+    selected_status = request.args.get('status', '')
+    start_date = request.args.get('start_date', '')
+    end_date = request.args.get('end_date', '')
+    
+    # بناء الاستعلام الأساسي
+    query = Visit.query.filter_by(doctor_id=current_user.id)
+    
+    # تطبيق فلتر الشهر والسنة
+    if selected_month and selected_year:
+        query = query.filter(
+            db.extract('month', Visit.date) == selected_month,
+            db.extract('year', Visit.date) == selected_year
+        )
+    elif selected_year:
+        query = query.filter(db.extract('year', Visit.date) == selected_year)
+    elif selected_month:
+        current_year = datetime.now().year
+        query = query.filter(
+            db.extract('month', Visit.date) == selected_month,
+            db.extract('year', Visit.date) == current_year
+        )
+    
+    # تطبيق فلتر التاريخ المخصص
+    if start_date:
+        try:
+            start_date_obj = datetime.strptime(start_date, '%Y-%m-%d').date()
+            query = query.filter(db.func.date(Visit.date) >= start_date_obj)
+        except ValueError:
+            flash("تاريخ البداية غير صحيح", "error")
+    
+    if end_date:
+        try:
+            end_date_obj = datetime.strptime(end_date, '%Y-%m-%d').date()
+            query = query.filter(db.func.date(Visit.date) <= end_date_obj)
+        except ValueError:
+            flash("تاريخ النهاية غير صحيح", "error")
+    
+    # تطبيق فلتر حالة الدفع
+    if selected_status:
+        # تحويل القيم العربية إلى الفرنسية
+        status_mapping = {
+            'مدفوع': 'payé',
+            'غير مدفوع': 'non_payé', 
+            'مدفوع جزئياً': 'partiellement_payé'
+        }
+        mapped_status = status_mapping.get(selected_status, selected_status)
+        query = query.filter_by(payment_status=mapped_status)
+    
+    # ترتيب النتائج
+    payments = query.order_by(Visit.date.desc()).all()
+    
+    # حساب الإحصائيات - استخدام نفس query المطبق على payments
+    # بدلاً من إنشاء query جديد، نستخدم نفس الفلاتر المطبقة على البيانات الرئيسية
+    stats_query = Visit.query.filter_by(doctor_id=current_user.id)
+    
+    # تطبيق فلتر الشهر والسنة
+    if selected_month and selected_year:
+        stats_query = stats_query.filter(
+            db.extract('month', Visit.date) == selected_month,
+            db.extract('year', Visit.date) == selected_year
+        )
+    elif selected_year:
+        stats_query = stats_query.filter(db.extract('year', Visit.date) == selected_year)
+    elif selected_month:
+        current_year = datetime.now().year
+        stats_query = stats_query.filter(
+            db.extract('month', Visit.date) == selected_month,
+            db.extract('year', Visit.date) == current_year
+        )
+    
+    # تطبيق فلتر التاريخ المخصص
+    if start_date:
+        try:
+            start_date_obj = datetime.strptime(start_date, '%Y-%m-%d').date()
+            stats_query = stats_query.filter(db.func.date(Visit.date) >= start_date_obj)
+        except ValueError:
+            pass
+    
+    if end_date:
+        try:
+            end_date_obj = datetime.strptime(end_date, '%Y-%m-%d').date()
+            stats_query = stats_query.filter(db.func.date(Visit.date) <= end_date_obj)
+        except ValueError:
+            pass
+    
+    # ملاحظة: لا نطبق فلتر حالة الدفع على الإحصائيات لأننا نريد عرض جميع الحالات
+    # حتى لو كان المستخدم يفلتر بحالة معينة
+    
+    # حساب الإحصائيات لكل حالة دفع
+    paid_visits = stats_query.filter_by(payment_status='payé').all()
+    unpaid_visits = stats_query.filter_by(payment_status='non_payé').all()
+    partial_visits = stats_query.filter_by(payment_status='partiellement_payé').all()
+    
+    paid_count = len(paid_visits)
+    unpaid_count = len(unpaid_visits)
+    partial_paid_count = len(partial_visits)
+    
+    paid_amount = sum(visit.price or 0 for visit in paid_visits)
+    unpaid_amount = sum(visit.price or 0 for visit in unpaid_visits)
+    partial_paid_amount = sum(visit.price or 0 for visit in partial_visits)
+    
+    total_paid = paid_amount + partial_paid_amount
+    
+    return render_template('doctor/payments.html',
+                         payments=payments,
+                         selected_month=selected_month,
+                         selected_year=selected_year,
+                         selected_status=selected_status,
+                         start_date=start_date,
+                         end_date=end_date,
+                         current_year=datetime.now().year,
+                         total_paid=total_paid,
+                         paid_count=paid_count,
+                         unpaid_count=unpaid_count,
+                         partial_paid_count=partial_paid_count,
+                         paid_amount=paid_amount,
+                         unpaid_amount=unpaid_amount,
+                         partial_paid_amount=partial_paid_amount)

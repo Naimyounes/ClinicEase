@@ -3,17 +3,17 @@
 {% block content %}
 <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1>تفاصيل الموعد</h1>
+        <h1>Détails du rendez-vous</h1>
         <div>
             <span class="badge bg-primary fs-5">{{ format_datetime(appointment.appointment_date) }}</span>
-            {% if appointment.status == "مجدول" %}
-                <span class="badge bg-primary fs-5">مجدول</span>
-            {% elif appointment.status == "مكتمل" %}
-                <span class="badge bg-success fs-5">مكتمل</span>
-            {% elif appointment.status == "ملغي" %}
-                <span class="badge bg-danger fs-5">ملغي</span>
-            {% elif appointment.status == "فائت" %}
-                <span class="badge bg-warning fs-5">فائت</span>
+            {% if appointment.status == "Programmé" %}
+                <span class="badge bg-primary fs-5">Programmé</span>
+            {% elif appointment.status == "Terminé" %}
+                <span class="badge bg-success fs-5">Terminé</span>
+            {% elif appointment.status == "Annulé" %}
+                <span class="badge bg-danger fs-5">Annulé</span>
+            {% elif appointment.status == "Manqué" %}
+                <span class="badge bg-warning fs-5">Manqué</span>
             {% else %}
                 <span class="badge bg-secondary fs-5">{{ appointment.status }}</span>
             {% endif %}
@@ -21,33 +21,33 @@
     </div>
 
     <div class="row">
-        <!-- معلومات المريض -->
+        <!-- Informations du patient -->
         <div class="col-md-6 mb-4">
             <div class="card h-100">
                 <div class="card-header bg-info text-white">
-                    <h4>معلومات المريض</h4>
+                    <h4>Informations du patient</h4>
                 </div>
                 <div class="card-body">
                     <table class="table table-borderless">
                         <tr>
-                            <th>الاسم الكامل:</th>
+                            <th>Nom complet:</th>
                             <td>{{ appointment.patient.full_name }}</td>
                         </tr>
                         <tr>
-                            <th>رقم الهاتف:</th>
+                            <th>Numéro de téléphone:</th>
                             <td>{{ appointment.patient.phone }}</td>
                         </tr>
                         <tr>
-                            <th>تاريخ الميلاد:</th>
-                            <td>{{ format_date(appointment.patient.birth_date) if appointment.patient.birth_date else 'غير محدد' }}</td>
+                            <th>Date de naissance:</th>
+                            <td>{{ format_date(appointment.patient.birth_date) if appointment.patient.birth_date else 'Non spécifié' }}</td>
                         </tr>
                         <tr>
-                            <th>الجنس:</th>
-                            <td>{{ "ذكر" if appointment.patient.gender == "male" else "أنثى" if appointment.patient.gender == "female" else "غير محدد" }}</td>
+                            <th>Sexe:</th>
+                            <td>{{ "Homme" if appointment.patient.gender == "male" else "Femme" if appointment.patient.gender == "female" else "Non spécifié" }}</td>
                         </tr>
                         <tr>
-                            <th>زمرة الدم:</th>
-                            <td>{{ appointment.patient.blood_group if appointment.patient.blood_group else 'غير محدد' }}</td>
+                            <th>Groupe sanguin:</th>
+                            <td>{{ appointment.patient.blood_group if appointment.patient.blood_group else 'Non spécifié' }}</td>
                         </tr>
                         <tr>
                             <th>العنوان:</th>

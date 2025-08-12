@@ -1,0 +1,1035 @@
+/* تصميم أبيض محسن ومتناسق لبرنامج ClinicEase */
+
+:root {
+    /* ألوان أساسية محسنة ومتناسقة */
+    --primary-color: #2563eb;
+    --primary-light: #3b82f6;
+    --primary-dark: #1d4ed8;
+    --primary-hover: #1e40af;
+    
+    --secondary-color: #64748b;
+    --secondary-light: #94a3b8;
+    --secondary-dark: #475569;
+    
+    --success-color: #059669;
+    --success-light: #10b981;
+    --success-dark: #047857;
+    
+    --warning-color: #d97706;
+    --warning-light: #f59e0b;
+    --warning-dark: #b45309;
+    
+    --danger-color: #dc2626;
+    --danger-light: #ef4444;
+    --danger-dark: #b91c1c;
+    
+    --info-color: #0891b2;
+    --info-light: #06b6d4;
+    --info-dark: #0e7490;
+    
+    /* خلفيات بيضاء ونظيفة */
+    --body-bg: #ffffff;
+    --card-bg: #ffffff;
+    --navbar-bg: #ffffff;
+    --sidebar-bg: #f8fafc;
+    --light-bg: #f8fafc;
+    --lighter-bg: #f1f5f9;
+    
+    /* ألوان النصوص */
+    --text-primary: #0f172a;
+    --text-secondary: #334155;
+    --text-muted: #64748b;
+    --text-light: #94a3b8;
+    
+    /* ألوان الحدود */
+    --border-color: #e2e8f0;
+    --border-light: #f1f5f9;
+    --border-dark: #cbd5e1;
+    
+    /* ظلال ناعمة ومتدرجة */
+    --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    
+    /* حدود وانتقالات */
+    --border-radius: 0.5rem;
+    --border-radius-lg: 0.75rem;
+    --border-radius-xl: 1rem;
+    --transition: all 0.2s ease-in-out;
+    --transition-fast: all 0.15s ease-in-out;
+    --transition-slow: all 0.3s ease-in-out;
+}
+
+/* إعادة تعيين عام */
+* {
+    box-sizing: border-box;
+}
+
+/* خلفية بيضاء نظيفة للجسم */
+body {
+    background: var(--body-bg) !important;
+    color: var(--text-primary) !important;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Segoe UI', sans-serif !important;
+    line-height: 1.6;
+    font-weight: 400;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* إزالة أي خلفيات متدرجة */
+body::before,
+body::after {
+    display: none !important;
+}
+
+/* تحسين navbar - الحفاظ على التصميم الأزرق */
+.navbar.bg-primary {
+    background: var(--primary-color) !important;
+    border-bottom: 1px solid var(--primary-dark) !important;
+    box-shadow: var(--shadow-sm) !important;
+    -webkit-backdrop-filter: blur(10px) !important;
+    backdrop-filter: blur(10px) !important;
+    padding: 1rem 0 !important;
+}
+
+.navbar.bg-primary .navbar-brand {
+    color: white !important;
+    font-weight: 700 !important;
+    font-size: 1.5rem !important;
+    transition: var(--transition) !important;
+}
+
+.navbar.bg-primary .navbar-brand:hover {
+    color: rgba(255, 255, 255, 0.9) !important;
+    transform: scale(1.02);
+}
+
+.navbar.bg-primary .navbar-nav .nav-link {
+    color: rgba(255, 255, 255, 0.9) !important;
+    font-weight: 500 !important;
+    padding: 0.5rem 1rem !important;
+    border-radius: var(--border-radius) !important;
+    transition: var(--transition) !important;
+    margin: 0 0.25rem;
+}
+
+.navbar.bg-primary .navbar-nav .nav-link:hover {
+    color: white !important;
+    background: rgba(255, 255, 255, 0.1) !important;
+    transform: translateY(-1px);
+}
+
+.navbar.bg-primary .navbar-nav .nav-link.active {
+    color: white !important;
+    background: rgba(255, 255, 255, 0.2) !important;
+    font-weight: 600;
+}
+
+/* تحسين البطاقات */
+.card {
+    background: var(--card-bg) !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: var(--border-radius-lg) !important;
+    box-shadow: var(--shadow-sm) !important;
+    transition: var(--transition) !important;
+    overflow: hidden;
+}
+
+.card:hover {
+    box-shadow: var(--shadow-md) !important;
+    transform: translateY(-2px) !important;
+    border-color: var(--border-dark) !important;
+}
+
+.card-header {
+    background: var(--light-bg) !important;
+    border-bottom: 1px solid var(--border-color) !important;
+    border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0 !important;
+    color: var(--text-primary) !important;
+    font-weight: 600 !important;
+    padding: 1.25rem 1.5rem !important;
+}
+
+.card-body {
+    padding: 1.5rem !important;
+    color: var(--text-primary) !important;
+    background: var(--card-bg) !important;
+}
+
+.card-footer {
+    background: var(--lighter-bg) !important;
+    border-top: 1px solid var(--border-color) !important;
+    padding: 1rem 1.5rem !important;
+}
+
+/* البطاقات الملونة المحسنة */
+.bg-gradient-primary {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%) !important;
+    color: white !important;
+    border: none !important;
+    box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.3) !important;
+}
+
+.bg-gradient-success {
+    background: linear-gradient(135deg, var(--success-color) 0%, var(--success-dark) 100%) !important;
+    color: white !important;
+    border: none !important;
+    box-shadow: 0 4px 6px -1px rgba(5, 150, 105, 0.3) !important;
+}
+
+.bg-gradient-warning {
+    background: linear-gradient(135deg, var(--warning-color) 0%, var(--warning-dark) 100%) !important;
+    color: white !important;
+    border: none !important;
+    box-shadow: 0 4px 6px -1px rgba(217, 119, 6, 0.3) !important;
+}
+
+.bg-gradient-info {
+    background: linear-gradient(135deg, var(--info-color) 0%, var(--info-dark) 100%) !important;
+    color: white !important;
+    border: none !important;
+    box-shadow: 0 4px 6px -1px rgba(8, 145, 178, 0.3) !important;
+}
+
+.bg-gradient-danger {
+    background: linear-gradient(135deg, var(--danger-color) 0%, var(--danger-dark) 100%) !important;
+    color: white !important;
+    border: none !important;
+    box-shadow: 0 4px 6px -1px rgba(220, 38, 38, 0.3) !important;
+}
+
+.bg-gradient-secondary {
+    background: linear-gradient(135deg, var(--secondary-color) 0%, var(--secondary-dark) 100%) !important;
+    color: white !important;
+    border: none !important;
+    box-shadow: 0 4px 6px -1px rgba(100, 116, 139, 0.3) !important;
+}
+
+/* تحسين الأزرار */
+.btn {
+    border-radius: var(--border-radius) !important;
+    font-weight: 500 !important;
+    padding: 0.625rem 1.25rem !important;
+    transition: var(--transition) !important;
+    border: none !important;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.btn:hover {
+    transform: translateY(-1px) !important;
+    box-shadow: var(--shadow-md) !important;
+}
+
+.btn:active {
+    transform: translateY(0) !important;
+}
+
+.btn-primary {
+    background: var(--primary-color) !important;
+    color: white !important;
+    box-shadow: var(--shadow-xs) !important;
+}
+
+.btn-primary:hover {
+    background: var(--primary-dark) !important;
+    color: white !important;
+    box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.4) !important;
+}
+
+.btn-success {
+    background: var(--success-color) !important;
+    color: white !important;
+    box-shadow: var(--shadow-xs) !important;
+}
+
+.btn-success:hover {
+    background: var(--success-dark) !important;
+    color: white !important;
+    box-shadow: 0 4px 6px -1px rgba(5, 150, 105, 0.4) !important;
+}
+
+.btn-warning {
+    background: var(--warning-color) !important;
+    color: white !important;
+    box-shadow: var(--shadow-xs) !important;
+}
+
+.btn-warning:hover {
+    background: var(--warning-dark) !important;
+    color: white !important;
+    box-shadow: 0 4px 6px -1px rgba(217, 119, 6, 0.4) !important;
+}
+
+.btn-danger {
+    background: var(--danger-color) !important;
+    color: white !important;
+    box-shadow: var(--shadow-xs) !important;
+}
+
+.btn-danger:hover {
+    background: var(--danger-dark) !important;
+    color: white !important;
+    box-shadow: 0 4px 6px -1px rgba(220, 38, 38, 0.4) !important;
+}
+
+.btn-info {
+    background: var(--info-color) !important;
+    color: white !important;
+    box-shadow: var(--shadow-xs) !important;
+}
+
+.btn-info:hover {
+    background: var(--info-dark) !important;
+    color: white !important;
+    box-shadow: 0 4px 6px -1px rgba(8, 145, 178, 0.4) !important;
+}
+
+.btn-secondary {
+    background: var(--secondary-color) !important;
+    color: white !important;
+    box-shadow: var(--shadow-xs) !important;
+}
+
+.btn-secondary:hover {
+    background: var(--secondary-dark) !important;
+    color: white !important;
+    box-shadow: 0 4px 6px -1px rgba(100, 116, 139, 0.4) !important;
+}
+
+/* أزرار outline محسنة */
+.btn-outline-primary {
+    border: 2px solid var(--primary-color) !important;
+    color: var(--primary-color) !important;
+    background: transparent !important;
+}
+
+.btn-outline-primary:hover {
+    background: var(--primary-color) !important;
+    color: white !important;
+    border-color: var(--primary-color) !important;
+}
+
+.btn-outline-success {
+    border: 2px solid var(--success-color) !important;
+    color: var(--success-color) !important;
+    background: transparent !important;
+}
+
+.btn-outline-success:hover {
+    background: var(--success-color) !important;
+    color: white !important;
+    border-color: var(--success-color) !important;
+}
+
+.btn-outline-warning {
+    border: 2px solid var(--warning-color) !important;
+    color: var(--warning-color) !important;
+    background: transparent !important;
+}
+
+.btn-outline-warning:hover {
+    background: var(--warning-color) !important;
+    color: white !important;
+    border-color: var(--warning-color) !important;
+}
+
+.btn-outline-danger {
+    border: 2px solid var(--danger-color) !important;
+    color: var(--danger-color) !important;
+    background: transparent !important;
+}
+
+.btn-outline-danger:hover {
+    background: var(--danger-color) !important;
+    color: white !important;
+    border-color: var(--danger-color) !important;
+}
+
+.btn-outline-info {
+    border: 2px solid var(--info-color) !important;
+    color: var(--info-color) !important;
+    background: transparent !important;
+}
+
+.btn-outline-info:hover {
+    background: var(--info-color) !important;
+    color: white !important;
+    border-color: var(--info-color) !important;
+}
+
+.btn-outline-secondary {
+    border: 2px solid var(--secondary-color) !important;
+    color: var(--secondary-color) !important;
+    background: transparent !important;
+}
+
+.btn-outline-secondary:hover {
+    background: var(--secondary-color) !important;
+    color: white !important;
+    border-color: var(--secondary-color) !important;
+}
+
+/* تحسين الجداول */
+.table {
+    background: var(--card-bg) !important;
+    border-radius: var(--border-radius-lg) !important;
+    overflow: hidden !important;
+    box-shadow: var(--shadow-sm) !important;
+    border: 1px solid var(--border-color) !important;
+}
+
+.table th {
+    background: var(--light-bg) !important;
+    color: var(--text-primary) !important;
+    font-weight: 600 !important;
+    border-bottom: 2px solid var(--border-color) !important;
+    padding: 1rem !important;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.table td {
+    border-bottom: 1px solid var(--border-light) !important;
+    color: var(--text-secondary) !important;
+    padding: 1rem !important;
+    vertical-align: middle;
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+    background: var(--lighter-bg) !important;
+}
+
+.table tbody tr:hover {
+    background: rgba(37, 99, 235, 0.05) !important;
+    transform: scale(1.01);
+    transition: var(--transition);
+}
+
+/* تحسين النماذج */
+.form-control, .form-select {
+    border: 2px solid var(--border-color) !important;
+    border-radius: var(--border-radius) !important;
+    background: var(--card-bg) !important;
+    color: var(--text-primary) !important;
+    padding: 0.75rem 1rem !important;
+    transition: var(--transition) !important;
+    font-size: 0.875rem;
+    line-height: 1.5;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--primary-color) !important;
+    box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.25) !important;
+    background: var(--card-bg) !important;
+    outline: none;
+}
+
+.form-control::placeholder {
+    color: var(--text-light) !important;
+    opacity: 1;
+}
+
+.form-label {
+    color: var(--text-primary) !important;
+    font-weight: 500 !important;
+    margin-bottom: 0.5rem !important;
+    font-size: 0.875rem;
+}
+
+.input-group {
+    box-shadow: var(--shadow-xs) !important;
+    border-radius: var(--border-radius) !important;
+    overflow: hidden;
+}
+
+.input-group-text {
+    background: var(--light-bg) !important;
+    border: 2px solid var(--border-color) !important;
+    color: var(--text-secondary) !important;
+    font-weight: 500;
+}
+
+/* تحسين الـ badges */
+.badge {
+    border-radius: var(--border-radius) !important;
+    font-weight: 500 !important;
+    padding: 0.375rem 0.75rem !important;
+    font-size: 0.75rem !important;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.badge.bg-primary {
+    background: var(--primary-color) !important;
+    color: white !important;
+}
+
+.badge.bg-success {
+    background: var(--success-color) !important;
+    color: white !important;
+}
+
+.badge.bg-warning {
+    background: var(--warning-color) !important;
+    color: white !important;
+}
+
+.badge.bg-danger {
+    background: var(--danger-color) !important;
+    color: white !important;
+}
+
+.badge.bg-info {
+    background: var(--info-color) !important;
+    color: white !important;
+}
+
+.badge.bg-secondary {
+    background: var(--secondary-color) !important;
+    color: white !important;
+}
+
+/* تحسين الـ alerts */
+.alert {
+    border-radius: var(--border-radius-lg) !important;
+    border: none !important;
+    padding: 1rem 1.5rem !important;
+    box-shadow: var(--shadow-sm) !important;
+    font-weight: 500;
+    position: relative;
+    overflow: hidden;
+}
+
+.alert::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: currentColor;
+}
+
+.alert-primary {
+    background: rgba(37, 99, 235, 0.1) !important;
+    color: var(--primary-dark) !important;
+    border-left: 4px solid var(--primary-color) !important;
+}
+
+.alert-success {
+    background: rgba(5, 150, 105, 0.1) !important;
+    color: var(--success-dark) !important;
+    border-left: 4px solid var(--success-color) !important;
+}
+
+.alert-warning {
+    background: rgba(217, 119, 6, 0.1) !important;
+    color: var(--warning-dark) !important;
+    border-left: 4px solid var(--warning-color) !important;
+}
+
+.alert-danger {
+    background: rgba(220, 38, 38, 0.1) !important;
+    color: var(--danger-dark) !important;
+    border-left: 4px solid var(--danger-color) !important;
+}
+
+.alert-info {
+    background: rgba(8, 145, 178, 0.1) !important;
+    color: var(--info-dark) !important;
+    border-left: 4px solid var(--info-color) !important;
+}
+
+/* تحسين القوائم المنسدلة */
+.dropdown-menu {
+    border-radius: var(--border-radius-lg) !important;
+    box-shadow: var(--shadow-lg) !important;
+    border: 1px solid var(--border-color) !important;
+    padding: 0.5rem !important;
+    margin-top: 0.5rem !important;
+    background: var(--card-bg) !important;
+}
+
+.dropdown-item {
+    border-radius: var(--border-radius) !important;
+    padding: 0.75rem 1rem !important;
+    transition: var(--transition) !important;
+    color: var(--text-secondary) !important;
+    font-weight: 500;
+}
+
+.dropdown-item:hover {
+    background: var(--light-bg) !important;
+    color: var(--primary-color) !important;
+    transform: translateX(4px);
+}
+
+.dropdown-item:active {
+    background: var(--primary-color) !important;
+    color: white !important;
+}
+
+.dropdown-header {
+    color: var(--text-muted) !important;
+    font-weight: 600 !important;
+    font-size: 0.75rem !important;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 0.5rem 1rem !important;
+    background: var(--lighter-bg) !important;
+    border-radius: var(--border-radius) !important;
+    margin-bottom: 0.25rem;
+}
+
+.dropdown-divider {
+    border-top: 1px solid var(--border-color) !important;
+    margin: 0.5rem 0 !important;
+}
+
+/* تحسين الصفحات */
+.pagination .page-link {
+    border-radius: var(--border-radius) !important;
+    margin: 0 2px !important;
+    border: 2px solid var(--border-color) !important;
+    color: var(--text-secondary) !important;
+    background: var(--card-bg) !important;
+    transition: var(--transition) !important;
+    font-weight: 500;
+}
+
+.pagination .page-link:hover {
+    background: var(--primary-color) !important;
+    color: white !important;
+    border-color: var(--primary-color) !important;
+    transform: translateY(-1px);
+}
+
+.pagination .page-item.active .page-link {
+    background: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
+    color: white !important;
+}
+
+/* تحسين الـ modals */
+.modal-content {
+    border-radius: var(--border-radius-xl) !important;
+    box-shadow: var(--shadow-xl) !important;
+    border: none !important;
+    background: var(--card-bg) !important;
+}
+
+.modal-header {
+    border-bottom: 1px solid var(--border-color) !important;
+    padding: 1.5rem !important;
+    background: var(--light-bg) !important;
+    border-radius: var(--border-radius-xl) var(--border-radius-xl) 0 0 !important;
+}
+
+.modal-body {
+    padding: 1.5rem !important;
+    background: var(--card-bg) !important;
+}
+
+.modal-footer {
+    border-top: 1px solid var(--border-color) !important;
+    padding: 1.5rem !important;
+    background: var(--lighter-bg) !important;
+    border-radius: 0 0 var(--border-radius-xl) var(--border-radius-xl) !important;
+}
+
+/* تحسين الـ tabs */
+.nav-tabs {
+    border-bottom: 2px solid var(--border-color) !important;
+}
+
+.nav-tabs .nav-link {
+    border: none !important;
+    border-bottom: 3px solid transparent !important;
+    color: var(--text-muted) !important;
+    font-weight: 500 !important;
+    padding: 1rem 1.5rem !important;
+    transition: var(--transition) !important;
+}
+
+.nav-tabs .nav-link:hover {
+    color: var(--primary-color) !important;
+    border-bottom-color: var(--primary-light) !important;
+}
+
+.nav-tabs .nav-link.active {
+    background: none !important;
+    border-bottom-color: var(--primary-color) !important;
+    color: var(--primary-color) !important;
+    font-weight: 600 !important;
+}
+
+/* تحسين الـ list groups */
+.list-group-item {
+    border: 1px solid var(--border-color) !important;
+    background: var(--card-bg) !important;
+    color: var(--text-secondary) !important;
+    padding: 1rem 1.25rem !important;
+    transition: var(--transition) !important;
+}
+
+.list-group-item:hover {
+    background: var(--light-bg) !important;
+    transform: translateX(4px);
+    border-color: var(--border-dark) !important;
+}
+
+.list-group-item.active {
+    background: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
+    color: white !important;
+}
+
+/* تحسين الـ progress bars */
+.progress {
+    background: var(--light-bg) !important;
+    border-radius: var(--border-radius) !important;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1) !important;
+}
+
+.progress-bar {
+    background: linear-gradient(90deg, var(--primary-color), var(--primary-light)) !important;
+    border-radius: var(--border-radius) !important;
+    transition: width 0.6s ease !important;
+}
+
+/* تأثيرات الحركة */
+@keyframes fadeIn {
+    from { 
+        opacity: 0; 
+        transform: translateY(20px); 
+    }
+    to { 
+        opacity: 1; 
+        transform: translateY(0); 
+    }
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.02);
+    }
+}
+
+.fade-in {
+    animation: fadeIn 0.6s ease-out;
+}
+
+.slide-in-right {
+    animation: slideInRight 0.5s ease-out;
+}
+
+.pulse {
+    animation: pulse 2s infinite;
+}
+
+/* تحسين responsive */
+@media (max-width: 1200px) {
+    .container-fluid {
+        padding: 0 1rem;
+    }
+    
+    .card-body {
+        padding: 1.25rem !important;
+    }
+}
+
+@media (max-width: 992px) {
+    .card-body {
+        padding: 1rem !important;
+    }
+    
+    .btn {
+        padding: 0.5rem 1rem !important;
+        font-size: 0.8rem;
+    }
+    
+    .navbar-nav .nav-link {
+        padding: 0.75rem 1rem !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .container-fluid {
+        padding: 0 0.75rem;
+    }
+    
+    .card {
+        margin-bottom: 1rem;
+    }
+    
+    .card-body {
+        padding: 0.875rem !important;
+    }
+    
+    .btn {
+        padding: 0.5rem 0.875rem !important;
+        font-size: 0.75rem;
+    }
+    
+    .table th,
+    .table td {
+        padding: 0.75rem !important;
+        font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .card-body {
+        padding: 0.75rem !important;
+    }
+    
+    .btn {
+        padding: 0.375rem 0.75rem !important;
+        font-size: 0.7rem;
+    }
+    
+    .navbar-brand {
+        font-size: 1.25rem !important;
+    }
+}
+
+/* تحسينات خاصة للعناصر المخصصة */
+.dashboard-stats-card {
+    border-radius: var(--border-radius-xl) !important;
+    border: none !important;
+    box-shadow: var(--shadow-md) !important;
+    transition: var(--transition-slow) !important;
+    overflow: hidden !important;
+    position: relative !important;
+    min-height: 140px !important;
+}
+
+.dashboard-stats-card:hover {
+    transform: translateY(-4px) !important;
+    box-shadow: var(--shadow-xl) !important;
+}
+
+.dashboard-stats-card .card-body {
+    padding: 1.5rem !important;
+    position: relative !important;
+    z-index: 2 !important;
+}
+
+.dashboard-stats-card .card-icon {
+    position: absolute !important;
+    top: 1rem !important;
+    right: 1rem !important;
+    font-size: 2.5rem !important;
+    opacity: 0.2 !important;
+    z-index: 1 !important;
+}
+
+.dashboard-stats-card h3 {
+    font-size: 2.5rem !important;
+    font-weight: 700 !important;
+    margin-bottom: 0.5rem !important;
+    line-height: 1 !important;
+}
+
+.dashboard-stats-card h4 {
+    font-size: 1.25rem !important;
+    font-weight: 600 !important;
+    margin-bottom: 0.25rem !important;
+    opacity: 0.9 !important;
+}
+
+/* تحسين خاص للإشعارات */
+.notification-bell {
+    position: relative;
+    transition: var(--transition) !important;
+}
+
+.notification-bell:hover {
+    transform: scale(1.1);
+}
+
+.notification-badge {
+    font-size: 0.7rem !important;
+    padding: 0.25rem 0.5rem !important;
+    border-radius: 50% !important;
+    animation: pulse 2s infinite;
+}
+
+.notification-dropdown {
+    min-width: 320px !important;
+    max-width: 400px !important;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+/* تحسين خاص للبحث */
+.search-box {
+    position: relative;
+}
+
+.search-box input {
+    padding-left: 2.5rem !important;
+    border-radius: var(--border-radius-lg) !important;
+}
+
+.search-box .search-icon {
+    position: absolute;
+    left: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-light);
+    z-index: 10;
+}
+
+/* تحسين خاص للأيقونات */
+.fas, .far, .fab {
+    transition: var(--transition) !important;
+}
+
+.btn:hover .fas,
+.btn:hover .far,
+.btn:hover .fab {
+    transform: scale(1.1);
+}
+
+/* تحسين خاص للنصوص */
+.text-primary {
+    color: var(--primary-color) !important;
+}
+
+.text-secondary {
+    color: var(--text-secondary) !important;
+}
+
+.text-muted {
+    color: var(--text-muted) !important;
+}
+
+.text-success {
+    color: var(--success-color) !important;
+}
+
+.text-warning {
+    color: var(--warning-color) !important;
+}
+
+.text-danger {
+    color: var(--danger-color) !important;
+}
+
+.text-info {
+    color: var(--info-color) !important;
+}
+
+/* تحسين خاص للخلفيات */
+.bg-light {
+    background: var(--light-bg) !important;
+}
+
+.bg-white {
+    background: var(--card-bg) !important;
+}
+
+/* تحسين خاص للحدود */
+.border {
+    border: 1px solid var(--border-color) !important;
+}
+
+.border-top {
+    border-top: 1px solid var(--border-color) !important;
+}
+
+.border-bottom {
+    border-bottom: 1px solid var(--border-color) !important;
+}
+
+.border-left {
+    border-left: 1px solid var(--border-color) !important;
+}
+
+.border-right {
+    border-right: 1px solid var(--border-color) !important;
+}
+
+/* تحسين خاص للظلال */
+.shadow-sm {
+    box-shadow: var(--shadow-sm) !important;
+}
+
+.shadow {
+    box-shadow: var(--shadow-md) !important;
+}
+
+.shadow-lg {
+    box-shadow: var(--shadow-lg) !important;
+}
+
+/* تحسين نهائي للتأكد من التناسق */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-color) var(--light-bg);
+}
+
+*::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+*::-webkit-scrollbar-track {
+    background: var(--light-bg);
+    border-radius: var(--border-radius);
+}
+
+*::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: var(--border-radius);
+    transition: var(--transition);
+}
+
+*::-webkit-scrollbar-thumb:hover {
+    background: var(--border-dark);
+}
+
+/* تحسين خاص للطباعة */
+@media print {
+    body {
+        background: white !important;
+        color: black !important;
+    }
+    
+    .card {
+        box-shadow: none !important;
+        border: 1px solid #ddd !important;
+    }
+    
+    .btn {
+        display: none !important;
+    }
+    
+    .navbar {
+        display: none !important;
+    }
+}

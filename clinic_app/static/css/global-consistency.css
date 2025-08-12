@@ -1,0 +1,742 @@
+/* ملف CSS لضمان التناسق الكامل في جميع أنحاء التطبيق */
+
+/* إعادة تعيين شاملة للتأكد من التناسق */
+* {
+    box-sizing: border-box !important;
+}
+
+*::before,
+*::after {
+    box-sizing: border-box !important;
+}
+
+/* ضمان الخلفية البيضاء في جميع الحالات */
+html,
+body,
+#root,
+.app,
+.main-wrapper,
+.content-wrapper {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    background-image: none !important;
+}
+
+/* إزالة أي خلفيات متدرجة غير مرغوب فيها */
+body::before,
+body::after,
+html::before,
+html::after,
+.container::before,
+.container::after,
+.container-fluid::before,
+.container-fluid::after {
+    display: none !important;
+    content: none !important;
+    background: none !important;
+}
+
+/* ضمان تناسق الألوان في جميع العناصر */
+.text-primary {
+    color: #2563eb !important;
+}
+
+.text-secondary {
+    color: #334155 !important;
+}
+
+.text-success {
+    color: #059669 !important;
+}
+
+.text-warning {
+    color: #d97706 !important;
+}
+
+.text-danger {
+    color: #dc2626 !important;
+}
+
+.text-info {
+    color: #0891b2 !important;
+}
+
+.text-muted {
+    color: #64748b !important;
+}
+
+.text-dark {
+    color: #0f172a !important;
+}
+
+.text-light {
+    color: #94a3b8 !important;
+}
+
+/* ضمان تناسق الخلفيات */
+.bg-primary {
+    background: #2563eb !important;
+    color: white !important;
+}
+
+.bg-secondary {
+    background: #64748b !important;
+    color: white !important;
+}
+
+.bg-success {
+    background: #059669 !important;
+    color: white !important;
+}
+
+.bg-warning {
+    background: #d97706 !important;
+    color: white !important;
+}
+
+.bg-danger {
+    background: #dc2626 !important;
+    color: white !important;
+}
+
+.bg-info {
+    background: #0891b2 !important;
+    color: white !important;
+}
+
+.bg-light {
+    background: #f8fafc !important;
+    color: #0f172a !important;
+}
+
+.bg-dark {
+    background: #0f172a !important;
+    color: white !important;
+}
+
+.bg-white {
+    background: #ffffff !important;
+    color: #0f172a !important;
+}
+
+/* ضمان تناسق الحدود */
+.border {
+    border: 1px solid #e2e8f0 !important;
+}
+
+.border-primary {
+    border-color: #2563eb !important;
+}
+
+.border-secondary {
+    border-color: #64748b !important;
+}
+
+.border-success {
+    border-color: #059669 !important;
+}
+
+.border-warning {
+    border-color: #d97706 !important;
+}
+
+.border-danger {
+    border-color: #dc2626 !important;
+}
+
+.border-info {
+    border-color: #0891b2 !important;
+}
+
+.border-light {
+    border-color: #f1f5f9 !important;
+}
+
+.border-dark {
+    border-color: #0f172a !important;
+}
+
+/* ضمان تناسق الظلال */
+.shadow-none {
+    box-shadow: none !important;
+}
+
+.shadow-sm {
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
+}
+
+.shadow {
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06) !important;
+}
+
+.shadow-lg {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* ضمان تناسق الحدود المدورة */
+.rounded {
+    border-radius: 0.5rem !important;
+}
+
+.rounded-sm {
+    border-radius: 0.375rem !important;
+}
+
+.rounded-lg {
+    border-radius: 0.75rem !important;
+}
+
+.rounded-xl {
+    border-radius: 1rem !important;
+}
+
+.rounded-2xl {
+    border-radius: 1.5rem !important;
+}
+
+.rounded-circle {
+    border-radius: 50% !important;
+}
+
+.rounded-pill {
+    border-radius: 50rem !important;
+}
+
+/* ضمان تناسق المسافات */
+.p-0 { padding: 0 !important; }
+.p-1 { padding: 0.25rem !important; }
+.p-2 { padding: 0.5rem !important; }
+.p-3 { padding: 1rem !important; }
+.p-4 { padding: 1.5rem !important; }
+.p-5 { padding: 3rem !important; }
+
+.m-0 { margin: 0 !important; }
+.m-1 { margin: 0.25rem !important; }
+.m-2 { margin: 0.5rem !important; }
+.m-3 { margin: 1rem !important; }
+.m-4 { margin: 1.5rem !important; }
+.m-5 { margin: 3rem !important; }
+
+/* ضمان تناسق الخطوط */
+.fw-light { font-weight: 300 !important; }
+.fw-normal { font-weight: 400 !important; }
+.fw-medium { font-weight: 500 !important; }
+.fw-semibold { font-weight: 600 !important; }
+.fw-bold { font-weight: 700 !important; }
+.fw-bolder { font-weight: 800 !important; }
+
+.fs-1 { font-size: 2.5rem !important; }
+.fs-2 { font-size: 2rem !important; }
+.fs-3 { font-size: 1.75rem !important; }
+.fs-4 { font-size: 1.5rem !important; }
+.fs-5 { font-size: 1.25rem !important; }
+.fs-6 { font-size: 1rem !important; }
+
+/* ضمان تناسق العرض والارتفاع */
+.w-25 { width: 25% !important; }
+.w-50 { width: 50% !important; }
+.w-75 { width: 75% !important; }
+.w-100 { width: 100% !important; }
+.w-auto { width: auto !important; }
+
+.h-25 { height: 25% !important; }
+.h-50 { height: 50% !important; }
+.h-75 { height: 75% !important; }
+.h-100 { height: 100% !important; }
+.h-auto { height: auto !important; }
+
+/* ضمان تناسق المحاذاة */
+.text-start { text-align: left !important; }
+.text-center { text-align: center !important; }
+.text-end { text-align: right !important; }
+
+.d-none { display: none !important; }
+.d-inline { display: inline !important; }
+.d-inline-block { display: inline-block !important; }
+.d-block { display: block !important; }
+.d-flex { display: flex !important; }
+.d-inline-flex { display: inline-flex !important; }
+
+.justify-content-start { justify-content: flex-start !important; }
+.justify-content-end { justify-content: flex-end !important; }
+.justify-content-center { justify-content: center !important; }
+.justify-content-between { justify-content: space-between !important; }
+.justify-content-around { justify-content: space-around !important; }
+.justify-content-evenly { justify-content: space-evenly !important; }
+
+.align-items-start { align-items: flex-start !important; }
+.align-items-end { align-items: flex-end !important; }
+.align-items-center { align-items: center !important; }
+.align-items-baseline { align-items: baseline !important; }
+.align-items-stretch { align-items: stretch !important; }
+
+/* ضمان تناسق الموضع */
+.position-static { position: static !important; }
+.position-relative { position: relative !important; }
+.position-absolute { position: absolute !important; }
+.position-fixed { position: fixed !important; }
+.position-sticky { position: sticky !important; }
+
+/* ضمان تناسق الفيض */
+.overflow-auto { overflow: auto !important; }
+.overflow-hidden { overflow: hidden !important; }
+.overflow-visible { overflow: visible !important; }
+.overflow-scroll { overflow: scroll !important; }
+
+/* ضمان تناسق الشفافية */
+.opacity-0 { opacity: 0 !important; }
+.opacity-25 { opacity: 0.25 !important; }
+.opacity-50 { opacity: 0.5 !important; }
+.opacity-75 { opacity: 0.75 !important; }
+.opacity-100 { opacity: 1 !important; }
+
+/* ضمان تناسق المؤشر */
+.cursor-auto { cursor: auto !important; }
+.cursor-default { cursor: default !important; }
+.cursor-pointer { cursor: pointer !important; }
+.cursor-wait { cursor: wait !important; }
+.cursor-text { cursor: text !important; }
+.cursor-move { cursor: move !important; }
+.cursor-help { cursor: help !important; }
+.cursor-not-allowed { cursor: not-allowed !important; }
+
+/* ضمان تناسق التحديد */
+.user-select-all { user-select: all !important; }
+.user-select-auto { user-select: auto !important; }
+.user-select-none { user-select: none !important; }
+
+/* ضمان تناسق الانتقالات */
+.transition-none { transition: none !important; }
+.transition-all { transition: all 0.15s ease-in-out !important; }
+.transition-colors { transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out !important; }
+.transition-opacity { transition: opacity 0.15s ease-in-out !important; }
+.transition-shadow { transition: box-shadow 0.15s ease-in-out !important; }
+.transition-transform { transition: transform 0.15s ease-in-out !important; }
+
+/* ضمان تناسق التحويلات */
+.transform-none { transform: none !important; }
+.scale-50 { transform: scale(0.5) !important; }
+.scale-75 { transform: scale(0.75) !important; }
+.scale-90 { transform: scale(0.9) !important; }
+.scale-95 { transform: scale(0.95) !important; }
+.scale-100 { transform: scale(1) !important; }
+.scale-105 { transform: scale(1.05) !important; }
+.scale-110 { transform: scale(1.1) !important; }
+.scale-125 { transform: scale(1.25) !important; }
+.scale-150 { transform: scale(1.5) !important; }
+
+/* ضمان تناسق الدوران */
+.rotate-0 { transform: rotate(0deg) !important; }
+.rotate-45 { transform: rotate(45deg) !important; }
+.rotate-90 { transform: rotate(90deg) !important; }
+.rotate-180 { transform: rotate(180deg) !important; }
+
+/* ضمان تناسق الترجمة */
+.translate-x-0 { transform: translateX(0) !important; }
+.translate-y-0 { transform: translateY(0) !important; }
+.translate-x-1 { transform: translateX(0.25rem) !important; }
+.translate-y-1 { transform: translateY(0.25rem) !important; }
+.translate-x-2 { transform: translateX(0.5rem) !important; }
+.translate-y-2 { transform: translateY(0.5rem) !important; }
+
+/* ضمان تناسق الفلاتر */
+.blur-none { filter: blur(0) !important; }
+.blur-sm { filter: blur(4px) !important; }
+.blur { filter: blur(8px) !important; }
+.blur-lg { filter: blur(16px) !important; }
+.blur-xl { filter: blur(24px) !important; }
+
+.brightness-0 { filter: brightness(0) !important; }
+.brightness-50 { filter: brightness(0.5) !important; }
+.brightness-75 { filter: brightness(0.75) !important; }
+.brightness-90 { filter: brightness(0.9) !important; }
+.brightness-95 { filter: brightness(0.95) !important; }
+.brightness-100 { filter: brightness(1) !important; }
+.brightness-105 { filter: brightness(1.05) !important; }
+.brightness-110 { filter: brightness(1.1) !important; }
+.brightness-125 { filter: brightness(1.25) !important; }
+.brightness-150 { filter: brightness(1.5) !important; }
+.brightness-200 { filter: brightness(2) !important; }
+
+/* ضمان تناسق الحدود العلوية والسفلية */
+.border-top { border-top: 1px solid #e2e8f0 !important; }
+.border-bottom { border-bottom: 1px solid #e2e8f0 !important; }
+.border-start { border-left: 1px solid #e2e8f0 !important; }
+.border-end { border-right: 1px solid #e2e8f0 !important; }
+
+.border-top-0 { border-top: 0 !important; }
+.border-bottom-0 { border-bottom: 0 !important; }
+.border-start-0 { border-left: 0 !important; }
+.border-end-0 { border-right: 0 !important; }
+
+/* ضمان تناسق الحدود المدورة للزوايا */
+.rounded-top { border-top-left-radius: 0.5rem !important; border-top-right-radius: 0.5rem !important; }
+.rounded-bottom { border-bottom-left-radius: 0.5rem !important; border-bottom-right-radius: 0.5rem !important; }
+.rounded-start { border-top-left-radius: 0.5rem !important; border-bottom-left-radius: 0.5rem !important; }
+.rounded-end { border-top-right-radius: 0.5rem !important; border-bottom-right-radius: 0.5rem !important; }
+
+/* ضمان تناسق الفجوات في flexbox و grid */
+.gap-0 { gap: 0 !important; }
+.gap-1 { gap: 0.25rem !important; }
+.gap-2 { gap: 0.5rem !important; }
+.gap-3 { gap: 1rem !important; }
+.gap-4 { gap: 1.5rem !important; }
+.gap-5 { gap: 3rem !important; }
+
+.row-gap-0 { row-gap: 0 !important; }
+.row-gap-1 { row-gap: 0.25rem !important; }
+.row-gap-2 { row-gap: 0.5rem !important; }
+.row-gap-3 { row-gap: 1rem !important; }
+.row-gap-4 { row-gap: 1.5rem !important; }
+.row-gap-5 { row-gap: 3rem !important; }
+
+.column-gap-0 { column-gap: 0 !important; }
+.column-gap-1 { column-gap: 0.25rem !important; }
+.column-gap-2 { column-gap: 0.5rem !important; }
+.column-gap-3 { column-gap: 1rem !important; }
+.column-gap-4 { column-gap: 1.5rem !important; }
+.column-gap-5 { column-gap: 3rem !important; }
+
+/* ضمان تناسق الـ z-index */
+.z-n1 { z-index: -1 !important; }
+.z-0 { z-index: 0 !important; }
+.z-1 { z-index: 1 !important; }
+.z-2 { z-index: 2 !important; }
+.z-3 { z-index: 3 !important; }
+
+/* ضمان تناسق الخطوط العربية */
+.text-arabic {
+    font-family: 'Tajawal', 'Cairo', 'Amiri', 'Noto Sans Arabic', sans-serif !important;
+    direction: rtl !important;
+    text-align: right !important;
+}
+
+/* ضمان تناسق الخطوط الإنجليزية */
+.text-english {
+    font-family: 'Inter', 'Roboto', 'Segoe UI', sans-serif !important;
+    direction: ltr !important;
+    text-align: left !important;
+}
+
+/* ضمان تناسق الخطوط الفرنسية */
+.text-french {
+    font-family: 'Inter', 'Roboto', 'Segoe UI', sans-serif !important;
+    direction: ltr !important;
+    text-align: left !important;
+}
+
+/* ضمان تناسق الأرقام */
+.font-tabular-nums {
+    font-variant-numeric: tabular-nums !important;
+}
+
+.font-proportional-nums {
+    font-variant-numeric: proportional-nums !important;
+}
+
+/* ضمان تناسق الخط المائل */
+.font-italic {
+    font-style: italic !important;
+}
+
+.font-not-italic {
+    font-style: normal !important;
+}
+
+/* ضمان تناسق تزيين النص */
+.text-decoration-none {
+    text-decoration: none !important;
+}
+
+.text-decoration-underline {
+    text-decoration: underline !important;
+}
+
+.text-decoration-line-through {
+    text-decoration: line-through !important;
+}
+
+/* ضمان تناسق تحويل النص */
+.text-uppercase {
+    text-transform: uppercase !important;
+}
+
+.text-lowercase {
+    text-transform: lowercase !important;
+}
+
+.text-capitalize {
+    text-transform: capitalize !important;
+}
+
+.text-normal-case {
+    text-transform: none !important;
+}
+
+/* ضمان تناسق المسافة بين الأحرف */
+.tracking-tighter {
+    letter-spacing: -0.05em !important;
+}
+
+.tracking-tight {
+    letter-spacing: -0.025em !important;
+}
+
+.tracking-normal {
+    letter-spacing: 0em !important;
+}
+
+.tracking-wide {
+    letter-spacing: 0.025em !important;
+}
+
+.tracking-wider {
+    letter-spacing: 0.05em !important;
+}
+
+.tracking-widest {
+    letter-spacing: 0.1em !important;
+}
+
+/* ضمان تناسق ارتفاع الخط */
+.leading-none {
+    line-height: 1 !important;
+}
+
+.leading-tight {
+    line-height: 1.25 !important;
+}
+
+.leading-snug {
+    line-height: 1.375 !important;
+}
+
+.leading-normal {
+    line-height: 1.5 !important;
+}
+
+.leading-relaxed {
+    line-height: 1.625 !important;
+}
+
+.leading-loose {
+    line-height: 2 !important;
+}
+
+/* ضمان تناسق كسر النص */
+.text-wrap {
+    text-wrap: wrap !important;
+}
+
+.text-nowrap {
+    text-wrap: nowrap !important;
+}
+
+.text-balance {
+    text-wrap: balance !important;
+}
+
+.text-pretty {
+    text-wrap: pretty !important;
+}
+
+/* ضمان تناسق كسر الكلمات */
+.break-normal {
+    overflow-wrap: normal !important;
+    word-break: normal !important;
+}
+
+.break-words {
+    overflow-wrap: break-word !important;
+}
+
+.break-all {
+    word-break: break-all !important;
+}
+
+.break-keep {
+    word-break: keep-all !important;
+}
+
+/* ضمان تناسق النص المقطوع */
+.truncate {
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+}
+
+/* ضمان تناسق المسافة البيضاء */
+.whitespace-normal {
+    white-space: normal !important;
+}
+
+.whitespace-nowrap {
+    white-space: nowrap !important;
+}
+
+.whitespace-pre {
+    white-space: pre !important;
+}
+
+.whitespace-pre-line {
+    white-space: pre-line !important;
+}
+
+.whitespace-pre-wrap {
+    white-space: pre-wrap !important;
+}
+
+.whitespace-break-spaces {
+    white-space: break-spaces !important;
+}
+
+/* ضمان تناسق الخلفية في الوضع المظلم (للمستقبل) */
+@media (prefers-color-scheme: dark) {
+    .dark\:bg-white {
+        background: #ffffff !important;
+    }
+    
+    .dark\:text-black {
+        color: #000000 !important;
+    }
+}
+
+/* ضمان تناسق الطباعة */
+@media print {
+    .print\:hidden {
+        display: none !important;
+    }
+    
+    .print\:block {
+        display: block !important;
+    }
+    
+    .print\:inline {
+        display: inline !important;
+    }
+    
+    .print\:flex {
+        display: flex !important;
+    }
+    
+    .print\:text-black {
+        color: #000000 !important;
+    }
+    
+    .print\:bg-white {
+        background: #ffffff !important;
+    }
+}
+
+/* ضمان تناسق الحركة */
+@media (prefers-reduced-motion: reduce) {
+    .motion-reduce\:transition-none {
+        transition: none !important;
+    }
+    
+    .motion-reduce\:animate-none {
+        animation: none !important;
+    }
+}
+
+/* ضمان تناسق الشفافية العالية */
+@media (prefers-contrast: high) {
+    .contrast-more\:border-black {
+        border-color: #000000 !important;
+    }
+    
+    .contrast-more\:text-black {
+        color: #000000 !important;
+    }
+}
+
+/* إعادة تعيين نهائية للتأكد من التناسق */
+.clinic-reset {
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    font-size: 100% !important;
+    font: inherit !important;
+    vertical-align: baseline !important;
+    background: transparent !important;
+    color: inherit !important;
+    text-decoration: none !important;
+    list-style: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+    border-radius: 0 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    overflow: visible !important;
+    display: block !important;
+    position: static !important;
+    float: none !important;
+    clear: none !important;
+    top: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    left: auto !important;
+    z-index: auto !important;
+    width: auto !important;
+    height: auto !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    max-width: none !important;
+    max-height: none !important;
+    line-height: normal !important;
+    white-space: normal !important;
+    text-align: left !important;
+    text-transform: none !important;
+    text-indent: 0 !important;
+    letter-spacing: normal !important;
+    word-spacing: normal !important;
+    font-weight: normal !important;
+    font-style: normal !important;
+    font-variant: normal !important;
+    text-rendering: auto !important;
+    cursor: auto !important;
+    resize: none !important;
+    user-select: auto !important;
+    pointer-events: auto !important;
+    transform: none !important;
+    transition: none !important;
+    animation: none !important;
+    filter: none !important;
+    backdrop-filter: none !important;
+    clip: auto !important;
+    clip-path: none !important;
+    mask: none !important;
+    mix-blend-mode: normal !important;
+    isolation: auto !important;
+    will-change: auto !important;
+    contain: none !important;
+    content: normal !important;
+    counter-reset: none !important;
+    counter-increment: none !important;
+    quotes: none !important;
+    speak: normal !important;
+    table-layout: auto !important;
+    border-collapse: separate !important;
+    border-spacing: 0 !important;
+    caption-side: top !important;
+    empty-cells: show !important;
+    list-style-image: none !important;
+    list-style-position: outside !important;
+    list-style-type: disc !important;
+    orphans: 2 !important;
+    widows: 2 !important;
+    page-break-after: auto !important;
+    page-break-before: auto !important;
+    page-break-inside: auto !important;
+    break-after: auto !important;
+    break-before: auto !important;
+    break-inside: auto !important;
+    column-count: auto !important;
+    column-fill: balance !important;
+    column-gap: normal !important;
+    column-rule: medium none currentColor !important;
+    column-span: none !important;
+    column-width: auto !important;
+    columns: auto !important;
+}

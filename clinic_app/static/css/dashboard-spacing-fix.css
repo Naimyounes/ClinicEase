@@ -1,0 +1,109 @@
+/* إصلاح المسافات بين كروت الداشبورد */
+
+/* تقليل المسافات بشكل جذري */
+.dashboard-stats-row {
+    margin: 0 !important;
+    padding: 0 !important;
+    gap: 2px !important;
+    row-gap: 2px !important;
+    column-gap: 2px !important;
+}
+
+.dashboard-stats-row [class*="col-"] {
+    padding: 1px !important;
+    margin: 0 !important;
+}
+
+/* إزالة جميع المسافات الإضافية */
+.dashboard-stats-row .col-xl-2,
+.dashboard-stats-row .col-lg-3,
+.dashboard-stats-row .col-md-4,
+.dashboard-stats-row .col-6 {
+    padding-left: 1px !important;
+    padding-right: 1px !important;
+    padding-top: 1px !important;
+    padding-bottom: 1px !important;
+    margin-bottom: 2px !important;
+}
+
+/* تحسين الحاوي الرئيسي */
+.container .dashboard-stats-row,
+.container-fluid .dashboard-stats-row {
+    margin-left: -1px !important;
+    margin-right: -1px !important;
+}
+
+/* إزالة المسافات من Bootstrap Grid */
+.dashboard-stats-row {
+    --bs-gutter-x: 2px !important;
+    --bs-gutter-y: 2px !important;
+}
+
+/* تحسين للشاشات المختلفة */
+@media (min-width: 1400px) {
+    .dashboard-stats-row [class*="col-"] {
+        padding: 2px !important;
+        margin-bottom: 3px !important;
+    }
+}
+
+@media (max-width: 1200px) {
+    .dashboard-stats-row [class*="col-"] {
+        padding: 1px !important;
+        margin-bottom: 2px !important;
+    }
+}
+
+@media (max-width: 992px) {
+    .dashboard-stats-row [class*="col-"] {
+        padding: 1px !important;
+        margin-bottom: 1px !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .dashboard-stats-row [class*="col-"] {
+        padding: 0.5px !important;
+        margin-bottom: 1px !important;
+    }
+}
+
+@media (max-width: 576px) {
+    .dashboard-stats-row [class*="col-"] {
+        padding: 0px !important;
+        margin-bottom: 1px !important;
+    }
+    
+    .dashboard-stats-row {
+        gap: 1px !important;
+        row-gap: 1px !important;
+        column-gap: 1px !important;
+    }
+}
+
+/* تحسين إضافي للمسافات */
+.dashboard-card {
+    margin: 0 !important;
+}
+
+/* إزالة أي مسافات إضافية من العناصر الأخرى */
+.dashboard-stats-row > * {
+    flex-shrink: 0;
+}
+
+/* تحسين التخطيط العام */
+.row.dashboard-stats-row {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: stretch !important;
+}
+
+.dashboard-stats-row [class*="col-"] {
+    display: flex !important;
+    align-items: stretch !important;
+}
+
+.dashboard-stats-row .dashboard-card {
+    width: 100% !important;
+    flex: 1 !important;
+}

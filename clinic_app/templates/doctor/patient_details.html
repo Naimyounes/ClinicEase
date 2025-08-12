@@ -5,8 +5,8 @@
         <div class="col-md-12">
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="{{ url_for('doctor.dashboard') }}">لوحة التحكم</a></li>
-                    <li class="breadcrumb-item active">تفاصيل المريض</li>
+                    <li class="breadcrumb-item"><a href="{{ url_for('doctor.dashboard') }}">Tableau de bord</a></li>
+                    <li class="breadcrumb-item active">Détails du patient</li>
                 </ol>
             </nav>
         </div>
@@ -16,10 +16,10 @@
         <div class="col-md-12">
             <div class="card mb-4">
                 <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                    <h3 class="mb-0">معلومات المريض</h3>
+                    <h3 class="mb-0">Informations du patient</h3>
                     <div>
                         <a href="{{ url_for('doctor.patient_visit', patient_id=patient.id) }}" class="btn btn-light">
-                            <i class="fas fa-plus-circle"></i> زيارة جديدة
+                            <i class="fas fa-plus-circle"></i> Nouvelle consultation
                         </a>
                     </div>
                 </div>
@@ -28,20 +28,20 @@
                         <div class="col-md-6">
                             <table class="table table-borderless">
                                 <tr>
-                                    <th width="40%">الاسم الكامل:</th>
+                                    <th width="40%">Nom complet:</th>
                                     <td>{{ patient.full_name }}</td>
                                 </tr>
                                 <tr>
-                                    <th>رقم الهاتف:</th>
+                                    <th>Numéro de téléphone:</th>
                                     <td>{{ patient.phone }}</td>
                                 </tr>
                                 <tr>
-                                    <th>تاريخ الميلاد:</th>
-                                    <td>{{ patient.birth_date.strftime('%Y-%m-%d') if patient.birth_date else 'غير محدد' }}</td>
+                                    <th>Date de naissance:</th>
+                                    <td>{{ patient.birth_date.strftime('%d/%m/%Y') if patient.birth_date else 'Non spécifié' }}</td>
                                 </tr>
                                 <tr>
-                                    <th>زمرة الدم:</th>
-                                    <td>{{ patient.blood_group if patient.blood_group else 'غير محدد' }}</td>
+                                    <th>Groupe sanguin:</th>
+                                    <td>{{ patient.blood_group if patient.blood_group else 'Non spécifié' }}</td>
                                 </tr>
                             </table>
                         </div>

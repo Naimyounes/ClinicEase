@@ -6,14 +6,14 @@
             <div class="card shadow">
                 <div class="card-header bg-info text-white">
                     <h4 class="mb-0">
-                        <i class="fas fa-search me-2"></i>نتائج البحث: "{{ search }}"
+                        <i class="fas fa-search me-2"></i>Résultats de recherche: "{{ search }}"
                     </h4>
                 </div>
                 <div class="card-body">
                     {% if patients %}
                         <div class="alert alert-info">
                             <i class="fas fa-info-circle me-2"></i>
-                            تم العثور على {{ patients|length }} مريض مطابق للبحث
+                            {{ patients|length }} patient(s) trouvé(s) correspondant à la recherche
                         </div>
                         
                         <div class="row">
@@ -43,7 +43,7 @@
                                             {% if patient.gender %}
                                             <p class="mb-1">
                                                 <i class="fas fa-user me-2 text-muted"></i>
-                                                <small>{{ 'ذكر' if patient.gender == 'male' else 'أنثى' if patient.gender == 'female' else patient.gender }}</small>
+                                                <small>{{ 'Homme' if patient.gender == 'male' else 'Femme' if patient.gender == 'female' else patient.gender }}</small>
                                             </p>
                                             {% endif %}
                                             {% if patient.blood_group %}

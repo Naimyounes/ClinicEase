@@ -1,224 +1,635 @@
 {% extends "layout.html" %}
 
 {% block content %}
-{% if is_ajax is not defined or not is_ajax %}
-<div class="container mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1>قائمة المرضى</h1>
-        <a href="{{ url_for('secretary.new_patient') }}" class="btn btn-primary">
-            <i class="fas fa-user-plus"></i> إضافة مريض جديد
-        </a>
-    </div>
-
-    <!-- نموذج البحث الفوري -->
-    <div class="card mb-4">
-        <div class="card-body">
-            <div class="row g-3">
-                <div class="col-md-8">
-                    <input type="text" id="live-search" class="form-control" placeholder="ابحث بالاسم أو رقم الهاتف..." value="{{ search }}" autocomplete="off">
-                    <div id="search-results" class="position-absolute w-100 mt-1 shadow rounded" style="z-index: 1000; max-height: 300px; overflow-y: auto; display: none;"></div>
-                </div>
-                <div class="col-md-2">
-                    <button id="search-btn" class="btn btn-primary w-100">بحث</button>
-                </div>
-                <div class="col-md-2">
-                    <a href="{{ url_for('secretary.list_patients') }}" class="btn btn-outline-secondary w-100">إعادة تعيين</a>
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3 text-primary">
+                    <i class="fas fa-users me-2"></i>
+                    Liste des Patients
+                </h1>
+                <div>
+                    <a href="{{ url_for('secretary.new_patient') }}" class="btn btn-success me-2">
+                        <i class="fas fa-user-plus"></i> Nouveau Patient
+                    </a>
+                    <a href="{{ url_for('secretary.dashboard') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left"></i> Retour au Tableau de Bord
+                    </a>
                 </div>
             </div>
-            <form id="search-form" action="{{ url_for('secretary.list_patients') }}" method="get" class="d-none">
-                <input type="hidden" name="search" id="search-hidden">
-            </form>
-        </div>
-    </div>
 
-    <!-- قائمة المرضى -->
-    <div class="card">
-        <div class="card-header bg-primary text-white">
-            <h5 class="mb-0">المرضى المسجلين</h5>
-        </div>
-        <div class="card-body">
-            {% if patients.items %}
-                <div class="table-responsive">
-                    <table class="table table-hover table-striped">
-                        <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>الاسم الكامل</th>
-                                <th>رقم الهاتف</th>
-                                <th>تاريخ الميلاد</th>
-                                <th>تاريخ التسجيل</th>
-                                <th>الإجراءات</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for patient in patients.items %}
-                                <tr>
-                                    <td>{{ loop.index + (patients.page - 1) * patients.per_page }}</td>
-                                    <td>{{ patient.full_name }}</td>
-                                    <td>{{ patient.phone }}</td>
-                                    <td>{{ format_date(patient.birth_date) if patient.birth_date else 'غير محدد' }}</td>
-                                    <td>{{ format_date(patient.created_at) if patient.created_at else 'غير محدد' }}</td>
-                                    <td>
-                                        <div class="btn-group btn-group-sm" role="group">
-                                            <a href="{{ url_for('secretary.patient_details', patient_id=patient.id) }}" class="btn btn-info">
-                                                <i class="fas fa-eye"></i> عرض
-                                            </a>
-                                            <a href="{{ url_for('secretary.edit_patient', patient_id=patient.id) }}" class="btn btn-warning">
-                                                <i class="fas fa-edit"></i> تعديل
-                                            </a>
-                                            <a href="{{ url_for('secretary.create_waiting_ticket', patient_id=patient.id) }}" class="btn btn-success">
-                                                <i class="fas fa-ticket-alt"></i> تذكرة
-                                            </a>
-                                        </div>
-                                    </td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-
-                <!-- ترقيم الصفحات -->
-                <nav class="mt-4">
-                    <ul class="pagination justify-content-center">
-                        {% if patients.has_prev %}
-                            <li class="page-item">
-                                <a class="page-link" href="{{ url_for('secretary.list_patients', page=patients.prev_num, search=search) }}">السابق</a>
-                            </li>
-                        {% else %}
-                            <li class="page-item disabled">
-                                <span class="page-link">السابق</span>
-                            </li>
-                        {% endif %}
-
-                        {% for page_num in patients.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
-                            {% if page_num %}
-                                {% if patients.page == page_num %}
-                                    <li class="page-item active">
-                                        <span class="page-link">{{ page_num }}</span>
-                                    </li>
-                                {% else %}
-                                    <li class="page-item">
-                                        <a class="page-link" href="{{ url_for('secretary.list_patients', page=page_num, search=search) }}">{{ page_num }}</a>
-                                    </li>
+            <!-- بطاقة البحث المحسنة -->
+            <div class="card shadow-sm mb-4 border-0">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <div class="position-relative">
+                                <div class="input-group input-group-lg">
+                                    <span class="input-group-text bg-primary text-white border-primary">
+                                        <i class="fas fa-search"></i>
+                                    </span>
+                                    <input 
+                                        type="text" 
+                                        id="patient-search" 
+                                        class="form-control border-primary" 
+                                        placeholder="Tapez le nom du patient, numéro de téléphone ou adresse pour rechercher..."
+                                        value="{{ search }}"
+                                        autocomplete="off"
+                                        style="border-left: none;"
+                                    >
+                                    <button class="btn btn-outline-secondary" type="button" id="clear-search" style="display: none;">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                                <!-- قائمة النتائج المنسدلة -->
+                                <div id="search-dropdown" class="position-absolute w-100 bg-white border border-top-0 rounded-bottom shadow-lg" 
+                                     style="z-index: 1050; max-height: 400px; overflow-y: auto; display: none;">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mt-3 mt-md-0">
+                            <div class="d-flex gap-2">
+                                <button id="search-btn" class="btn btn-primary flex-fill">
+                                    <i class="fas fa-search me-1"></i>
+                                    Recherche Générale
+                                </button>
+                                <a href="{{ url_for('secretary.list_patients') }}" class="btn btn-outline-primary flex-fill">
+                                    <i class="fas fa-refresh me-1"></i>
+                                    Réinitialiser
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- معلومات سريعة -->
+                    <div class="mt-3 pt-3 border-top">
+                        <div class="row text-center">
+                            <div class="col-md-4">
+                                <div class="d-flex align-items-center justify-content-center">
+                                    <i class="fas fa-users text-primary me-2"></i>
+                                    <small class="text-muted">
+                                        Total Patients: <strong>{{ patients.total }}</strong>
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="d-flex align-items-center justify-content-center">
+                                    <i class="fas fa-file-alt text-info me-2"></i>
+                                    <small class="text-muted">
+                                        Page: <strong>{{ patients.page }}</strong> de <strong>{{ patients.pages }}</strong>
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                {% if search %}
+                                <div class="d-flex align-items-center justify-content-center">
+                                    <i class="fas fa-search text-success me-2"></i>
+                                    <small class="text-muted">
+                                        Résultats de Recherche: <strong>{{ patients.total }}</strong>
+                                    </small>
+                                </div>
                                 {% endif %}
-                            {% else %}
-                                <li class="page-item disabled">
-                                    <span class="page-link">...</span>
-                                </li>
-                            {% endif %}
-                        {% endfor %}
+                            </div>
+                        </div>
+                    </div>
 
-                        {% if patients.has_next %}
-                            <li class="page-item">
-                                <a class="page-link" href="{{ url_for('secretary.list_patients', page=patients.next_num, search=search) }}">التالي</a>
-                            </li>
-                        {% else %}
-                            <li class="page-item disabled">
-                                <span class="page-link">التالي</span>
-                            </li>
-                        {% endif %}
-                    </ul>
-                </nav>
-            {% else %}
-                <div class="alert alert-info">
-                    {% if search %}
-                        لا توجد نتائج مطابقة للبحث "{{ search }}"
+                    <!-- نموذج البحث المخفي -->
+                    <form id="search-form" action="{{ url_for('secretary.list_patients') }}" method="get" class="d-none">
+                        <input type="hidden" name="search" id="search-input">
+                    </form>
+                </div>
+            </div>
+
+            <!-- جدول المرضى -->
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-gradient-primary text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="fas fa-list me-2"></i>
+                            {% if search %}
+                                Résultats de recherche pour "{{ search }}"
+                            {% else %}
+                                Liste des Patients Enregistrés
+                            {% endif %}
+                        </h5>
+                        <span class="badge bg-light text-primary">
+                            {{ patients.total }} Patient(s)
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="card-body p-0">
+                    {% if patients.items %}
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="bg-light">
+                                    <tr>
+                                        <th class="border-0 px-4 py-3">#</th>
+                                        <th class="border-0 px-4 py-3">
+                                            <i class="fas fa-user me-2 text-primary"></i>
+                                            Nom Complet
+                                        </th>
+                                        <th class="border-0 px-4 py-3">
+                                            <i class="fas fa-phone me-2 text-success"></i>
+                                            Numéro de Téléphone
+                                        </th>
+                                        <th class="border-0 px-4 py-3">
+                                            <i class="fas fa-birthday-cake me-2 text-warning"></i>
+                                            Âge
+                                        </th>
+                                        <th class="border-0 px-4 py-3">
+                                            <i class="fas fa-venus-mars me-2 text-info"></i>
+                                            Sexe
+                                        </th>
+                                        <th class="border-0 px-4 py-3">
+                                            <i class="fas fa-calendar me-2 text-secondary"></i>
+                                            Date d'Inscription
+                                        </th>
+                                        <th class="border-0 px-4 py-3 text-center">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for patient in patients.items %}
+                                        <tr class="patient-row" data-patient-id="{{ patient.id }}">
+                                            <td class="px-4 py-3 fw-bold text-primary">
+                                                {{ loop.index + (patients.page - 1) * patients.per_page }}
+                                            </td>
+                                            <td class="px-4 py-3">
+                                                <div class="d-flex align-items-center">
+                                                    <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-3" 
+                                                         style="width: 40px; height: 40px;">
+                                                        {{ patient.full_name[0].upper() }}
+                                                    </div>
+                                                    <div>
+                                                        <div class="fw-bold">{{ patient.full_name }}</div>
+                                                        {% if patient.address %}
+                                                            <small class="text-muted">
+                                                                <i class="fas fa-map-marker-alt me-1"></i>
+                                                                {{ patient.address[:30] }}{% if patient.address|length > 30 %}...{% endif %}
+                                                            </small>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="px-4 py-3">
+                                                {% if patient.phone %}
+                                                    <span class="badge bg-success-subtle text-success">
+                                                        <i class="fas fa-phone me-1"></i>
+                                                        {{ patient.phone }}
+                                                    </span>
+                                                {% else %}
+                                                    <span class="text-muted">Non spécifié</span>
+                                                {% endif %}
+                                            </td>
+                                            <td class="px-4 py-3">
+                                                {% if patient.birth_date %}
+                                                    {% set today = get_current_date() %}
+                                                    {% set age = today.year - patient.birth_date.year %}
+                                                    {% if today.month < patient.birth_date.month or (today.month == patient.birth_date.month and today.day < patient.birth_date.day) %}
+                                                        {% set age = age - 1 %}
+                                                    {% endif %}
+                                                    <span class="badge bg-warning-subtle text-warning">
+                                                        {{ age }} ans
+                                                    </span>
+                                                {% else %}
+                                                    <span class="text-muted">Non spécifié</span>
+                                                {% endif %}
+                                            </td>
+                                            <td class="px-4 py-3">
+                                                {% if patient.gender %}
+                                                    {% if patient.gender == 'male' %}
+                                                        <span class="badge bg-info-subtle text-info">
+                                                            <i class="fas fa-mars me-1"></i>
+                                                            Homme
+                                                        </span>
+                                                    {% elif patient.gender == 'female' %}
+                                                        <span class="badge bg-pink-subtle text-pink">
+                                                            <i class="fas fa-venus me-1"></i>
+                                                            Femme
+                                                        </span>
+                                                    {% else %}
+                                                        <span class="badge bg-secondary-subtle text-secondary">
+                                                            <i class="fas fa-question me-1"></i>
+                                                            Non spécifié
+                                                        </span>
+                                                    {% endif %}
+                                                {% else %}
+                                                    <span class="text-muted">Non spécifié</span>
+                                                {% endif %}
+                                            </td>
+                                            <td class="px-4 py-3">
+                                                <small class="text-muted">
+                                                    {{ patient.created_at.strftime('%Y-%m-%d') if patient.created_at }}
+                                                </small>
+                                            </td>
+                                            <td class="px-4 py-3">
+                                                <div class="btn-group btn-group-sm" role="group">
+                                                    <a href="{{ url_for('secretary.patient_details', patient_id=patient.id) }}" 
+                                                       class="btn btn-outline-info" title="Voir les détails">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                    <a href="{{ url_for('secretary.edit_patient', patient_id=patient.id) }}" 
+                                                       class="btn btn-outline-warning" title="Modifier les données">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                    <a href="{{ url_for('secretary.create_ticket', patient_id=patient.id) }}" 
+                                                       class="btn btn-outline-success" title="Créer un ticket">
+                                                        <i class="fas fa-ticket-alt"></i>
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- الترقيم المحسن -->
+                        <div class="card-footer bg-light">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <small class="text-muted">
+                                        Affichage {{ (patients.page - 1) * patients.per_page + 1 }} - 
+                                        {{ patients.page * patients.per_page if patients.page * patients.per_page <= patients.total else patients.total }} 
+                                        sur {{ patients.total }} patient(s)
+                                    </small>
+                                </div>
+                                
+                                {% if patients.pages > 1 %}
+                                <nav aria-label="Pagination des pages">
+                                    <ul class="pagination pagination-sm mb-0">
+                                        {% if patients.has_prev %}
+                                            <li class="page-item">
+                                                <a class="page-link" href="{{ url_for('secretary.list_patients', page=patients.prev_num, search=search) }}">
+                                                    <i class="fas fa-chevron-left"></i>
+                                                    Précédent
+                                                </a>
+                                            </li>
+                                        {% endif %}
+
+                                        {% for page_num in patients.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+                                            {% if page_num %}
+                                                {% if patients.page == page_num %}
+                                                    <li class="page-item active">
+                                                        <span class="page-link">{{ page_num }}</span>
+                                                    </li>
+                                                {% else %}
+                                                    <li class="page-item">
+                                                        <a class="page-link" href="{{ url_for('secretary.list_patients', page=page_num, search=search) }}">
+                                                            {{ page_num }}
+                                                        </a>
+                                                    </li>
+                                                {% endif %}
+                                            {% else %}
+                                                <li class="page-item disabled">
+                                                    <span class="page-link">...</span>
+                                                </li>
+                                            {% endif %}
+                                        {% endfor %}
+
+                                        {% if patients.has_next %}
+                                            <li class="page-item">
+                                                <a class="page-link" href="{{ url_for('secretary.list_patients', page=patients.next_num, search=search) }}">
+                                                    Suivant
+                                                    <i class="fas fa-chevron-right"></i>
+                                                </a>
+                                            </li>
+                                        {% endif %}
+                                    </ul>
+                                </nav>
+                                {% endif %}
+                            </div>
+                        </div>
                     {% else %}
-                        لا يوجد مرضى مسجلين حتى الآن
+                        <div class="text-center py-5">
+                            <div class="mb-3">
+                                <i class="fas fa-users text-muted" style="font-size: 4rem;"></i>
+                            </div>
+                            {% if search %}
+                                <h5 class="text-muted">Aucun résultat trouvé</h5>
+                                <p class="text-muted">Aucun patient ne correspond à la recherche "{{ search }}"</p>
+                                <a href="{{ url_for('secretary.list_patients') }}" class="btn btn-outline-primary">
+                                    <i class="fas fa-list me-1"></i>
+                                    Afficher Tous les Patients
+                                </a>
+                            {% else %}
+                                <h5 class="text-muted">Aucun patient enregistré</h5>
+                                <p class="text-muted">Aucun patient n'a encore été enregistré</p>
+                                <a href="{{ url_for('secretary.new_patient') }}" class="btn btn-success">
+                                    <i class="fas fa-user-plus me-1"></i>
+                                    Enregistrer le Premier Patient
+                                </a>
+                            {% endif %}
+                        </div>
                     {% endif %}
                 </div>
-            {% endif %}
+            </div>
         </div>
     </div>
-
-    <div class="mt-4">
-        <a href="{{ url_for('secretary.dashboard') }}" class="btn btn-secondary">العودة للوحة التحكم</a>
-    </div>
 </div>
-{% endif %}
 
-<!-- إضافة كود البحث الفوري -->
+<!-- CSS مخصص -->
+<style>
+.bg-gradient-primary {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+}
+
+.bg-success-subtle {
+    background-color: rgba(25, 135, 84, 0.1) !important;
+}
+
+.text-success {
+    color: #198754 !important;
+}
+
+.bg-warning-subtle {
+    background-color: rgba(255, 193, 7, 0.1) !important;
+}
+
+.text-warning {
+    color: #ffc107 !important;
+}
+
+.bg-info-subtle {
+    background-color: rgba(13, 202, 240, 0.1) !important;
+}
+
+.text-info {
+    color: #0dcaf0 !important;
+}
+
+.bg-pink-subtle {
+    background-color: rgba(255, 20, 147, 0.1) !important;
+}
+
+.text-pink {
+    color: #ff1493 !important;
+}
+
+.patient-row {
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.patient-row:hover {
+    background-color: rgba(13, 110, 253, 0.05);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.search-item {
+    padding: 12px 16px;
+    border-bottom: 1px solid #e9ecef;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.search-item:hover {
+    background-color: #f8f9fa;
+}
+
+.search-item:last-child {
+    border-bottom: none;
+}
+
+.search-item.active {
+    background-color: #e7f3ff;
+    border-left: 3px solid #007bff;
+}
+
+#patient-search:focus {
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+    border-color: #86b7fe;
+}
+
+.input-group-lg .form-control {
+    font-size: 1rem;
+    padding: 0.75rem 1rem;
+}
+</style>
+
+<!-- JavaScript للبحث التلقائي -->
 <script>
-document.addEventListener("DOMContentLoaded", function() {
-    const searchInput = document.getElementById('live-search');
-    const searchResults = document.getElementById('search-results');
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('patient-search');
+    const searchDropdown = document.getElementById('search-dropdown');
+    const clearBtn = document.getElementById('clear-search');
     const searchBtn = document.getElementById('search-btn');
     const searchForm = document.getElementById('search-form');
-    const searchHidden = document.getElementById('search-hidden');
+    const searchHiddenInput = document.getElementById('search-input');
+    
     let searchTimeout;
+    let currentSelectedIndex = -1;
+    let searchResults = [];
 
-    // عند كتابة أي حرف في خانة البحث
+    // إظهار/إخفاء زر المسح
+    function toggleClearButton() {
+        if (searchInput.value.trim()) {
+            clearBtn.style.display = 'block';
+        } else {
+            clearBtn.style.display = 'none';
+        }
+    }
+
+    // البحث التلقائي
     searchInput.addEventListener('input', function() {
-        const term = searchInput.value.trim();
-
-        // مسح المؤقت السابق إذا وجد
+        const term = this.value.trim();
+        
         clearTimeout(searchTimeout);
-
-        // إخفاء النتائج إذا كان البحث فارغًا
-        if (!term || term.length < 2) {
-            searchResults.style.display = 'none';
+        toggleClearButton();
+        currentSelectedIndex = -1;
+        
+        if (!term) {
+            hideDropdown();
             return;
         }
 
-        // تأخير الطلب لتحسين الأداء (300 مللي ثانية بعد التوقف عن الكتابة)
+        // تأخير البحث لتحسين الأداء
         searchTimeout = setTimeout(() => {
-            // استخدام واجهة API الجديدة
-            fetch(`/secretary/api/search-patients?term=${encodeURIComponent(term)}`)
-                .then(response => response.json())
-                .then(patients => {
-                    if (patients && patients.length > 0) {
-                        // إنشاء قائمة النتائج
-                        let resultsHTML = '<div class="list-group">';
-
-                        // تحويل بيانات JSON إلى عناصر قائمة
-                        for (let i = 0; i < patients.length; i++) {
-                            const patient = patients[i];
-                            resultsHTML += `
-                                <a href="${patient.view_url}" class="list-group-item list-group-item-action">
-                                    <div class="d-flex justify-content-between">
-                                        <strong>${patient.full_name}</strong>
-                                        <span class="text-muted">${patient.phone}</span>
-                                    </div>
-                                </a>`;
-                        }
-
-                        resultsHTML += '</div>';
-                        searchResults.innerHTML = resultsHTML;
-                        searchResults.style.display = 'block';
-                    } else {
-                        searchResults.innerHTML = '<div class="list-group"><div class="list-group-item">لا توجد نتائج مطابقة</div></div>';
-                        searchResults.style.display = 'block';
-                    }
-                })
-                .catch(error => {
-                    console.error('خطأ في البحث:', error);
-                    searchResults.innerHTML = '<div class="list-group"><div class="list-group-item text-danger">حدث خطأ في البحث</div></div>';
-                    searchResults.style.display = 'block';
-                });
-        }, 300);
+            performSearch(term);
+        }, 200);
     });
 
-    // إخفاء نتائج البحث عند النقر خارجها
-    document.addEventListener('click', function(e) {
-        if (e.target !== searchInput && e.target !== searchResults) {
-            searchResults.style.display = 'none';
+    // تنفيذ البحث
+    function performSearch(term) {
+        console.log('Début de recherche pour:', term);
+        
+        fetch(`/secretary/api/search-patients?term=${encodeURIComponent(term)}`)
+            .then(response => {
+                console.log('Réponse reçue:', response.status, response.statusText);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Données reçues:', data);
+                searchResults = data;
+                displaySearchResults(data);
+            })
+            .catch(error => {
+                console.error('Erreur détaillée:', error);
+                console.log('Type d\'erreur:', typeof error);
+                console.log('Message d\'erreur:', error.message);
+                displayError();
+            });
+    }
+
+    // عرض نتائج البحث
+    function displaySearchResults(patients) {
+        if (!Array.isArray(patients) || patients.length === 0) {
+            displayNoResults();
+            return;
         }
-    });
 
-    // إرسال نموذج البحث عند النقر على زر البحث
-    searchBtn.addEventListener('click', function() {
-        searchHidden.value = searchInput.value;
-        searchForm.submit();
-    });
+        let html = '';
+        patients.forEach((patient, index) => {
+            html += `
+                <div class="search-item" data-index="${index}" data-patient-id="${patient.id}">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div class="flex-grow-1">
+                            <div class="fw-bold text-primary">${patient.full_name}</div>
+                            <div class="small text-muted mt-1">
+                                <div class="d-flex flex-wrap gap-3">
+                                    <span><i class="fas fa-phone me-1"></i>${patient.phone}</span>
+                                    ${patient.age ? `<span><i class="fas fa-birthday-cake me-1"></i>${patient.age}</span>` : ''}
+                                    <span><i class="fas fa-venus-mars me-1"></i>${patient.gender}</span>
+                                </div>
+                                ${patient.address !== 'Non spécifié' ? `<div class="mt-1"><i class="fas fa-map-marker-alt me-1"></i>${patient.address}</div>` : ''}
+                            </div>
+                        </div>
+                        <div class="btn-group btn-group-sm">
+                            <a href="${patient.view_url}" class="btn btn-outline-info btn-sm" title="Voir">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            <a href="${patient.edit_url}" class="btn btn-outline-warning btn-sm" title="Modifier">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <a href="${patient.ticket_url}" class="btn btn-outline-success btn-sm" title="Ticket">
+                                <i class="fas fa-ticket-alt"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
 
-    // إرسال النموذج عند الضغط على Enter
-    searchInput.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
+        searchDropdown.innerHTML = html;
+        showDropdown();
+        
+        // إضافة مستمعي الأحداث للعناصر
+        document.querySelectorAll('.search-item').forEach(item => {
+            item.addEventListener('click', function() {
+                const patientName = this.querySelector('.fw-bold').textContent;
+                searchInput.value = patientName;
+                hideDropdown();
+            });
+        });
+    }
+
+    // عرض رسالة عدم وجود نتائج
+    function displayNoResults() {
+        searchDropdown.innerHTML = `
+            <div class="search-item text-center">
+                <div class="text-muted">
+                    <i class="fas fa-search me-2"></i>
+                    Aucun résultat trouvé
+                </div>
+            </div>
+        `;
+        showDropdown();
+    }
+
+    // عرض رسالة خطأ
+    function displayError() {
+        searchDropdown.innerHTML = `
+            <div class="search-item text-center">
+                <div class="text-danger">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Erreur lors de la recherche
+                </div>
+                <small class="text-muted mt-1 d-block">
+                    Vérifiez votre connexion et réessayez
+                </small>
+            </div>
+        `;
+        showDropdown();
+    }
+
+    // إظهار القائمة المنسدلة
+    function showDropdown() {
+        searchDropdown.style.display = 'block';
+    }
+
+    // إخفاء القائمة المنسدلة
+    function hideDropdown() {
+        searchDropdown.style.display = 'none';
+        currentSelectedIndex = -1;
+    }
+
+    // التنقل بالأسهم
+    searchInput.addEventListener('keydown', function(e) {
+        const items = document.querySelectorAll('.search-item');
+        
+        if (e.key === 'ArrowDown') {
             e.preventDefault();
-            searchHidden.value = searchInput.value;
-            searchForm.submit();
+            if (currentSelectedIndex < items.length - 1) {
+                currentSelectedIndex++;
+                updateSelection(items);
+            }
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            if (currentSelectedIndex > 0) {
+                currentSelectedIndex--;
+                updateSelection(items);
+            }
+        } else if (e.key === 'Enter') {
+            e.preventDefault();
+            if (currentSelectedIndex >= 0 && items[currentSelectedIndex]) {
+                items[currentSelectedIndex].click();
+            } else {
+                submitSearch();
+            }
+        } else if (e.key === 'Escape') {
+            hideDropdown();
         }
     });
+
+    // تحديث الاختيار
+    function updateSelection(items) {
+        items.forEach(item => item.classList.remove('active'));
+        if (currentSelectedIndex >= 0 && items[currentSelectedIndex]) {
+            items[currentSelectedIndex].classList.add('active');
+        }
+    }
+
+    // إرسال البحث العام
+    function submitSearch() {
+        searchHiddenInput.value = searchInput.value;
+        searchForm.submit();
+    }
+
+    // أحداث الأزرار
+    clearBtn.addEventListener('click', function() {
+        searchInput.value = '';
+        hideDropdown();
+        toggleClearButton();
+        searchInput.focus();
+    });
+
+    searchBtn.addEventListener('click', submitSearch);
+
+    // إخفاء القائمة عند النقر خارجها
+    document.addEventListener('click', function(e) {
+        if (!searchInput.contains(e.target) && !searchDropdown.contains(e.target)) {
+            hideDropdown();
+        }
+    });
+
+    // تهيئة الحالة الأولية
+    toggleClearButton();
 });
 </script>
 {% endblock content %}

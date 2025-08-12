@@ -1,21 +1,21 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="fr" dir="ltr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <!-- Bootstrap RTL CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Cairo Font -->
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Roboto Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <!-- Animate.css for animations -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     <!-- Custom CSS -->
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/main.css') }}">
 
-    <title>صالة الانتظار | ClinicEase</title>
+    <title>Salle d'attente | ClinicEase</title>
 
     <!-- أنماط خاصة بصفحة الانتظار -->
     <style>
@@ -39,7 +39,7 @@
             margin: 0;
             padding: 0;
             overflow: hidden;
-            font-family: 'Cairo', sans-serif;
+            font-family: 'Roboto', sans-serif;
             background: linear-gradient(135deg, var(--light-color) 0%, #ffffff 100%);
             color: var(--dark-color);
         }
@@ -453,26 +453,25 @@
 
     <div class="fullscreen-container">
         <div class="container-fluid d-flex flex-column h-100">
-            <!-- تنبيه الأولوية -->
-            <div class="row mb-2">
-                <div class="col-12">
-                    <div class="alert alert-warning text-center py-2 mb-0 animate__animated animate__pulse animate__infinite" style="background: linear-gradient(45deg, #f39c12, #e67e22); border: none; color: white; font-weight: bold; border-radius: 15px;">
-                        <i class="fas fa-star me-2"></i>
-                        التذاكر ذات الأولوية (المواعيد) يتم استدعاؤها أولاً
-                        <i class="fas fa-star ms-2"></i>
-                    </div>
-                </div>
-            </div>
-            
+        
             <!-- عرض رقم التذكرة الحالية بشكل كبير في وسط الشاشة -->
             {% if current_ticket %}
             <div class="row justify-content-center align-items-center" style="flex: 1; min-height: 0;">
                 <div class="col-12 text-center d-flex flex-column justify-content-center align-items-center">
-                    <div class="ticket-heading mb-2"><i class="fas fa-ticket-alt me-2"></i>التذكرة الحالية</div>
-                    <div class="ticket-current flashing mb-2" id="currentTicket" data-ticket-number="{{ current_ticket.number }}" data-patient-name="{{ current_ticket.patient.full_name }}">{{ current_ticket.number }}</div>
+                    <div class="ticket-heading mb-2"><i class="fas fa-ticket-alt me-2"></i>Ticket actuel</div>
+                    <div class="ticket-current flashing mb-2" id="currentTicket" data-ticket-number="{{ current_ticket.number }}" data-display-number="{{ current_ticket.display_number }}" data-patient-name="{{ current_ticket.patient.full_name }}" data-ticket-type="{{ current_ticket.ticket_type }}">{{ current_ticket.display_number }}</div>
+                    <div class="mb-2" id="currentTicketType">
+                        {% if current_ticket.ticket_type == 'emergency' %}
+                            <span class="badge bg-danger"><i class="fas fa-triangle-exclamation me-1"></i> طارئة</span>
+                        {% elif current_ticket.ticket_type == 'reservation' %}
+                            <span class="badge bg-info"><i class="fas fa-calendar-check me-1"></i> موعد</span>
+                        {% else %}
+                            <span class="badge bg-secondary"><i class="fas fa-user-clock me-1"></i> عادية</span>
+                        {% endif %}
+                    </div>
                     <div class="ticket-patient-name animate__animated animate__fadeIn mb-2" id="currentPatientName"></div>
                     <div class="badge bg-success ticket-direction p-2 animate__animated animate__pulse animate__infinite">
-                        <i class="fas fa-door-open"></i> يرجى الدخول للفحص
+                        <i class="fas fa-door-open"></i> Veuillez entrer pour l'examen
                     </div>
                 </div>
             </div>
@@ -482,7 +481,7 @@
                 <div class="col-12">
                     <div class="card mb-1 shadow-sm">
                     <div class="card-header py-1">
-                        <h6 class="m-0 small"><i class="fas fa-users-between-lines me-1"></i>المرضى في الانتظار</h6>
+                        <h6 class="m-0 small"><i class="fas fa-users-between-lines me-1"></i>Patients en attente</h6>
                     </div>
                     <div class="card-body p-1">
                         {% if waiting_tickets %}
@@ -491,16 +490,26 @@
                                     <thead>
                                         <tr class="small">
                                             <th class="text-center py-1"><i class="fas fa-hashtag"></i></th>
-                                            <th class="py-1"><i class="fas fa-ticket-alt me-1"></i>رقم التذكرة</th>
-                                            <th class="py-1"><i class="fas fa-user me-1"></i>اسم المريض</th>
+                                            <th class="py-1"><i class="fas fa-ticket-alt me-1"></i>N° Ticket</th>
+                                            <th class="py-1"><i class="fas fa-user me-1"></i>Nom du patient</th>
+                                            <th class="py-1"><i class="fas fa-bolt me-1"></i>Type</th>
                                         </tr>
                                     </thead>    
                                     <tbody id="waiting-tickets-body">
                                         {% for ticket in waiting_tickets %}
                                         <tr class="animate__animated animate__fadeIn" style="animation-delay: {{ loop.index0 * 0.1 }}s">
                                             <td class="text-center py-1">{{ loop.index }}</td>
-                                            <td class="fs-5 fw-bold py-1">{{ ticket.number }}</td>
+                                            <td class="fs-5 fw-bold py-1">{{ ticket.display_number }}</td>
                                             <td class="py-1">{{ ticket.patient.full_name }}</td>
+                                            <td class="py-1">
+                                                {% if ticket.ticket_type == 'emergency' %}
+                                                    <span class="badge bg-danger">طارئة</span>
+                                                {% elif ticket.ticket_type == 'reservation' %}
+                                                    <span class="badge bg-info">موعد</span>
+                                                {% else %}
+                                                    <span class="badge bg-secondary">عادية</span>
+                                                {% endif %}
+                                            </td>
                                         </tr>
                                         {% endfor %}
                                     </tbody>
@@ -508,7 +517,7 @@
                             </div>
                         {% else %}
                             <div class="alert alert-info py-1 mb-0 animate__animated animate__fadeIn" id="no-patients-message">
-                                <p class="text-center mb-0 small"><i class="fas fa-info-circle me-1"></i>لا يوجد مرضى في قائمة الانتظار حاليًا.</p>
+                                <p class="text-center mb-0 small"><i class="fas fa-info-circle me-1"></i>Aucun patient en liste d'attente actuellement.</p>
                             </div>
                         {% endif %}
                     </div>
@@ -517,15 +526,15 @@
                 <!-- إضافة قسم معلومات إضافية -->
                 <div class="card mt-1 animate__animated animate__fadeIn shadow-sm">
                     <div class="card-header py-1">
-                        <h6 class="m-0 small"><i class="fas fa-info-circle me-2"></i>معلومات إضافية</h6>
+                        <h6 class="m-0 small"><i class="fas fa-info-circle me-2"></i>Informations supplémentaires</h6>
                     </div>
                     <div class="card-body p-1 text-center">
                         <div class="row g-1 justify-content-center">
-                            <!-- مربع عرض رقم آخر تذكرة -->
+                            <!-- Boîte d'affichage du dernier ticket -->
                             <div class="col-6">
                                 <div class="card bg-light h-100 shadow-sm">
                                     <div class="card-header bg-primary text-white py-1">
-                                        <h6 class="m-0 small"><i class="fas fa-ticket-alt me-1"></i>آخر تذكرة</h6>
+                                        <h6 class="m-0 small"><i class="fas fa-ticket-alt me-1"></i>Dernier ticket</h6>
                                     </div>
                                     <div class="card-body p-1 d-flex align-items-center justify-content-center">
                                         <div class="fw-bold mb-0" id="last-ticket-number">-</div>
@@ -533,11 +542,11 @@
                                 </div>
                             </div>
                             
-                            <!-- مربع عدد المرضى في الانتظار -->
+                            <!-- Boîte du nombre de patients en attente -->
                             <div class="col-6">
                                 <div class="card bg-light h-100 shadow-sm">
                                     <div class="card-header bg-success text-white py-1">
-                                        <h6 class="m-0 small"><i class="fas fa-users me-1"></i>عدد المنتظرين</h6>
+                                        <h6 class="m-0 small"><i class="fas fa-users me-1"></i>Nombre en attente</h6>
                                     </div>
                                     <div class="card-body p-1 d-flex align-items-center justify-content-center">
                                         <div class="fw-bold mb-0" id="waiting-count">0</div>
@@ -546,22 +555,7 @@
                             </div>
                         </div>
                         
-                        <div class="d-flex flex-wrap justify-content-center align-items-center mt-1 small">
-                            <div class="mx-1">
-                                <i class="fas fa-info-circle me-1 text-primary"></i>
-                                تحديث كل <span class="fw-bold">5</span> ثوانٍ
-                            </div>
-                            <div class="mx-1 d-none d-md-block">|</div>
-                            <div class="mx-1">
-                                <i class="fas fa-clock me-1 text-secondary"></i>
-                                آخر تحديث: <span id="last-update-time" class="fw-bold">--:--:--</span>
-                            </div>
-                            <div id="loading-indicator" style="display: none;" class="ms-1">
-                                <div class="spinner-border spinner-border-sm text-primary" role="status" style="width: 0.75rem; height: 0.75rem;">
-                                    <span class="visually-hidden">جاري التحميل...</span>
-                                </div>
-                            </div>
-                        </div>
+                        
                     </div>
                 </div>
             </div>
@@ -593,7 +587,7 @@
         let lastPatientName = null;
         let lastWaitingCount = null;
         let updateTimer;
-        let updateInterval = 5000; // 5 ثوانٍ للتحديث السريع
+        let updateInterval = 1000; // 5 ثوانٍ للتحديث السريع
 
         // وظيفة لفحص وجود تذكرة جديدة
         function checkForNewTicket() {
@@ -623,6 +617,11 @@
                         
                         // تحديث رقم التذكرة واسم المريض في العرض مع تأثير حركي
                         if (currentTicketElement && currentPatientNameElement) {
+                            // تفضيل عرض الرقم المعروض إذا توفر
+                            const displayNumber = data.current_ticket.display_number || newTicketNumber;
+                            // حدّث النص المعروض مباشرة لتجنب ظهور 1 بشكل ثابت
+                            currentTicketElement.textContent = displayNumber;
+                            currentTicketElement.dataset.displayNumber = displayNumber;
                             // إذا كان هناك تذكرة جديدة أو تغيير في اسم المريض، أضف تأثير حركي
                             if ((lastTicketNumber !== null && lastTicketNumber !== newTicketNumber) || 
                                 (lastPatientName !== null && lastPatientName !== patientName)) {
@@ -634,12 +633,19 @@
                                 setTimeout(() => {
                                     currentTicketElement.classList.add('animate__animated', 'animate__pulse');
                                     currentPatientNameElement.classList.add('animate__animated', 'animate__fadeIn');
-                                    currentTicketElement.textContent = newTicketNumber;
+                                    // استخدم display_number إن وجد وإلا استخدم number
+                                    const displayNumber = data.current_ticket.display_number || newTicketNumber;
+                                    currentTicketElement.textContent = displayNumber;
                                     currentTicketElement.dataset.ticketNumber = newTicketNumber;
+                                    currentTicketElement.dataset.displayNumber = displayNumber;
                                     currentPatientNameElement.textContent = patientName;
                                     currentPatientNameElement.dataset.patientName = patientName;
                                     
+                                    // تحديث شارة نوع التذكرة
+                                    updateCurrentTypeBadge(data.current_ticket.ticket_type);
+                                    
                                     // تشغيل الإعلان الصوتي للتذكرة واسم المريض
+                                    // ملاحظة: الإعلان الصوتي يعتمد على الرقم فقط، لا حاجة لتغيير إن كان عرضي
                                     playTicketAndPatientAnnouncement(newTicketNumber, patientName).catch((error) => {
                                         console.error('خطأ في تشغيل الإعلان الصوتي:', error);
                                     });
@@ -647,10 +653,13 @@
                                     console.log(`تم استدعاء المريض: ${patientName} - رقم التذكرة: ${newTicketNumber}`);
                                 }, 50);
                             } else {
-                                currentTicketElement.textContent = newTicketNumber;
+                                const displayNumber = data.current_ticket.display_number || newTicketNumber;
+                                currentTicketElement.textContent = displayNumber;
                                 currentTicketElement.dataset.ticketNumber = newTicketNumber;
+                                currentTicketElement.dataset.displayNumber = displayNumber;
                                 currentPatientNameElement.textContent = patientName;
                                 currentPatientNameElement.dataset.patientName = patientName;
+                                updateCurrentTypeBadge(data.current_ticket.ticket_type);
                             }
                         }
                         
@@ -693,10 +702,31 @@
 
         // وظيفة لتحديث جدول الانتظار
         function updateWaitingTable(tickets) {
+            // مساعدين لعرض شارة نوع التذكرة الحالية
+            window.updateCurrentTypeBadge = function(type) {
+                const typeContainer = document.getElementById('currentTicketType');
+                if (!typeContainer) return;
+                let badgeHtml = '<span class="badge bg-secondary"><i class="fas fa-user-clock me-1"></i> عادية</span>';
+                if (type === 'emergency') {
+                    badgeHtml = '<span class="badge bg-danger"><i class="fas fa-triangle-exclamation me-1"></i> طارئة</span>';
+                } else if (type === 'reservation') {
+                    badgeHtml = '<span class="badge bg-info"><i class="fas fa-calendar-check me-1"></i> موعد</span>';
+                }
+                typeContainer.innerHTML = badgeHtml;
+            }
+            
             const tableBody = document.getElementById('waiting-tickets-body');
             const alertInfo = document.getElementById('no-patients-message');
             const tableContainer = document.getElementById('waiting-table-container');
             const lastTicketDisplay = document.getElementById('last-ticket-number');
+            // تحديث رأس الجدول لإضافة عمود النوع إن لم يكن موجودًا
+            const thead = tableBody && tableBody.parentElement && tableBody.parentElement.querySelector('thead tr');
+            if (thead && thead.children.length === 3) {
+                const th = document.createElement('th');
+                th.className = 'py-1';
+                th.innerHTML = '<i class="fas fa-bolt me-1"></i>Type';
+                thead.appendChild(th);
+            }
             
             if (!tableBody) {
                 console.error('لم يتم العثور على عنصر جدول الانتظار');
@@ -737,12 +767,23 @@
                     } else if (ticket.patient && ticket.patient.full_name) {
                         patientName = ticket.patient.full_name;
                     }
+
+                    // تجهيز نوع التذكرة
+                    const ticketType = ticket.ticket_type || 'regular';
+                    let typeBadge = '<span class="badge bg-secondary">عادية</span>';
+                    if (ticketType === 'emergency') {
+                        typeBadge = '<span class="badge bg-danger">طارئة</span>';
+                    } else if (ticketType === 'reservation') {
+                        typeBadge = '<span class="badge bg-info">موعد</span>';
+                    }
+                    const displayNumber = ticket.display_number || ticket.number;
                     
                     tableContent += `
                         <tr class="animate__animated animate__fadeIn" ${animationDelay}>
                             <td class="text-center py-1">${index + 1}</td>
-                            <td class="fs-4 fw-bold py-1">${ticket.number}</td>
+                            <td class="fs-4 fw-bold py-1">${displayNumber}</td>
                             <td class="py-1">${patientName}</td>
+                            <td class="py-1">${typeBadge}</td>
                         </tr>
                     `;
                 });

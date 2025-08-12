@@ -33,25 +33,17 @@
 }
 
 body {
-    font-family: 'Cairo', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #ffffff;
     background-attachment: fixed;
     min-height: 100vh;
     line-height: 1.6;
     color: var(--gray-800);
 }
 
-/* خلفية متدرجة للصفحة */
+/* خلفية بيضاء نظيفة للصفحة */
 body::before {
-    content: '';
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    opacity: 0.1;
-    z-index: -1;
+    display: none;
 }
 
 /* تحسين شكل البطاقات */
@@ -61,6 +53,7 @@ body::before {
     transition: var(--transition);
     border: 1px solid var(--gray-200);
     background: var(--white);
+    -webkit-backdrop-filter: blur(10px);
     backdrop-filter: blur(10px);
     overflow: hidden;
 }
@@ -237,8 +230,8 @@ body::before {
 /* تحسين شكل النافبار */
 .navbar {
     box-shadow: var(--shadow-lg);
+    -webkit-backdrop-filter: blur(10px);
     backdrop-filter: blur(10px);
-    background: rgba(255, 255, 255, 0.95) !important;
     border-bottom: 1px solid var(--gray-200);
 }
 
@@ -257,7 +250,7 @@ body::before {
 .navbar-brand {
     font-weight: 700;
     font-size: 1.5rem;
-    color: var(--primary-color) !important;
+    color: white !important;
 }
 
 .nav-link {
@@ -266,12 +259,12 @@ body::before {
     border-radius: var(--border-radius);
     transition: var(--transition);
     font-weight: 500;
-    color: var(--gray-700) !important;
+    color: rgba(255, 255, 255, 0.9) !important;
 }
 
 .nav-link:hover {
-    background-color: var(--gray-100);
-    color: var(--primary-color) !important;
+    background-color: rgba(255, 255, 255, 0.1);
+    color: white !important;
     transform: translateY(-1px);
 }
 
@@ -822,6 +815,53 @@ body::before {
   height: 100%;
   overflow: auto;
   z-index: 9999;
+}
+
+/* Gradient backgrounds for cards */
+.bg-gradient-orange {
+    background: linear-gradient(135deg, #ff7849 0%, #ff6b35 100%) !important;
+    color: white !important;
+}
+
+.bg-gradient-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    color: white !important;
+}
+
+.bg-gradient-success {
+    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%) !important;
+    color: white !important;
+}
+
+.bg-gradient-warning {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%) !important;
+    color: white !important;
+}
+
+.bg-gradient-danger {
+    background: linear-gradient(135deg, #fc466b 0%, #3f5efb 100%) !important;
+    color: white !important;
+}
+
+.bg-gradient-info {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%) !important;
+    color: white !important;
+}
+
+.bg-gradient-secondary {
+    background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%) !important;
+    color: #333 !important;
+}
+
+/* Clickable card hover effect */
+.clickable-card {
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.clickable-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
 }
 
 

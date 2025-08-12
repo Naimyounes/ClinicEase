@@ -32,11 +32,14 @@ def home():
 @main.route("/waiting-room")
 def waiting_room():
     """صفحة قاعة الانتظار - تعرض المريض الحالي وعدد المرضى في الانتظار"""
-    # الحصول على المريض الحالي
-    current_ticket = Ticket.query.filter_by(status="called").first()
+    # الحصول على المريض الحالي (آخر مناداة اليوم)
+    today = datetime.now().date()
+    current_ticket = Ticket.query.filter(
+        Ticket.status == "called",
+        Ticket.created_at >= today
+    ).order_by(Ticket.created_at.desc()).first()
 
     # الحصول على قائمة الانتظار
-    today = datetime.now().date()
     waiting_tickets = Ticket.query.filter(
         Ticket.created_at >= today,
         Ticket.status == "waiting"
@@ -54,11 +57,14 @@ def waiting_room():
 @main.route("/api/waiting-data")
 def api_waiting_data():
     """API للحصول على بيانات قاعة الانتظار بتنسيق JSON"""
-    # الحصول على المريض الحالي
-    current_ticket = Ticket.query.filter_by(status="called").first()
+    # الحصول على المريض الحالي (آخر مناداة اليوم)
+    today = datetime.now().date()
+    current_ticket = Ticket.query.filter(
+        Ticket.status == "called",
+        Ticket.created_at >= today
+    ).order_by(Ticket.created_at.desc()).first()
 
     # الحصول على قائمة الانتظار
-    today = datetime.now().date()
     waiting_tickets = Ticket.query.filter(
         Ticket.created_at >= today,
         Ticket.status == "waiting"
@@ -78,6 +84,8 @@ def api_waiting_data():
         response_data["current_ticket"] = {
             "id": current_ticket.id,
             "number": current_ticket.number,
+            "display_number": current_ticket.display_number,
+            "ticket_type": current_ticket.ticket_type,
             "status": current_ticket.status,
             "patient_name": patient.full_name if patient else ""
         }
@@ -89,6 +97,8 @@ def api_waiting_data():
         response_data["waiting_tickets"].append({
             "id": ticket.id,
             "number": ticket.number,
+            "display_number": ticket.display_number,
+            "ticket_type": ticket.ticket_type,
             "status": ticket.status,
             "patient_name": patient.full_name if patient else ""
         })
@@ -99,8 +109,12 @@ def api_waiting_data():
 @main.route("/api/get-current-ticket")
 def get_current_ticket():
     """API للحصول على التذكرة الحالية بتنسيق JSON"""
-    # الحصول على المريض الحالي
-    current_ticket = Ticket.query.filter_by(status="called").first()
+    # الحصول على المريض الحالي (آخر مناداة اليوم)
+    today = datetime.now().date()
+    current_ticket = Ticket.query.filter(
+        Ticket.status == "called",
+        Ticket.created_at >= today
+    ).order_by(Ticket.created_at.desc()).first()
 
     # تهيئة البيانات للرد
     response_data = {

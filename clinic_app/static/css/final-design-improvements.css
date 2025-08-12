@@ -1,0 +1,886 @@
+/* تحسينات التصميم النهائية لبرنامج ClinicEase */
+
+/* تحسين الخطوط والنصوص */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+    /* تحسين متغيرات الألوان */
+    --clinic-primary: #2563eb;
+    --clinic-primary-rgb: 37, 99, 235;
+    --clinic-success: #059669;
+    --clinic-success-rgb: 5, 150, 105;
+    --clinic-warning: #d97706;
+    --clinic-warning-rgb: 217, 119, 6;
+    --clinic-danger: #dc2626;
+    --clinic-danger-rgb: 220, 38, 38;
+    --clinic-info: #0891b2;
+    --clinic-info-rgb: 8, 145, 178;
+    
+    /* ألوان الخلفية المحسنة */
+    --clinic-bg-primary: #ffffff;
+    --clinic-bg-secondary: #f8fafc;
+    --clinic-bg-tertiary: #f1f5f9;
+    --clinic-bg-quaternary: #e2e8f0;
+    
+    /* ألوان النصوص المحسنة */
+    --clinic-text-primary: #0f172a;
+    --clinic-text-secondary: #334155;
+    --clinic-text-tertiary: #64748b;
+    --clinic-text-quaternary: #94a3b8;
+    
+    /* ظلال محسنة */
+    --clinic-shadow-subtle: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --clinic-shadow-soft: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+    --clinic-shadow-medium: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --clinic-shadow-large: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --clinic-shadow-extra-large: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    
+    /* انتقالات محسنة */
+    --clinic-transition-fast: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    --clinic-transition-normal: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    --clinic-transition-slow: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    
+    /* حدود محسنة */
+    --clinic-border-radius-sm: 0.375rem;
+    --clinic-border-radius: 0.5rem;
+    --clinic-border-radius-lg: 0.75rem;
+    --clinic-border-radius-xl: 1rem;
+    --clinic-border-radius-2xl: 1.5rem;
+}
+
+/* تحسين الخط الأساسي */
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+    font-weight: 400 !important;
+    line-height: 1.6 !important;
+    color: var(--clinic-text-primary) !important;
+    background: var(--clinic-bg-primary) !important;
+    -webkit-font-smoothing: antialiased !important;
+    -moz-osx-font-smoothing: grayscale !important;
+}
+
+/* تحسين العناوين */
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Inter', sans-serif !important;
+    font-weight: 600 !important;
+    line-height: 1.4 !important;
+    color: var(--clinic-text-primary) !important;
+    margin-bottom: 1rem !important;
+}
+
+h1 {
+    font-size: 2.25rem !important;
+    font-weight: 700 !important;
+}
+
+h2 {
+    font-size: 1.875rem !important;
+    font-weight: 700 !important;
+}
+
+h3 {
+    font-size: 1.5rem !important;
+    font-weight: 600 !important;
+}
+
+h4 {
+    font-size: 1.25rem !important;
+    font-weight: 600 !important;
+}
+
+h5 {
+    font-size: 1.125rem !important;
+    font-weight: 500 !important;
+}
+
+h6 {
+    font-size: 1rem !important;
+    font-weight: 500 !important;
+}
+
+/* تحسين الفقرات */
+p {
+    color: var(--clinic-text-secondary) !important;
+    line-height: 1.7 !important;
+    margin-bottom: 1rem !important;
+}
+
+/* تحسين الروابط */
+a {
+    color: var(--clinic-primary) !important;
+    text-decoration: none !important;
+    transition: var(--clinic-transition-fast) !important;
+}
+
+a:hover {
+    color: #1d4ed8 !important;
+    text-decoration: none !important;
+}
+
+/* تحسين navbar بشكل أكبر */
+.navbar {
+    background: var(--clinic-bg-primary) !important;
+    border-bottom: 1px solid var(--clinic-bg-quaternary) !important;
+    box-shadow: var(--clinic-shadow-soft) !important;
+    padding: 1rem 0 !important;
+    -webkit-backdrop-filter: blur(10px) !important;
+    backdrop-filter: blur(10px) !important;
+}
+
+.navbar-brand {
+    font-family: 'Inter', sans-serif !important;
+    font-weight: 800 !important;
+    font-size: 1.5rem !important;
+    color: var(--clinic-primary) !important;
+    transition: var(--clinic-transition-normal) !important;
+}
+
+.navbar-brand:hover {
+    color: #1d4ed8 !important;
+    transform: scale(1.02) !important;
+}
+
+.navbar-nav .nav-link {
+    font-family: 'Inter', sans-serif !important;
+    font-weight: 500 !important;
+    color: var(--clinic-text-secondary) !important;
+    padding: 0.5rem 1rem !important;
+    border-radius: var(--clinic-border-radius) !important;
+    transition: var(--clinic-transition-normal) !important;
+    margin: 0 0.25rem !important;
+}
+
+.navbar-nav .nav-link:hover {
+    color: var(--clinic-primary) !important;
+    background: var(--clinic-bg-secondary) !important;
+    transform: translateY(-1px) !important;
+}
+
+.navbar-nav .nav-link.active {
+    color: var(--clinic-primary) !important;
+    background: rgba(var(--clinic-primary-rgb), 0.1) !important;
+    font-weight: 600 !important;
+}
+
+/* تحسين البطاقات بشكل أكبر */
+.card {
+    background: var(--clinic-bg-primary) !important;
+    border: 1px solid var(--clinic-bg-quaternary) !important;
+    border-radius: var(--clinic-border-radius-lg) !important;
+    box-shadow: var(--clinic-shadow-soft) !important;
+    transition: var(--clinic-transition-normal) !important;
+    overflow: hidden !important;
+}
+
+.card:hover {
+    box-shadow: var(--clinic-shadow-medium) !important;
+    transform: translateY(-2px) !important;
+    border-color: #cbd5e1 !important;
+}
+
+.card-header {
+    background: var(--clinic-bg-secondary) !important;
+    border-bottom: 1px solid var(--clinic-bg-quaternary) !important;
+    padding: 1.25rem 1.5rem !important;
+    font-family: 'Inter', sans-serif !important;
+    font-weight: 600 !important;
+    color: var(--clinic-text-primary) !important;
+    font-size: 1.125rem !important;
+}
+
+.card-body {
+    padding: 1.5rem !important;
+    background: var(--clinic-bg-primary) !important;
+}
+
+.card-footer {
+    background: var(--clinic-bg-tertiary) !important;
+    border-top: 1px solid var(--clinic-bg-quaternary) !important;
+    padding: 1rem 1.5rem !important;
+}
+
+/* تحسين الأزرار بشكل أكبر */
+.btn {
+    font-family: 'Inter', sans-serif !important;
+    font-weight: 500 !important;
+    border-radius: var(--clinic-border-radius) !important;
+    padding: 0.625rem 1.25rem !important;
+    font-size: 0.875rem !important;
+    line-height: 1.5 !important;
+    transition: var(--clinic-transition-normal) !important;
+    border: none !important;
+    cursor: pointer !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0.5rem !important;
+    text-decoration: none !important;
+}
+
+.btn:hover {
+    transform: translateY(-1px) !important;
+    box-shadow: var(--clinic-shadow-medium) !important;
+}
+
+.btn:active {
+    transform: translateY(0) !important;
+}
+
+.btn:focus {
+    outline: none !important;
+    box-shadow: 0 0 0 3px rgba(var(--clinic-primary-rgb), 0.3) !important;
+}
+
+/* تحسين ألوان الأزرار */
+.btn-primary {
+    background: var(--clinic-primary) !important;
+    color: white !important;
+    box-shadow: var(--clinic-shadow-subtle) !important;
+}
+
+.btn-primary:hover {
+    background: #1d4ed8 !important;
+    color: white !important;
+    box-shadow: 0 4px 6px -1px rgba(var(--clinic-primary-rgb), 0.4) !important;
+}
+
+.btn-success {
+    background: var(--clinic-success) !important;
+    color: white !important;
+    box-shadow: var(--clinic-shadow-subtle) !important;
+}
+
+.btn-success:hover {
+    background: #047857 !important;
+    color: white !important;
+    box-shadow: 0 4px 6px -1px rgba(var(--clinic-success-rgb), 0.4) !important;
+}
+
+.btn-warning {
+    background: var(--clinic-warning) !important;
+    color: white !important;
+    box-shadow: var(--clinic-shadow-subtle) !important;
+}
+
+.btn-warning:hover {
+    background: #b45309 !important;
+    color: white !important;
+    box-shadow: 0 4px 6px -1px rgba(var(--clinic-warning-rgb), 0.4) !important;
+}
+
+.btn-danger {
+    background: var(--clinic-danger) !important;
+    color: white !important;
+    box-shadow: var(--clinic-shadow-subtle) !important;
+}
+
+.btn-danger:hover {
+    background: #b91c1c !important;
+    color: white !important;
+    box-shadow: 0 4px 6px -1px rgba(var(--clinic-danger-rgb), 0.4) !important;
+}
+
+.btn-info {
+    background: var(--clinic-info) !important;
+    color: white !important;
+    box-shadow: var(--clinic-shadow-subtle) !important;
+}
+
+.btn-info:hover {
+    background: #0e7490 !important;
+    color: white !important;
+    box-shadow: 0 4px 6px -1px rgba(var(--clinic-info-rgb), 0.4) !important;
+}
+
+/* تحسين الجداول بشكل أكبر */
+.table {
+    background: var(--clinic-bg-primary) !important;
+    border-radius: var(--clinic-border-radius-lg) !important;
+    overflow: hidden !important;
+    box-shadow: var(--clinic-shadow-soft) !important;
+    border: 1px solid var(--clinic-bg-quaternary) !important;
+    font-family: 'Inter', sans-serif !important;
+}
+
+.table th {
+    background: var(--clinic-bg-secondary) !important;
+    color: var(--clinic-text-primary) !important;
+    font-weight: 600 !important;
+    font-size: 0.875rem !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+    padding: 1rem !important;
+    border-bottom: 2px solid var(--clinic-bg-quaternary) !important;
+}
+
+.table td {
+    color: var(--clinic-text-secondary) !important;
+    padding: 1rem !important;
+    border-bottom: 1px solid var(--clinic-bg-tertiary) !important;
+    vertical-align: middle !important;
+    font-size: 0.875rem !important;
+}
+
+.table tbody tr:hover {
+    background: rgba(var(--clinic-primary-rgb), 0.05) !important;
+    transform: scale(1.01) !important;
+    transition: var(--clinic-transition-normal) !important;
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+    background: var(--clinic-bg-tertiary) !important;
+}
+
+/* تحسين النماذج بشكل أكبر */
+.form-control,
+.form-select {
+    font-family: 'Inter', sans-serif !important;
+    border: 2px solid var(--clinic-bg-quaternary) !important;
+    border-radius: var(--clinic-border-radius) !important;
+    background: var(--clinic-bg-primary) !important;
+    color: var(--clinic-text-primary) !important;
+    padding: 0.75rem 1rem !important;
+    font-size: 0.875rem !important;
+    line-height: 1.5 !important;
+    transition: var(--clinic-transition-normal) !important;
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--clinic-primary) !important;
+    box-shadow: 0 0 0 0.2rem rgba(var(--clinic-primary-rgb), 0.25) !important;
+    background: var(--clinic-bg-primary) !important;
+    outline: none !important;
+}
+
+.form-control::placeholder {
+    color: var(--clinic-text-quaternary) !important;
+    opacity: 1 !important;
+}
+
+.form-label {
+    font-family: 'Inter', sans-serif !important;
+    color: var(--clinic-text-primary) !important;
+    font-weight: 500 !important;
+    font-size: 0.875rem !important;
+    margin-bottom: 0.5rem !important;
+}
+
+/* تحسين الـ badges */
+.badge {
+    font-family: 'Inter', sans-serif !important;
+    font-weight: 500 !important;
+    font-size: 0.75rem !important;
+    padding: 0.375rem 0.75rem !important;
+    border-radius: var(--clinic-border-radius) !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+}
+
+/* تحسين الـ alerts */
+.alert {
+    font-family: 'Inter', sans-serif !important;
+    border-radius: var(--clinic-border-radius-lg) !important;
+    border: none !important;
+    padding: 1rem 1.5rem !important;
+    box-shadow: var(--clinic-shadow-soft) !important;
+    font-weight: 500 !important;
+    position: relative !important;
+    overflow: hidden !important;
+}
+
+.alert::before {
+    content: '' !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 4px !important;
+    height: 100% !important;
+    background: currentColor !important;
+}
+
+/* تحسين القوائم المنسدلة */
+.dropdown-menu {
+    font-family: 'Inter', sans-serif !important;
+    border-radius: var(--clinic-border-radius-lg) !important;
+    box-shadow: var(--clinic-shadow-large) !important;
+    border: 1px solid var(--clinic-bg-quaternary) !important;
+    padding: 0.5rem !important;
+    margin-top: 0.5rem !important;
+    background: var(--clinic-bg-primary) !important;
+}
+
+.dropdown-item {
+    font-family: 'Inter', sans-serif !important;
+    border-radius: var(--clinic-border-radius) !important;
+    padding: 0.75rem 1rem !important;
+    transition: var(--clinic-transition-normal) !important;
+    color: var(--clinic-text-secondary) !important;
+    font-weight: 500 !important;
+    font-size: 0.875rem !important;
+}
+
+.dropdown-item:hover {
+    background: var(--clinic-bg-secondary) !important;
+    color: var(--clinic-primary) !important;
+    transform: translateX(4px) !important;
+}
+
+.dropdown-item:active {
+    background: var(--clinic-primary) !important;
+    color: white !important;
+}
+
+/* تحسين الـ modals */
+.modal-content {
+    font-family: 'Inter', sans-serif !important;
+    border-radius: var(--clinic-border-radius-2xl) !important;
+    box-shadow: var(--clinic-shadow-extra-large) !important;
+    border: none !important;
+    background: var(--clinic-bg-primary) !important;
+}
+
+.modal-header {
+    background: var(--clinic-bg-secondary) !important;
+    border-bottom: 1px solid var(--clinic-bg-quaternary) !important;
+    padding: 1.5rem !important;
+    border-radius: var(--clinic-border-radius-2xl) var(--clinic-border-radius-2xl) 0 0 !important;
+}
+
+.modal-title {
+    font-weight: 600 !important;
+    color: var(--clinic-text-primary) !important;
+}
+
+.modal-body {
+    padding: 1.5rem !important;
+    background: var(--clinic-bg-primary) !important;
+}
+
+.modal-footer {
+    background: var(--clinic-bg-tertiary) !important;
+    border-top: 1px solid var(--clinic-bg-quaternary) !important;
+    padding: 1.5rem !important;
+    border-radius: 0 0 var(--clinic-border-radius-2xl) var(--clinic-border-radius-2xl) !important;
+}
+
+/* تحسين الـ pagination */
+.pagination .page-link {
+    font-family: 'Inter', sans-serif !important;
+    border-radius: var(--clinic-border-radius) !important;
+    margin: 0 2px !important;
+    border: 2px solid var(--clinic-bg-quaternary) !important;
+    color: var(--clinic-text-secondary) !important;
+    background: var(--clinic-bg-primary) !important;
+    transition: var(--clinic-transition-normal) !important;
+    font-weight: 500 !important;
+    padding: 0.5rem 0.75rem !important;
+}
+
+.pagination .page-link:hover {
+    background: var(--clinic-primary) !important;
+    color: white !important;
+    border-color: var(--clinic-primary) !important;
+    transform: translateY(-1px) !important;
+}
+
+.pagination .page-item.active .page-link {
+    background: var(--clinic-primary) !important;
+    border-color: var(--clinic-primary) !important;
+    color: white !important;
+}
+
+/* تحسين الـ tabs */
+.nav-tabs {
+    border-bottom: 2px solid var(--clinic-bg-quaternary) !important;
+}
+
+.nav-tabs .nav-link {
+    font-family: 'Inter', sans-serif !important;
+    border: none !important;
+    border-bottom: 3px solid transparent !important;
+    color: var(--clinic-text-tertiary) !important;
+    font-weight: 500 !important;
+    padding: 1rem 1.5rem !important;
+    transition: var(--clinic-transition-normal) !important;
+}
+
+.nav-tabs .nav-link:hover {
+    color: var(--clinic-primary) !important;
+    border-bottom-color: #3b82f6 !important;
+}
+
+.nav-tabs .nav-link.active {
+    background: none !important;
+    border-bottom-color: var(--clinic-primary) !important;
+    color: var(--clinic-primary) !important;
+    font-weight: 600 !important;
+}
+
+/* تحسين الـ list groups */
+.list-group-item {
+    font-family: 'Inter', sans-serif !important;
+    border: 1px solid var(--clinic-bg-quaternary) !important;
+    background: var(--clinic-bg-primary) !important;
+    color: var(--clinic-text-secondary) !important;
+    padding: 1rem 1.25rem !important;
+    transition: var(--clinic-transition-normal) !important;
+    font-size: 0.875rem !important;
+}
+
+.list-group-item:hover {
+    background: var(--clinic-bg-secondary) !important;
+    transform: translateX(4px) !important;
+    border-color: #cbd5e1 !important;
+}
+
+.list-group-item.active {
+    background: var(--clinic-primary) !important;
+    border-color: var(--clinic-primary) !important;
+    color: white !important;
+}
+
+/* تحسين الـ progress bars */
+.progress {
+    background: var(--clinic-bg-secondary) !important;
+    border-radius: var(--clinic-border-radius) !important;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1) !important;
+    height: 0.75rem !important;
+}
+
+.progress-bar {
+    background: linear-gradient(90deg, var(--clinic-primary), #3b82f6) !important;
+    border-radius: var(--clinic-border-radius) !important;
+    transition: width 0.6s ease !important;
+}
+
+/* تحسين الـ breadcrumbs */
+.breadcrumb {
+    font-family: 'Inter', sans-serif !important;
+    background: var(--clinic-bg-secondary) !important;
+    border-radius: var(--clinic-border-radius) !important;
+    padding: 0.75rem 1rem !important;
+    margin-bottom: 1rem !important;
+}
+
+.breadcrumb-item {
+    font-size: 0.875rem !important;
+    color: var(--clinic-text-secondary) !important;
+}
+
+.breadcrumb-item.active {
+    color: var(--clinic-text-primary) !important;
+    font-weight: 500 !important;
+}
+
+.breadcrumb-item + .breadcrumb-item::before {
+    color: var(--clinic-text-quaternary) !important;
+}
+
+/* تحسين الـ tooltips */
+.tooltip-inner {
+    font-family: 'Inter', sans-serif !important;
+    background: var(--clinic-text-primary) !important;
+    color: white !important;
+    border-radius: var(--clinic-border-radius) !important;
+    padding: 0.5rem 0.75rem !important;
+    font-size: 0.75rem !important;
+    font-weight: 500 !important;
+}
+
+/* تحسين الـ popovers */
+.popover {
+    font-family: 'Inter', sans-serif !important;
+    background: var(--clinic-bg-primary) !important;
+    border: 1px solid var(--clinic-bg-quaternary) !important;
+    border-radius: var(--clinic-border-radius-lg) !important;
+    box-shadow: var(--clinic-shadow-large) !important;
+}
+
+.popover-header {
+    background: var(--clinic-bg-secondary) !important;
+    border-bottom: 1px solid var(--clinic-bg-quaternary) !important;
+    color: var(--clinic-text-primary) !important;
+    font-weight: 600 !important;
+}
+
+.popover-body {
+    background: var(--clinic-bg-primary) !important;
+    color: var(--clinic-text-secondary) !important;
+}
+
+/* تحسين الـ spinners */
+.spinner-border {
+    color: var(--clinic-primary) !important;
+}
+
+.spinner-grow {
+    color: var(--clinic-primary) !important;
+}
+
+/* تحسين الـ close buttons */
+.btn-close {
+    background: none !important;
+    border: none !important;
+    opacity: 0.5 !important;
+    transition: var(--clinic-transition-normal) !important;
+}
+
+.btn-close:hover {
+    opacity: 1 !important;
+    transform: scale(1.1) !important;
+}
+
+/* تحسين الـ input groups */
+.input-group {
+    box-shadow: var(--clinic-shadow-subtle) !important;
+    border-radius: var(--clinic-border-radius) !important;
+    overflow: hidden !important;
+}
+
+.input-group-text {
+    background: var(--clinic-bg-secondary) !important;
+    border: 2px solid var(--clinic-bg-quaternary) !important;
+    color: var(--clinic-text-secondary) !important;
+    font-weight: 500 !important;
+    font-family: 'Inter', sans-serif !important;
+}
+
+/* تحسين الـ accordions */
+.accordion-item {
+    background: var(--clinic-bg-primary) !important;
+    border: 1px solid var(--clinic-bg-quaternary) !important;
+    border-radius: var(--clinic-border-radius-lg) !important;
+    margin-bottom: 0.5rem !important;
+}
+
+.accordion-header {
+    background: var(--clinic-bg-secondary) !important;
+}
+
+.accordion-button {
+    font-family: 'Inter', sans-serif !important;
+    background: var(--clinic-bg-secondary) !important;
+    color: var(--clinic-text-primary) !important;
+    font-weight: 500 !important;
+    border: none !important;
+    border-radius: var(--clinic-border-radius-lg) !important;
+}
+
+.accordion-button:not(.collapsed) {
+    background: var(--clinic-primary) !important;
+    color: white !important;
+}
+
+.accordion-body {
+    background: var(--clinic-bg-primary) !important;
+    color: var(--clinic-text-secondary) !important;
+    font-family: 'Inter', sans-serif !important;
+}
+
+/* تحسين الـ offcanvas */
+.offcanvas {
+    background: var(--clinic-bg-primary) !important;
+    font-family: 'Inter', sans-serif !important;
+}
+
+.offcanvas-header {
+    background: var(--clinic-bg-secondary) !important;
+    border-bottom: 1px solid var(--clinic-bg-quaternary) !important;
+}
+
+.offcanvas-title {
+    color: var(--clinic-text-primary) !important;
+    font-weight: 600 !important;
+}
+
+.offcanvas-body {
+    background: var(--clinic-bg-primary) !important;
+    color: var(--clinic-text-secondary) !important;
+}
+
+/* تحسين responsive للخطوط */
+@media (max-width: 768px) {
+    h1 {
+        font-size: 1.875rem !important;
+    }
+    
+    h2 {
+        font-size: 1.5rem !important;
+    }
+    
+    h3 {
+        font-size: 1.25rem !important;
+    }
+    
+    .navbar-brand {
+        font-size: 1.25rem !important;
+    }
+    
+    .btn {
+        font-size: 0.8rem !important;
+        padding: 0.5rem 1rem !important;
+    }
+    
+    .table th,
+    .table td {
+        font-size: 0.8rem !important;
+        padding: 0.75rem !important;
+    }
+}
+
+@media (max-width: 576px) {
+    h1 {
+        font-size: 1.5rem !important;
+    }
+    
+    h2 {
+        font-size: 1.25rem !important;
+    }
+    
+    h3 {
+        font-size: 1.125rem !important;
+    }
+    
+    .navbar-brand {
+        font-size: 1.125rem !important;
+    }
+    
+    .btn {
+        font-size: 0.75rem !important;
+        padding: 0.375rem 0.75rem !important;
+    }
+    
+    .table th,
+    .table td {
+        font-size: 0.75rem !important;
+        padding: 0.5rem !important;
+    }
+}
+
+/* تحسين الـ scrollbars */
+* {
+    scrollbar-width: thin !important;
+    scrollbar-color: var(--clinic-bg-quaternary) var(--clinic-bg-secondary) !important;
+}
+
+*::-webkit-scrollbar {
+    width: 8px !important;
+    height: 8px !important;
+}
+
+*::-webkit-scrollbar-track {
+    background: var(--clinic-bg-secondary) !important;
+    border-radius: var(--clinic-border-radius) !important;
+}
+
+*::-webkit-scrollbar-thumb {
+    background: var(--clinic-bg-quaternary) !important;
+    border-radius: var(--clinic-border-radius) !important;
+    transition: var(--clinic-transition-normal) !important;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+    background: #cbd5e1 !important;
+}
+
+/* تحسين الـ selection */
+::selection {
+    background: rgba(var(--clinic-primary-rgb), 0.3) !important;
+    color: var(--clinic-text-primary) !important;
+}
+
+::-moz-selection {
+    background: rgba(var(--clinic-primary-rgb), 0.3) !important;
+    color: var(--clinic-text-primary) !important;
+}
+
+/* تحسين الـ focus states */
+*:focus {
+    outline: none !important;
+}
+
+*:focus-visible {
+    outline: 2px solid var(--clinic-primary) !important;
+    outline-offset: 2px !important;
+}
+
+/* تحسين الـ disabled states */
+.btn:disabled,
+.btn.disabled {
+    opacity: 0.6 !important;
+    cursor: not-allowed !important;
+    transform: none !important;
+}
+
+.form-control:disabled,
+.form-select:disabled {
+    background: var(--clinic-bg-tertiary) !important;
+    color: var(--clinic-text-quaternary) !important;
+    cursor: not-allowed !important;
+}
+
+/* تحسين الـ loading states */
+.btn.loading {
+    position: relative !important;
+    color: transparent !important;
+}
+
+.btn.loading::after {
+    content: '' !important;
+    position: absolute !important;
+    width: 16px !important;
+    height: 16px !important;
+    top: 50% !important;
+    left: 50% !important;
+    margin-left: -8px !important;
+    margin-top: -8px !important;
+    border: 2px solid transparent !important;
+    border-top-color: currentColor !important;
+    border-radius: 50% !important;
+    animation: spin 1s linear infinite !important;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* تحسين الطباعة */
+@media print {
+    * {
+        background: white !important;
+        color: black !important;
+        box-shadow: none !important;
+    }
+    
+    .navbar,
+    .btn,
+    .dropdown,
+    .modal {
+        display: none !important;
+    }
+    
+    .card {
+        border: 1px solid #ddd !important;
+        box-shadow: none !important;
+        page-break-inside: avoid !important;
+    }
+    
+    h1, h2, h3, h4, h5, h6 {
+        page-break-after: avoid !important;
+    }
+    
+    .table {
+        border-collapse: collapse !important;
+    }
+    
+    .table th,
+    .table td {
+        border: 1px solid #ddd !important;
+    }
+}

@@ -3,41 +3,41 @@
 {% block content %}
 <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1>إدارة المدفوعات</h1>
+        <h1>Gestion des paiements</h1>
         <div>
-            <span class="badge bg-info fs-6">إجمالي الزيارات: {{ visits.total }}</span>
+            <span class="badge bg-info fs-6">Total des consultations: {{ visits.total }}</span>
         </div>
     </div>
 
-    <!-- فلتر حالة الدفع -->
+    <!-- Filtre statut de paiement -->
     <div class="card mb-4">
         <div class="card-body">
             <div class="row">
                 <div class="col-md-6">
-                    <label class="form-label">فلترة حسب حالة الدفع:</label>
+                    <label class="form-label">Filtrer par statut de paiement:</label>
                     <select class="form-select" id="payment-filter" onchange="filterPayments()">
-                        <option value="all" {{ 'selected' if payment_filter == 'all' else '' }}>جميع الحالات</option>
-                        <option value="مدفوع" {{ 'selected' if payment_filter == 'مدفوع' else '' }}>مدفوع</option>
-                        <option value="غير مدفوع" {{ 'selected' if payment_filter == 'غير مدفوع' else '' }}>غير مدفوع</option>
-                        <option value="مدفوع جزئياً" {{ 'selected' if payment_filter == 'مدفوع جزئياً' else '' }}>مدفوع جزئياً</option>
+                        <option value="all" {{ 'selected' if payment_filter == 'all' else '' }}>Tous les statuts</option>
+                        <option value="payé" {{ 'selected' if payment_filter == 'payé' else '' }}>Payé</option>
+                        <option value="non_payé" {{ 'selected' if payment_filter == 'non_payé' else '' }}>Non payé</option>
+                        <option value="partiellement_payé" {{ 'selected' if payment_filter == 'partiellement_payé' else '' }}>Partiellement payé</option>
                     </select>
                 </div>
                 <div class="col-md-6 d-flex align-items-end">
-                    {% set unpaid_count = visits.items | selectattr('payment_status', 'equalto', 'غير مدفوع') | list | length %}
-                    {% set partial_count = visits.items | selectattr('payment_status', 'equalto', 'مدفوع جزئياً') | list | length %}
+                    {% set unpaid_count = visits.items | selectattr('payment_status', 'equalto', 'non_payé') | list | length %}
+                    {% set partial_count = visits.items | selectattr('payment_status', 'equalto', 'partiellement_payé') | list | length %}
                     <div>
-                        <span class="badge bg-danger me-2">غير مدفوع: {{ unpaid_count }}</span>
-                        <span class="badge bg-warning">جزئي: {{ partial_count }}</span>
+                        <span class="badge bg-danger me-2">Non payé: {{ unpaid_count }}</span>
+                        <span class="badge bg-warning">Partiel: {{ partial_count }}</span>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- قائمة المدفوعات -->
+    <!-- Liste des paiements -->
     <div class="card">
         <div class="card-header bg-primary text-white">
-            <h5 class="mb-0">سجل المدفوعات</h5>
+            <h5 class="mb-0">Registre des paiements</h5>
         </div>
         <div class="card-body">
             {% if visits.items %}
@@ -46,12 +46,12 @@
                         <thead>
                             <tr>
                                 <th>#</th>
-                                <th>المريض</th>
-                                <th>الطبيب</th>
-                                <th>تاريخ الزيارة</th>
-                                <th>المبلغ</th>
-                                <th>حالة الدفع</th>
-                                <th>الإجراءات</th>
+                                <th>Patient</th>
+                                <th>Médecin</th>
+                                <th>Date de visite</th>
+                                <th>Montant</th>
+                                <th>Statut de paiement</th>
+                                <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -68,18 +68,18 @@
                                     <td>{{ format_datetime(visit.date) }}</td>
                                     <td>
                                         {% if visit.price %}
-                                            <strong>{{ visit.price }} ل.س</strong>
+                                            <strong>{{ visit.price }} DA</strong>
                                         {% else %}
-                                            <span class="text-muted">غير محدد</span>
+                                            <span class="text-muted">Non spécifié</span>
                                         {% endif %}
                                     </td>
                                     <td>
-                                        {% if visit.payment_status == 'مدفوع' %}
-                                            <span class="badge bg-success">مدفوع</span>
-                                        {% elif visit.payment_status == 'غير مدفوع' %}
-                                            <span class="badge bg-danger">غير مدفوع</span>
-                                        {% elif visit.payment_status == 'مدفوع جزئياً' %}
-                                            <span class="badge bg-warning">مدفوع جزئياً</span>
+                                        {% if visit.payment_status == 'payé' %}
+                                            <span class="badge bg-success">Payé</span>
+                                        {% elif visit.payment_status == 'non_payé' %}
+                                            <span class="badge bg-danger">Non payé</span>
+                                        {% elif visit.payment_status == 'partiellement_payé' %}
+                                            <span class="badge bg-warning">Partiellement payé</span>
                                         {% else %}
                                             <span class="badge bg-secondary">{{ visit.payment_status }}</span>
                                         {% endif %}
@@ -87,17 +87,17 @@
                                     <td>
                                         <div class="btn-group btn-group-sm" role="group">
                                             <a href="{{ url_for('secretary.patient_details', patient_id=visit.patient.id) }}" 
-                                               class="btn btn-info" title="عرض ملف المريض">
+                                               class="btn btn-info" title="Voir le dossier patient">
                                                 <i class="fas fa-user"></i>
                                             </a>
-                                            {% if visit.payment_status != 'مدفوع' %}
+                                            {% if visit.payment_status != 'payé' %}
                                                 <a href="{{ url_for('secretary.update_visit_payment', visit_id=visit.id) }}" 
-                                                   class="btn btn-success" title="تحديث حالة الدفع">
+                                                   class="btn btn-success" title="Mettre à jour le statut de paiement">
                                                     <i class="fas fa-money-bill-wave"></i>
                                                 </a>
                                                 <button type="button" class="btn btn-primary" 
                                                         onclick="markAsPaid({{ visit.id }})" 
-                                                        title="تحديد كمدفوع سريع">
+                                                        title="Marquer comme payé rapidement">
                                                     <i class="fas fa-check"></i>
                                                 </button>
                                             {% endif %}
@@ -114,11 +114,11 @@
                     <ul class="pagination justify-content-center">
                         {% if visits.has_prev %}
                             <li class="page-item">
-                                <a class="page-link" href="{{ url_for('secretary.payments', page=visits.prev_num, payment=payment_filter) }}">السابق</a>
+                                <a class="page-link" href="{{ url_for('secretary.payments', page=visits.prev_num, payment=payment_filter) }}">Précédent</a>
                             </li>
                         {% else %}
                             <li class="page-item disabled">
-                                <span class="page-link">السابق</span>
+                                <span class="page-link">Précédent</span>
                             </li>
                         {% endif %}
 
@@ -142,25 +142,25 @@
 
                         {% if visits.has_next %}
                             <li class="page-item">
-                                <a class="page-link" href="{{ url_for('secretary.payments', page=visits.next_num, payment=payment_filter) }}">التالي</a>
+                                <a class="page-link" href="{{ url_for('secretary.payments', page=visits.next_num, payment=payment_filter) }}">Suivant</a>
                             </li>
                         {% else %}
                             <li class="page-item disabled">
-                                <span class="page-link">التالي</span>
+                                <span class="page-link">Suivant</span>
                             </li>
                         {% endif %}
                     </ul>
                 </nav>
             {% else %}
                 <div class="alert alert-info">
-                    لا توجد زيارات مطابقة للفلتر المحدد
+                    Aucune visite ne correspond au filtre sélectionné
                 </div>
             {% endif %}
         </div>
     </div>
 
     <div class="mt-4">
-        <a href="{{ url_for('secretary.dashboard') }}" class="btn btn-secondary">العودة للوحة التحكم</a>
+        <a href="{{ url_for('secretary.dashboard') }}" class="btn btn-secondary">Retour au tableau de bord</a>
     </div>
 </div>
 
@@ -171,8 +171,8 @@ function filterPayments() {
 }
 
 function markAsPaid(visitId) {
-    if (confirm('هل أنت متأكد من تحديد هذه الزيارة كمدفوعة؟')) {
-        // إنشاء نموذج مخفي لإرسال البيانات
+    if (confirm('Êtes-vous sûr de marquer cette visite comme payée ?')) {
+        // Créer un formulaire caché pour envoyer les données
         const form = document.createElement('form');
         form.method = 'POST';
         form.action = `/secretary/visit/${visitId}/mark_as_paid`;

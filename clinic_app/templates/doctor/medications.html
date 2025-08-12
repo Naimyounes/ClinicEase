@@ -5,8 +5,8 @@
         <div class="col-md-12">
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="{{ url_for('doctor.dashboard') }}">لوحة التحكم</a></li>
-                    <li class="breadcrumb-item active">إدارة الأدوية</li>
+                    <li class="breadcrumb-item"><a href="{{ url_for('doctor.dashboard') }}">Tableau de bord</a></li>
+                    <li class="breadcrumb-item active">Gestion des médicaments</li>
                 </ol>
             </nav>
         </div>
@@ -16,7 +16,10 @@
         <div class="col-md-12">
             <div class="card">
                 <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                    <h3 class="mb-0">إضافة دواء جديد</h3>
+                    <h3 class="mb-0">
+                        <i class="fas fa-pills me-2"></i>
+                        Ajouter un nouveau médicament
+                    </h3>
                 </div>
                 <div class="card-body">
                     <form method="POST" action="">
@@ -24,8 +27,11 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group mb-3">
-                                    {{ form.name.label(class="form-control-label") }}
-                                    {{ form.name(class="form-control") }}
+                                    <label for="{{ form.name.id }}" class="form-control-label">
+                                        <i class="fas fa-capsules me-1"></i>
+                                        Nom du médicament
+                                    </label>
+                                    {{ form.name(class="form-control", placeholder="Ex: Paracétamol") }}
                                     {% if form.name.errors %}
                                         <div class="invalid-feedback d-block">
                                             {% for error in form.name.errors %}
@@ -37,8 +43,11 @@
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group mb-3">
-                                    {{ form.dosage.label(class="form-control-label") }}
-                                    {{ form.dosage(class="form-control") }}
+                                    <label for="{{ form.dosage.id }}" class="form-control-label">
+                                        <i class="fas fa-weight me-1"></i>
+                                        Dosage
+                                    </label>
+                                    {{ form.dosage(class="form-control", placeholder="Ex: 500mg") }}
                                     {% if form.dosage.errors %}
                                         <div class="invalid-feedback d-block">
                                             {% for error in form.dosage.errors %}
@@ -50,8 +59,9 @@
                             </div>
                         </div>
                         <div class="text-center">
-                            <button type="submit" class="btn btn-success">
-                                <i class="fas fa-plus"></i> إضافة الدواء
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="fas fa-plus me-2"></i>
+                                Ajouter le médicament
                             </button>
                         </div>
                     </form>
@@ -63,31 +73,93 @@
     <div class="row">
         <div class="col-md-12">
             <div class="card">
-                <div class="card-header bg-info text-white">
-                    <h3 class="mb-0">قائمة الأدوية</h3>
+                <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+                    <h3 class="mb-0">
+                        <i class="fas fa-list me-2"></i>
+                        Liste des médicaments
+                    </h3>
+                    <span class="badge bg-light text-dark fs-6">
+                        Page {{ medications.page }} sur {{ medications.pages }} | Total: {{ medications.total }} médicament(s)
+                    </span>
                 </div>
                 <div class="card-body">
-                    {% if medications %}
+                    {% if medications.items %}
+                        <!-- Barre de recherche et options -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <form method="GET" action="{{ url_for('doctor.medications') }}" class="d-flex">
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <i class="fas fa-search"></i>
+                                        </span>
+                                        <input type="text" name="search" class="form-control" 
+                                               placeholder="Rechercher un médicament..." 
+                                               value="{{ search }}">
+                                        <button class="btn btn-outline-primary" type="submit">
+                                            <i class="fas fa-search"></i>
+                                        </button>
+                                        {% if search %}
+                                        <a href="{{ url_for('doctor.medications') }}" class="btn btn-outline-secondary">
+                                            <i class="fas fa-times"></i>
+                                        </a>
+                                        {% endif %}
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="d-flex justify-content-end align-items-center">
+                                    <label class="me-2">Afficher:</label>
+                                    <select class="form-select form-select-sm" style="width: auto;" onchange="changePerPage(this.value)">
+                                        <option value="25" {% if per_page == 25 %}selected{% endif %}>25</option>
+                                        <option value="50" {% if per_page == 50 %}selected{% endif %}>50</option>
+                                        <option value="100" {% if per_page == 100 %}selected{% endif %}>100</option>
+                                        <option value="200" {% if per_page == 200 %}selected{% endif %}>200</option>
+                                    </select>
+                                    <span class="ms-2">par page</span>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="table-responsive">
-                            <table class="table table-striped table-bordered">
+                            <table class="table table-striped table-bordered" id="medicationsTable">
                                 <thead class="table-dark">
                                     <tr>
-                                        <th>#</th>
-                                        <th>اسم الدواء</th>
-                                        <th>الجرعة</th>
-                                        <th>الإجراءات</th>
+                                        <th style="width: 5%">#</th>
+                                        <th style="width: 45%">
+                                            <i class="fas fa-capsules me-1"></i>
+                                            Nom du médicament
+                                        </th>
+                                        <th style="width: 25%">
+                                            <i class="fas fa-weight me-1"></i>
+                                            Dosage
+                                        </th>
+                                        <th style="width: 25%" class="text-center">
+                                            <i class="fas fa-cogs me-1"></i>
+                                            Actions
+                                        </th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {% for medication in medications %}
+                                    {% for medication in medications.items %}
                                     <tr>
-                                        <td>{{ loop.index }}</td>
-                                        <td>{{ medication.name }}</td>
-                                        <td>{{ medication.dosage }}</td>
+                                        <td class="text-center">{{ ((medications.page - 1) * medications.per_page) + loop.index }}</td>
                                         <td>
-                                            <form method="POST" action="{{ url_for('doctor.delete_medication', medication_id=medication.id) }}" style="display: inline;" onsubmit="return confirm('هل أنت متأكد من حذف هذا الدواء؟')">
-                                                <button type="submit" class="btn btn-sm btn-danger">
-                                                    <i class="fas fa-trash"></i> حذف
+                                            <strong>{{ medication.name }}</strong>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-secondary">{{ medication.dosage or 'Non spécifié' }}</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <form method="POST" 
+                                                  action="{{ url_for('doctor.delete_medication', medication_id=medication.id) }}" 
+                                                  style="display: inline;" 
+                                                  class="delete-form"
+                                                  data-medication-name="{{ medication.name }}"
+                                                  data-medication-dosage="{{ medication.dosage or 'Non spécifié' }}">
+                                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                                <button type="submit" class="btn btn-sm btn-danger" title="Supprimer ce médicament">
+                                                    <i class="fas fa-trash me-1"></i>
+                                                    Supprimer
                                                 </button>
                                             </form>
                                         </td>
@@ -96,9 +168,105 @@
                                 </tbody>
                             </table>
                         </div>
+
+                        <!-- Pagination -->
+                        {% if medications.pages > 1 %}
+                        <div class="row mt-4">
+                            <div class="col-md-12">
+                                <nav aria-label="Navigation des pages">
+                                    <ul class="pagination justify-content-center">
+                                        <!-- Première page -->
+                                        {% if medications.has_prev %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="{{ url_for('doctor.medications', page=1, search=search, per_page=per_page) }}">
+                                                <i class="fas fa-angle-double-left"></i>
+                                            </a>
+                                        </li>
+                                        <li class="page-item">
+                                            <a class="page-link" href="{{ url_for('doctor.medications', page=medications.prev_num, search=search, per_page=per_page) }}">
+                                                <i class="fas fa-angle-left"></i>
+                                            </a>
+                                        </li>
+                                        {% else %}
+                                        <li class="page-item disabled">
+                                            <span class="page-link"><i class="fas fa-angle-double-left"></i></span>
+                                        </li>
+                                        <li class="page-item disabled">
+                                            <span class="page-link"><i class="fas fa-angle-left"></i></span>
+                                        </li>
+                                        {% endif %}
+
+                                        <!-- Pages numérotées -->
+                                        {% for page_num in medications.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+                                            {% if page_num %}
+                                                {% if page_num != medications.page %}
+                                                <li class="page-item">
+                                                    <a class="page-link" href="{{ url_for('doctor.medications', page=page_num, search=search, per_page=per_page) }}">
+                                                        {{ page_num }}
+                                                    </a>
+                                                </li>
+                                                {% else %}
+                                                <li class="page-item active">
+                                                    <span class="page-link">{{ page_num }}</span>
+                                                </li>
+                                                {% endif %}
+                                            {% else %}
+                                            <li class="page-item disabled">
+                                                <span class="page-link">...</span>
+                                            </li>
+                                            {% endif %}
+                                        {% endfor %}
+
+                                        <!-- Dernière page -->
+                                        {% if medications.has_next %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="{{ url_for('doctor.medications', page=medications.next_num, search=search, per_page=per_page) }}">
+                                                <i class="fas fa-angle-right"></i>
+                                            </a>
+                                        </li>
+                                        <li class="page-item">
+                                            <a class="page-link" href="{{ url_for('doctor.medications', page=medications.pages, search=search, per_page=per_page) }}">
+                                                <i class="fas fa-angle-double-right"></i>
+                                            </a>
+                                        </li>
+                                        {% else %}
+                                        <li class="page-item disabled">
+                                            <span class="page-link"><i class="fas fa-angle-right"></i></span>
+                                        </li>
+                                        <li class="page-item disabled">
+                                            <span class="page-link"><i class="fas fa-angle-double-right"></i></span>
+                                        </li>
+                                        {% endif %}
+                                    </ul>
+                                </nav>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <!-- Informations de pagination -->
+                        <div class="row mt-3">
+                            <div class="col-md-12">
+                                <div class="alert alert-light d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <i class="fas fa-info-circle me-2"></i>
+                                        Affichage de {{ ((medications.page - 1) * medications.per_page) + 1 }} à 
+                                        {{ medications.page * medications.per_page if medications.page * medications.per_page <= medications.total else medications.total }} 
+                                        sur <strong>{{ medications.total }}</strong> médicament(s)
+                                        {% if search %}
+                                        <span class="badge bg-primary ms-2">Recherche: "{{ search }}"</span>
+                                        {% endif %}
+                                    </div>
+                                    <div>
+                                        <small class="text-muted">Page {{ medications.page }} sur {{ medications.pages }}</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     {% else %}
                         <div class="alert alert-info text-center">
-                            <i class="fas fa-info-circle fa-lg me-2"></i> لا توجد أدوية مسجلة
+                            <i class="fas fa-info-circle fa-2x mb-3"></i>
+                            <h5>Aucun médicament enregistré</h5>
+                            <p class="mb-0">Commencez par ajouter votre premier médicament en utilisant le formulaire ci-dessus.</p>
                         </div>
                     {% endif %}
                 </div>
@@ -106,4 +274,189 @@
         </div>
     </div>
 </div>
+
+<!-- Scripts pour la pagination, recherche et suppression -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Script pour la confirmation de suppression
+    const deleteForms = document.querySelectorAll('.delete-form');
+    deleteForms.forEach(function(form) {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const medicationName = form.getAttribute('data-medication-name');
+            const medicationDosage = form.getAttribute('data-medication-dosage');
+            
+            const confirmMessage = `Êtes-vous sûr de vouloir supprimer ce médicament ?\n\nMédicament: ${medicationName}\nDosage: ${medicationDosage}\n\nCette action est irréversible.`;
+            
+            if (confirm(confirmMessage)) {
+                form.submit();
+            }
+        });
+    });
+});
+
+// Fonction pour changer le nombre d'éléments par page
+function changePerPage(perPage) {
+    const currentUrl = new URL(window.location.href);
+    currentUrl.searchParams.set('per_page', perPage);
+    currentUrl.searchParams.set('page', '1'); // Retour à la première page
+    window.location.href = currentUrl.toString();
+}
+
+// Fonction pour aller à une page spécifique
+function goToPage(page) {
+    const currentUrl = new URL(window.location.href);
+    currentUrl.searchParams.set('page', page);
+    window.location.href = currentUrl.toString();
+}
+
+// Raccourcis clavier pour la navigation
+document.addEventListener('keydown', function(e) {
+    // Ctrl + flèche gauche = page précédente
+    if (e.ctrlKey && e.key === 'ArrowLeft') {
+        const prevLink = document.querySelector('.pagination .page-item:not(.disabled) a[href*="page=' + ({{ medications.page }} - 1) + '"]');
+        if (prevLink) {
+            e.preventDefault();
+            window.location.href = prevLink.href;
+        }
+    }
+    
+    // Ctrl + flèche droite = page suivante
+    if (e.ctrlKey && e.key === 'ArrowRight') {
+        const nextLink = document.querySelector('.pagination .page-item:not(.disabled) a[href*="page=' + ({{ medications.page }} + 1) + '"]');
+        if (nextLink) {
+            e.preventDefault();
+            window.location.href = nextLink.href;
+        }
+    }
+});
+</script>
+
+<style>
+.table th {
+    background-color: #343a40 !important;
+    color: white !important;
+    border-color: #454d55 !important;
+}
+
+.table-striped > tbody > tr:nth-of-type(odd) > td {
+    background-color: rgba(0,0,0,.05);
+}
+
+.btn-danger:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
+}
+
+.card-header {
+    border-bottom: 3px solid rgba(255,255,255,0.2);
+}
+
+.badge {
+    font-size: 0.85em;
+}
+
+/* Styles pour la pagination */
+.pagination {
+    margin-bottom: 0;
+}
+
+.pagination .page-link {
+    color: #007bff;
+    border: 1px solid #dee2e6;
+    padding: 0.5rem 0.75rem;
+    margin: 0 2px;
+    border-radius: 0.375rem;
+    transition: all 0.2s ease-in-out;
+}
+
+.pagination .page-link:hover {
+    color: #0056b3;
+    background-color: #e9ecef;
+    border-color: #adb5bd;
+    transform: translateY(-1px);
+}
+
+.pagination .page-item.active .page-link {
+    background-color: #007bff;
+    border-color: #007bff;
+    color: white;
+    font-weight: bold;
+}
+
+.pagination .page-item.disabled .page-link {
+    color: #6c757d;
+    background-color: #fff;
+    border-color: #dee2e6;
+    cursor: not-allowed;
+}
+
+/* Styles pour la barre de recherche */
+.input-group .form-control:focus {
+    border-color: #17a2b8;
+    box-shadow: 0 0 0 0.2rem rgba(23, 162, 184, 0.25);
+}
+
+.input-group .btn-outline-primary:hover {
+    transform: translateY(-1px);
+}
+
+.input-group .btn-outline-secondary:hover {
+    transform: translateY(-1px);
+}
+
+/* Styles pour le sélecteur de nombre par page */
+.form-select-sm:focus {
+    border-color: #17a2b8;
+    box-shadow: 0 0 0 0.2rem rgba(23, 162, 184, 0.25);
+}
+
+/* Animation pour les lignes du tableau */
+.table tbody tr {
+    transition: background-color 0.2s ease-in-out;
+}
+
+.table tbody tr:hover {
+    background-color: rgba(0, 123, 255, 0.1) !important;
+}
+
+/* Responsive pour la pagination */
+@media (max-width: 768px) {
+    .pagination {
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+    
+    .pagination .page-link {
+        padding: 0.375rem 0.5rem;
+        font-size: 0.875rem;
+    }
+    
+    .d-flex.justify-content-end {
+        justify-content: center !important;
+        margin-top: 1rem;
+    }
+}
+
+/* Indicateur de chargement */
+.loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+/* Styles pour les badges de recherche */
+.badge.bg-primary {
+    background-color: #0d6efd !important;
+}
+
+/* Animation pour les boutons */
+.btn {
+    transition: all 0.2s ease-in-out;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+}
+</style>
 {% endblock content %}

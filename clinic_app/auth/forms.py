@@ -4,21 +4,21 @@ from wtforms.validators import DataRequired, Length, EqualTo
 
 
 class LoginForm(FlaskForm):
-    """نموذج تسجيل الدخول"""
-    username = StringField("اسم المستخدم", validators=[DataRequired()])
-    password = PasswordField("كلمة المرور", validators=[DataRequired()])
-    submit = SubmitField("تسجيل الدخول")
+    """Formulaire de connexion"""
+    username = StringField("Nom d'utilisateur", validators=[DataRequired()])
+    password = PasswordField("Mot de passe", validators=[DataRequired()])
+    submit = SubmitField("Se connecter")
 
 
 class ChangePasswordForm(FlaskForm):
-    """نموذج تغيير كلمة المرور"""
-    current_password = PasswordField("كلمة المرور الحالية", validators=[DataRequired()])
-    new_password = PasswordField("كلمة المرور الجديدة", validators=[
+    """Formulaire de changement de mot de passe"""
+    current_password = PasswordField("Mot de passe actuel", validators=[DataRequired()])
+    new_password = PasswordField("Nouveau mot de passe", validators=[
         DataRequired(), 
-        Length(min=6, message="كلمة المرور يجب أن تكون 6 أحرف على الأقل")
+        Length(min=6, message="Le mot de passe doit contenir au moins 6 caractères")
     ])
-    confirm_password = PasswordField("تأكيد كلمة المرور الجديدة", validators=[
+    confirm_password = PasswordField("Confirmer le nouveau mot de passe", validators=[
         DataRequired(),
-        EqualTo('new_password', message="كلمات المرور غير متطابقة")
+        EqualTo('new_password', message="Les mots de passe ne correspondent pas")
     ])
-    submit = SubmitField("تغيير كلمة المرور")
+    submit = SubmitField("Changer le mot de passe")

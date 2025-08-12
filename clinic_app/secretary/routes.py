@@ -2,46 +2,46 @@ from flask import Blueprint, render_template, redirect, url_for, flash, request,
 from flask_login import login_required, current_user
 from clinic_app import db
 from clinic_app.models import Patient, Ticket, Visit, User, Appointment
-from clinic_app.secretary.forms import PatientForm, SecretaryAppointmentForm, PaymentUpdateForm
+from clinic_app.secretary.forms import PatientForm, PatientFormFrench, SecretaryAppointmentForm, PaymentUpdateForm
 from datetime import datetime, timedelta
 from functools import wraps
 
-# إنشاء بلوبرينت للسكرتير
+# Création du blueprint pour la secrétaire
 secretary = Blueprint("secretary", __name__)
 
 
 def secretary_required(f):
-    """تأكد أن المستخدم هو سكرتير"""
+    """S'assurer que l'utilisateur est une secrétaire"""
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if current_user.role != "secretary":
-            flash("غير مسموح لك بالوصول إلى هذه الصفحة", "danger")
+            flash("Vous n'êtes pas autorisé à accéder à cette page", "danger")
             return redirect(url_for("auth.login"))
         return f(*args, **kwargs)
     return decorated_function
 
 
 def get_notification_data():
-    """الحصول على بيانات الإشعارات للسكرتيرة"""
+    """Obtenir les données de notification pour la secrétaire"""
     from datetime import timedelta
     today = datetime.now().date()
     tomorrow = today + timedelta(days=1)
     
-    # مواعيد اليوم
+    # Rendez-vous d'aujourd'hui
     today_appointments = Appointment.query.filter(
         db.func.date(Appointment.appointment_date) == today,
-        Appointment.status == "مجدول"
+        Appointment.status == "Programmé"
     ).all()
     
-    # مواعيد الغد
+    # Rendez-vous de demain
     tomorrow_appointments = Appointment.query.filter(
         db.func.date(Appointment.appointment_date) == tomorrow,
-        Appointment.status == "مجدول"
+        Appointment.status == "Programmé"
     ).all()
     
-    # حساب المواعيد التي لم يتم الاتصال بها
-    today_not_contacted = [apt for apt in today_appointments if not apt.notes or 'تم الاتصال' not in apt.notes]
-    tomorrow_not_contacted = [apt for apt in tomorrow_appointments if not apt.notes or 'تم الاتصال' not in apt.notes]
+    # Calculer les rendez-vous non contactés
+    today_not_contacted = [apt for apt in today_appointments if not apt.notes or 'Contacté' not in apt.notes]
+    tomorrow_not_contacted = [apt for apt in tomorrow_appointments if not apt.notes or 'Contacté' not in apt.notes]
     
     return {
         'today_not_contacted': today_not_contacted,
@@ -49,25 +49,25 @@ def get_notification_data():
     }
 
 
-@secretary.route("/dashboard/secretary")
+@secretary.route("/dashboard")
 @login_required
 @secretary_required
 def dashboard():
     """لوحة تحكم السكرتير"""
-    today = datetime.now().date()
-    
+    today = datetime.now().date()  
     # الحصول على قائمة المرضى المسجلين اليوم
     recent_patients = Patient.query.filter(
         db.func.date(Patient.created_at) == today
     ).order_by(Patient.created_at.desc()).all()
 
     # الحصول على قائمة الانتظار الحالية مرتبة حسب الأولوية
+    # الأولوية: 2 = طارئة، 1 = حجز، 0 = عادية
     waiting_tickets = Ticket.query.filter(
         db.func.date(Ticket.created_at) == today,
         Ticket.status.in_(["waiting", "called"])
     ).order_by(
-        Ticket.priority.desc(),
-        Ticket.number.asc()
+        Ticket.priority.desc(),  # الأولوية الأعلى أولاً
+        Ticket.created_at.asc()  # ثم حسب وقت الإنشاء
     ).all()
 
     # الحصول على المريض الحالي - الذي لديه تذكرة بحالة called
@@ -77,15 +77,14 @@ def dashboard():
     ).first()
     
     # الحصول على المدفوعات المستحقة (الزيارات غير المدفوعة)
-    pending_payments = Visit.query.filter_by(payment_status="غير مدفوع").order_by(Visit.date.desc()).all()
+    pending_payments = Visit.query.filter_by(payment_status="non_payé").order_by(Visit.date.desc()).all()
     
     # حساب إجمالي المبالغ المستحقة
     total_pending_amount = sum(visit.price or 0 for visit in pending_payments)
     
-    # الحصول على آخر زيارة مكتملة اليوم غير مدفوعة
+    # الحصول على آخر زيارة غير مدفوعة (بشكل عام، ليس اليوم فقط)
     last_unpaid_visit = Visit.query.filter(
-        db.func.date(Visit.date) == today,
-        Visit.payment_status == "غير مدفوع"
+        Visit.payment_status == "non_payé"
     ).order_by(Visit.date.desc()).first()
     
 
@@ -94,9 +93,18 @@ def dashboard():
     patients_today = len(recent_patients)
     visits_today = Visit.query.filter(db.func.date(Visit.date) == today).count()
     
+    # حساب المبلغ الإجمالي للزيارات المدفوعة اليوم
+    paid_visits_today = Visit.query.filter(
+        db.func.date(Visit.date) == today,
+        Visit.payment_status == "payé"
+    ).all()
+    total_paid_today = sum(visit.price or 0 for visit in paid_visits_today)
+    
     daily_stats = {
         'patients_today': patients_today,
-        'visits_today': visits_today
+        'visits_today': visits_today,
+        'total_paid_today': total_paid_today,
+        'paid_visits_count': len(paid_visits_today)
     }
 
     # إضافة إحصائيات إضافية
@@ -104,7 +112,7 @@ def dashboard():
     
     return render_template(
         "secretary/dashboard_improved.html",
-        title="لوحة تحكم السكرتير",
+        title="Tableuau de bord",
         recent_patients=recent_patients,
         waiting_tickets=waiting_tickets,
         current_ticket=current_ticket,
@@ -115,14 +123,14 @@ def dashboard():
     )
 
 
-@secretary.route("/secretary/api/update-payment/<int:visit_id>", methods=["POST"])
+@secretary.route("/api/update-payment/<int:visit_id>", methods=["POST"])
 @login_required
 @secretary_required
 def update_payment_api(visit_id):
     """تحديث حالة الدفع للزيارة (API)"""
     try:
         visit = Visit.query.get_or_404(visit_id)
-        payment_status = request.form.get("payment_status", "مدفوع")
+        payment_status = request.form.get("payment_status", "payé")
         
         # تحديث حالة الدفع
         visit.payment_status = payment_status
@@ -141,7 +149,7 @@ def update_payment_api(visit_id):
         }), 500
 
 
-@secretary.route("/secretary/update-payment/<int:visit_id>", methods=["POST"])
+@secretary.route("/update-payment/<int:visit_id>", methods=["POST"])
 @login_required
 @secretary_required
 def update_payment_form(visit_id):
@@ -156,12 +164,13 @@ def update_payment_form(visit_id):
     return redirect(url_for("secretary.dashboard"))
 
 
-@secretary.route("/secretary/patient/new", methods=["GET", "POST"])
+@secretary.route("/patient/new", methods=["GET", "POST"])
 @login_required
 @secretary_required
 def new_patient():
     """تسجيل مريض جديد"""
-    form = PatientForm()
+    # استخدام النسخة الفرنسية للواجهة الموحدة للطبيب والسكرتير
+    form = PatientFormFrench()
 
     if form.validate_on_submit():
         patient = Patient(
@@ -176,13 +185,14 @@ def new_patient():
         db.session.add(patient)
         db.session.commit()
 
-        flash(f"تم تسجيل المريض {patient.full_name} بنجاح!", "success")
+        flash(f"Le patient {patient.full_name} a été enregistré avec succès!", "success")
         return redirect(url_for("secretary.create_waiting_ticket", patient_id=patient.id))
 
-    return render_template("secretary/patient_form.html", title="إضافة مريض جديد", form=form, legend="تسجيل مريض جديد")
+    # réutiliser le même design que la page du médecin
+    return render_template("doctor/patient_form_new.html", title="Ajouter un patient", form=form)
 
 
-@secretary.route("/secretary/patient/<int:patient_id>/edit", methods=["GET", "POST"])
+@secretary.route("/patient/<int:patient_id>/edit", methods=["GET", "POST"])
 @login_required
 @secretary_required
 def edit_patient(patient_id):
@@ -211,30 +221,233 @@ def edit_patient(patient_id):
     return render_template("secretary/patient_form.html", title="تعديل بيانات مريض", form=form, legend="تعديل بيانات مريض")
 
 
-@secretary.route("/secretary/patients")
+@secretary.route("/patients")
 @login_required
 @secretary_required
 def list_patients():
     """قائمة المرضى المسجلين"""
     page = request.args.get("page", 1, type=int)
     search = request.args.get("search", "")
-    is_ajax = request.args.get("ajax", "0") == "1"
+    per_page = 15  # زيادة عدد المرضى في الصفحة
 
     if search:
-        patients = Patient.query.filter(Patient.full_name.ilike(f"%{search}%") | Patient.phone.ilike(f"%{search}%")).paginate(page=page, per_page=10)
+        # البحث المحسن في الاسم ورقم الهاتف والعنوان
+        patients = Patient.query.filter(
+            db.or_(
+                Patient.full_name.ilike(f"%{search}%"),
+                Patient.phone.ilike(f"%{search}%"),
+                Patient.address.ilike(f"%{search}%")
+            )
+        ).order_by(Patient.full_name.asc()).paginate(
+            page=page, per_page=per_page, error_out=False
+        )
     else:
-        patients = Patient.query.order_by(Patient.created_at.desc()).paginate(page=page, per_page=10)
+        patients = Patient.query.order_by(Patient.created_at.desc()).paginate(
+            page=page, per_page=per_page, error_out=False
+        )
 
-    # إرجاع طريقة عرض مختلفة للطلبات العادية وطلبات AJAX
-    if is_ajax:
-        # طلب AJAX، نرجع الجدول فقط
-        return render_template("secretary/patients.html", title="قائمة المرضى", patients=patients, search=search, is_ajax=True)
+    return render_template(
+        "secretary/patients.html", 
+        title="Liste des Patients", 
+        patients=patients, 
+        search=search
+    )
+
+
+@secretary.route("/patients-french")
+@login_required
+@secretary_required
+def list_patients_french():
+    """صفحة قائمة المرضى - النسخة الفرنسية"""
+    page = request.args.get('page', 1, type=int)
+    search = request.args.get('search', '').strip()
+    per_page = 10
+
+    if search:
+        patients = Patient.query.filter(
+            db.or_(
+                Patient.full_name.ilike(f'%{search}%'),
+                Patient.phone.ilike(f'%{search}%'),
+                Patient.address.ilike(f'%{search}%')
+            )
+        ).order_by(Patient.created_at.desc()).paginate(
+            page=page, per_page=per_page, error_out=False
+        )
     else:
-        # طلب عادي، نرجع الصفحة كاملة
-        return render_template("secretary/patients.html", title="قائمة المرضى", patients=patients, search=search, is_ajax=False)
+        patients = Patient.query.order_by(Patient.created_at.desc()).paginate(
+            page=page, per_page=per_page, error_out=False
+        )
+
+    return render_template(
+        "secretary/patients.html", 
+        title="Liste des Patients", 
+        patients=patients, 
+        search=search
+    )
 
 
-@secretary.route("/secretary/patient/<int:patient_id>")
+@secretary.route("/api/search-patients")
+@login_required
+@secretary_required
+def search_patients_api():
+    """API للبحث التلقائي عن المرضى"""
+    term = request.args.get("term", "").strip()
+    
+    if not term or len(term) < 1:  # البحث من أول حرف
+        return jsonify([])
+    
+    try:
+        # البحث المحسن في جميع الحقول المهمة
+        patients = Patient.query.filter(
+            db.or_(
+                Patient.full_name.ilike(f"%{term}%"),
+                Patient.phone.ilike(f"%{term}%"),
+                Patient.address.ilike(f"%{term}%")
+            )
+        ).order_by(Patient.full_name.asc()).limit(8).all()
+        
+        # تحويل النتائج إلى JSON مع معلومات إضافية
+        results = []
+        for patient in patients:
+            # حساب عمر المريض
+            age = ""
+            if patient.birth_date:
+                today = datetime.now().date()
+                age_years = today.year - patient.birth_date.year
+                if today.month < patient.birth_date.month or (today.month == patient.birth_date.month and today.day < patient.birth_date.day):
+                    age_years -= 1
+                age = f"{age_years} ans"
+            
+            # تحويل الجنس للفرنسية
+            gender_display = 'Non spécifié'
+            if patient.gender == 'male':
+                gender_display = 'Homme'
+            elif patient.gender == 'female':
+                gender_display = 'Femme'
+            elif patient.gender == 'other':
+                gender_display = 'Non spécifié'
+            
+            results.append({
+                'id': patient.id,
+                'full_name': patient.full_name or '',
+                'phone': patient.phone or 'Non spécifié',
+                'age': age,
+                'gender': gender_display,
+                'address': patient.address or 'Non spécifié',
+                'view_url': url_for('secretary.patient_details', patient_id=patient.id),
+                'edit_url': url_for('secretary.edit_patient', patient_id=patient.id),
+                'ticket_url': url_for('secretary.create_ticket', patient_id=patient.id)
+            })
+        
+        return jsonify(results)
+        
+    except Exception as e:
+        # طباعة تفاصيل الخطأ في console للتشخيص
+        import traceback
+        print(f"Erreur dans la recherche: {str(e)}")
+        print(f"Détails de l'erreur: {traceback.format_exc()}")
+        print(f"Terme recherché: {term}")
+        return jsonify([]), 200
+
+
+@secretary.route("/api/search-patients-french")
+@login_required
+@secretary_required
+def search_patients_api_french():
+    """API للبحث التلقائي عن المرضى - النسخة الفرنسية"""
+    term = request.args.get("term", "").strip()
+    
+    if not term or len(term) < 1:  # البحث من أول حرف
+        return jsonify([])
+    
+    try:
+        # البحث المحسن في جميع الحقول المهمة
+        patients = Patient.query.filter(
+            db.or_(
+                Patient.full_name.ilike(f"%{term}%"),
+                Patient.phone.ilike(f"%{term}%"),
+                Patient.address.ilike(f"%{term}%")
+            )
+        ).order_by(Patient.full_name.asc()).limit(8).all()
+        
+        # تحويل النتائج إلى JSON مع معلومات إضافية
+        results = []
+        for patient in patients:
+            # حساب عمر المريض
+            age = ""
+            if patient.birth_date:
+                today = datetime.now().date()
+                age_years = today.year - patient.birth_date.year
+                if today.month < patient.birth_date.month or (today.month == patient.birth_date.month and today.day < patient.birth_date.day):
+                    age_years -= 1
+                age = f"{age_years} ans"
+            
+            # تحويل الجنس للفرنسية
+            gender_display = 'Non spécifié'
+            if patient.gender == 'male':
+                gender_display = 'Homme'
+            elif patient.gender == 'female':
+                gender_display = 'Femme'
+            elif patient.gender == 'other':
+                gender_display = 'Non spécifié'
+            
+            results.append({
+                'id': patient.id,
+                'full_name': patient.full_name or '',
+                'phone': patient.phone or 'Non spécifié',
+                'age': age,
+                'gender': gender_display,
+                'address': patient.address or 'Non spécifié',
+                'view_url': url_for('secretary.patient_details', patient_id=patient.id),
+                'edit_url': url_for('secretary.edit_patient', patient_id=patient.id),
+                'ticket_url': url_for('secretary.create_ticket', patient_id=patient.id)
+            })
+        
+        return jsonify(results)
+        
+    except Exception as e:
+        # طباعة تفاصيل الخطأ في console للتشخيص
+        import traceback
+        print(f"Erreur dans recherche française: {str(e)}")
+        print(f"Détails de l'erreur: {traceback.format_exc()}")
+        print(f"Recherche pour: {term}")
+        return jsonify([]), 200
+
+
+@secretary.route("/api/quick-patient-select")
+@login_required
+@secretary_required
+def quick_patient_select():
+    """API لاختيار مريض سريع (لإنشاء التذاكر)"""
+    term = request.args.get("term", "").strip()
+    
+    if not term or len(term) < 1:
+        return jsonify([])
+    
+    try:
+        patients = Patient.query.filter(
+            db.or_(
+                Patient.full_name.ilike(f"%{term}%"),
+                Patient.phone.ilike(f"%{term}%")
+            )
+        ).order_by(Patient.full_name.asc()).limit(5).all()
+        
+        results = []
+        for patient in patients:
+            results.append({
+                'id': patient.id,
+                'text': f"{patient.full_name} - {patient.phone or 'بلا هاتف'}",
+                'full_name': patient.full_name,
+                'phone': patient.phone or ''
+            })
+        
+        return jsonify(results)
+        
+    except Exception as e:
+        return jsonify([]), 500
+
+
+@secretary.route("/patient/<int:patient_id>")
 @login_required
 @secretary_required
 def patient_details(patient_id):
@@ -244,7 +457,7 @@ def patient_details(patient_id):
     return render_template("secretary/patient_details.html", title=f"تفاصيل المريض - {patient.full_name}", patient=patient, now=now)
 
 
-@secretary.route("/secretary/create-ticket")
+@secretary.route("/create-ticket")
 @login_required
 @secretary_required
 def create_ticket_page():
@@ -275,7 +488,7 @@ def create_ticket_page():
     )
 
 
-@secretary.route("/secretary/ticket/create/<int:patient_id>")
+@secretary.route("/ticket/create/<int:patient_id>")
 @login_required
 @secretary_required
 def create_ticket(patient_id):
@@ -330,7 +543,7 @@ def create_ticket(patient_id):
     return redirect(url_for("secretary.dashboard"))
 
 
-@secretary.route("/secretary/ticket/search", methods=["POST"])
+@secretary.route("/ticket/search", methods=["POST"])
 @login_required
 @secretary_required
 def search_patient_for_ticket():
@@ -366,7 +579,7 @@ def search_patient_for_ticket():
     return render_template("secretary/search_results.html", title="نتائج البحث", patients=patients, search=search_term)
 
 
-@secretary.route("/secretary/waiting-list")
+@secretary.route("/waiting-list")
 @login_required
 @secretary_required
 def waiting_list():
@@ -379,7 +592,7 @@ def waiting_list():
     return render_template("secretary/waiting_list.html", title="قائمة الانتظار", tickets=tickets)
 
 
-@secretary.route("/secretary/api/waiting-list")
+@secretary.route("/api/waiting-list")
 @login_required
 @secretary_required
 def api_waiting_list():
@@ -417,33 +630,10 @@ def api_waiting_list():
     })
 
 
-@secretary.route("/secretary/api/search-patients")
-@login_required
-@secretary_required
-def api_search_patients():
-    """واجهة برمجية للبحث عن المرضى"""
-    search_term = request.args.get("term", "")
 
-    if not search_term or len(search_term) < 2:
-        return jsonify([])
 
-    # البحث عن المرضى
-    patients = Patient.query.filter(
-        Patient.full_name.ilike(f"%{search_term}%") | 
-        Patient.phone.ilike(f"%{search_term}%")
-    ).limit(10).all()
 
-    # تهيئة البيانات
-    patients_data = []
-    for patient in patients:
-        patients_data.append({
-            "id": patient.id,
-            "full_name": patient.full_name,
-            "phone": patient.phone,
-            "view_url": url_for('secretary.patient_details', patient_id=patient.id)
-        })
 
-    return jsonify(patients_data)
 
 
 # ==================== إدارة المواعيد ====================
@@ -630,7 +820,7 @@ def quick_update_payment(visit_id):
     visit = Visit.query.get_or_404(visit_id)
     
     new_status = request.form.get('payment_status')
-    valid_statuses = ['مدفوع', 'غير مدفوع', 'مدفوع جزئياً']
+    valid_statuses = ['payé', 'non_payé', 'partiellement_payé']
     
     if new_status in valid_statuses:
         old_status = visit.payment_status
@@ -860,7 +1050,7 @@ def update_payment_status():
             return jsonify({'success': False, 'message': 'بيانات غير مكتملة'})
         
         # التحقق من صحة حالة الدفع
-        valid_statuses = ['مدفوع', 'غير مدفوع', 'مدفوع جزئياً']
+        valid_statuses = ['payé', 'non_payé', 'partiellement_payé']
         if payment_status not in valid_statuses:
             return jsonify({'success': False, 'message': 'حالة دفع غير صحيحة'})
         
@@ -879,7 +1069,7 @@ def update_payment_status():
         return jsonify({'success': False, 'message': 'حدث خطأ في التحديث'})
 
 
-@secretary.route("/secretary/visit/<int:visit_id>/mark_as_paid", methods=['POST'])
+@secretary.route("/visit/<int:visit_id>/mark_as_paid", methods=['POST'])
 @login_required
 @secretary_required
 def mark_as_paid(visit_id):
@@ -889,7 +1079,7 @@ def mark_as_paid(visit_id):
         
         # تحديث حالة الدفع إلى مدفوع
         old_status = visit.payment_status
-        visit.payment_status = 'مدفوع'
+        visit.payment_status = 'payé'
         db.session.commit()
         
         flash(f'تم تحديد زيارة المريض {visit.patient.full_name} كمدفوعة', 'success')
@@ -904,7 +1094,7 @@ def mark_as_paid(visit_id):
 
 
 
-@secretary.route("/secretary/visit/<int:visit_id>/mark_as_paid_get", methods=['GET'])
+@secretary.route("/visit/<int:visit_id>/mark_as_paid_get", methods=['GET'])
 @login_required
 @secretary_required
 def mark_as_paid_get(visit_id):
@@ -914,7 +1104,7 @@ def mark_as_paid_get(visit_id):
         
         # تحديث حالة الدفع إلى مدفوع
         old_status = visit.payment_status
-        visit.payment_status = 'مدفوع'
+        visit.payment_status = 'payé'
         db.session.commit()
         
         flash(f'تم تحديد زيارة المريض {visit.patient.full_name} كمدفوعة', 'success')
@@ -940,75 +1130,48 @@ def get_last_completed_visit():
 
 # ==================== API Endpoints ====================
 
-@secretary.route("/secretary/api/search-patients-for-ticket")
+@secretary.route("/api/search-patients-for-ticket")
 @login_required
 @secretary_required
 def api_search_patients_for_ticket():
     """API للبحث عن المرضى لإنشاء التذاكر"""
-    term = request.args.get('term', '').strip()
-    
-    if not term or len(term) < 2:
-        return jsonify([])
-    
-    # البحث في الاسم ورقم الهاتف
-    patients = Patient.query.filter(
-        db.or_(
-            Patient.full_name.contains(term),
-            Patient.phone.contains(term)
+    try:
+        term = request.args.get('term', '').strip()
+        
+        if not term or len(term) < 2:
+            return jsonify([])
+        
+        # البحث في الاسم ورقم الهاتف
+        patients = Patient.query.filter(
+            Patient.full_name.ilike(f"%{term}%") | 
+            Patient.phone.ilike(f"%{term}%")
+        ).limit(10).all()
+        
+        # تحويل النتائج إلى JSON مع التأكد من التشفير الصحيح
+        results = []
+        for patient in patients:
+            results.append({
+                'id': patient.id,
+                'full_name': str(patient.full_name) if patient.full_name else '',
+                'phone': str(patient.phone) if patient.phone else '',
+                'birth_date': patient.birth_date.strftime('%Y-%m-%d') if patient.birth_date else None,
+                'gender': str(patient.gender) if patient.gender else '',
+                'blood_group': str(patient.blood_group) if patient.blood_group else ''
+            })
+        
+        # إرجاع JSON مع التأكد من التشفير العربي
+        from flask import current_app
+        response = current_app.response_class(
+            response=current_app.json.dumps(results, ensure_ascii=False),
+            status=200,
+            mimetype='application/json; charset=utf-8'
         )
-    ).limit(10).all()
-    
-    # تحويل النتائج إلى JSON مع التأكد من التشفير الصحيح
-    results = []
-    for patient in patients:
-        results.append({
-            'id': patient.id,
-            'full_name': str(patient.full_name) if patient.full_name else '',
-            'phone': str(patient.phone) if patient.phone else '',
-            'birth_date': patient.birth_date.strftime('%Y-%m-%d') if patient.birth_date else None,
-            'gender': str(patient.gender) if patient.gender else '',
-            'blood_group': str(patient.blood_group) if patient.blood_group else ''
-        })
-    
-    # إرجاع JSON مع التأكد من التشفير العربي
-    from flask import current_app
-    response = current_app.response_class(
-        response=current_app.json.dumps(results, ensure_ascii=False),
-        status=200,
-        mimetype='application/json; charset=utf-8'
-    )
-    return response
+        return response
+    except Exception as e:
+        print(f"Error in api_search_patients_for_ticket: {e}")
+        return jsonify({"error": str(e)}), 500
 
 
-@secretary.route("/secretary/api/search-patients")
-@login_required
-@secretary_required
-def api_search_patients_general():
-    """API للبحث عن المرضى (للاستخدام العام)"""
-    term = request.args.get('term', '').strip()
-    
-    if not term or len(term) < 2:
-        return jsonify([])
-    
-    # البحث في الاسم ورقم الهاتف
-    patients = Patient.query.filter(
-        db.or_(
-            Patient.full_name.contains(term),
-            Patient.phone.contains(term)
-        )
-    ).limit(10).all()
-    
-    # تحويل النتائج إلى JSON
-    results = []
-    for patient in patients:
-        results.append({
-            'id': patient.id,
-            'full_name': patient.full_name,
-            'phone': patient.phone,
-            'view_url': url_for('secretary.patient_details', patient_id=patient.id)
-        })
-    
-    return jsonify(results)
 
 
 # ==================== المواعيد الأونلاين ====================
@@ -1031,7 +1194,7 @@ def online_appointments():
     
     try:
         # بناء URL مع الفلاتر - استخدام الموقع المستضاف
-        api_url = 'https://appointment-1-96c4.onrender.com/api/appointments/all?token=123456'
+        api_url = 'https://appointment-010t.onrender.com/api/appointments/all?token=123456'
         
         if status_filter:
             api_url += f'&status={status_filter}'
@@ -1123,7 +1286,7 @@ def confirm_online_appointment(appointment_id):
         }
         
         response = requests.put(
-            f'https://appointment-1-96c4.onrender.com/api/appointments/{appointment_id}/status?token=123456',
+            f'https://appointment-010t.onrender.com/api/appointments/{appointment_id}/status?token=123456',
             json=update_data,
             headers={'Content-Type': 'application/json'},
             timeout=15
@@ -1158,7 +1321,7 @@ def cancel_online_appointment(appointment_id):
         }
         
         response = requests.put(
-            f'https://appointment-1-96c4.onrender.com/api/appointments/{appointment_id}/status?token=123456',
+            f'https://appointment-010t.onrender.com/api/appointments/{appointment_id}/status?token=123456',
             json=update_data,
             headers={'Content-Type': 'application/json'},
             timeout=15
@@ -1193,7 +1356,7 @@ def complete_online_appointment(appointment_id):
         }
         
         response = requests.put(
-            f'https://appointment-1-96c4.onrender.com/api/appointments/{appointment_id}/status?token=123456',
+            f'https://appointment-010t.onrender.com/api/appointments/{appointment_id}/status?token=123456',
             json=update_data,
             headers={'Content-Type': 'application/json'},
             timeout=15
@@ -1208,3 +1371,168 @@ def complete_online_appointment(appointment_id):
         flash('خطأ في الاتصال بخدمة المواعيد', 'danger')
     
     return redirect(url_for('secretary.online_appointments'))
+
+
+@secretary.route("/visit/<int:visit_id>/mark_as_paid", methods=['POST'])
+@login_required
+@secretary_required
+def mark_visit_as_paid(visit_id):
+    """تحديد الزيارة كمدفوعة بسرعة"""
+    try:
+        visit = Visit.query.get_or_404(visit_id)
+        old_status = visit.payment_status
+        
+        # تحديث حالة الدفع إلى مدفوع
+        visit.payment_status = 'payé'
+        db.session.commit()
+        
+        flash(f'تم تحديد زيارة المريض {visit.patient.full_name} كمدفوعة بنجاح', 'success')
+        
+    except Exception as e:
+        db.session.rollback()
+        flash('حدث خطأ أثناء تحديث حالة الدفع', 'error')
+    
+    return redirect(url_for('secretary.payments'))
+
+
+@secretary.route("/visit/<int:visit_id>/mark_as_paid_get", methods=['GET'])
+@login_required
+@secretary_required
+def mark_visit_as_paid_get(visit_id):
+    """تحديد الزيارة كمدفوعة بسرعة (GET method للتوافق مع dashboard)"""
+    try:
+        visit = Visit.query.get_or_404(visit_id)
+        old_status = visit.payment_status
+        
+        # التحقق من أن الزيارة غير مدفوعة
+        if visit.payment_status == 'payé':
+            flash(f'زيارة المريض {visit.patient.full_name} مدفوعة بالفعل', 'info')
+        else:
+            # تحديث حالة الدفع إلى مدفوع
+            visit.payment_status = 'payé'
+            db.session.commit()
+            flash(f'تم تحديد زيارة المريض {visit.patient.full_name} كمدفوعة بنجاح', 'success')
+        
+    except Exception as e:
+        db.session.rollback()
+        flash(f'حدث خطأ أثناء تحديث حالة الدفع: {str(e)}', 'error')
+        print(f"Error in mark_visit_as_paid_get: {e}")  # للتشخيص
+    
+    return redirect(url_for('secretary.dashboard'))
+
+
+@secretary.route("/emergency-ticket", methods=["GET", "POST"])
+@login_required
+@secretary_required
+def emergency_ticket():
+    """إنشاء تذكرة طارئة ذات أولوية عالية"""
+    if request.method == "POST":
+        patient_search = request.form.get("patient_search", "").strip()
+        
+        if not patient_search:
+            flash("يرجى إدخال اسم المريض أو رقم الهاتف", "warning")
+            return redirect(url_for("secretary.emergency_ticket"))
+        
+        # البحث عن المريض
+        patient = None
+        
+        # محاولة البحث بالمعرف إذا كان رقماً
+        if patient_search.isdigit():
+            patient = Patient.query.get(int(patient_search))
+        
+        # البحث بالاسم أو رقم الهاتف
+        if not patient:
+            patients = Patient.query.filter(
+                Patient.full_name.ilike(f"%{patient_search}%") | 
+                Patient.phone.ilike(f"%{patient_search}%")
+            ).all()
+            
+            if len(patients) == 1:
+                patient = patients[0]
+            elif len(patients) > 1:
+                # إذا كان هناك أكثر من مريض، عرض قائمة للاختيار
+                return render_template(
+                    "secretary/emergency_ticket.html",
+                    title="تذكرة طارئة",
+                    patients=patients,
+                    search_term=patient_search
+                )
+            else:
+                flash(f"لم يتم العثور على مريض بالاسم أو الرقم: {patient_search}", "error")
+                return redirect(url_for("secretary.emergency_ticket"))
+        
+        if patient:
+            return redirect(url_for("secretary.create_emergency_ticket", patient_id=patient.id))
+    
+    # إحصائيات سريعة للعرض
+    today = datetime.now().date()
+    emergency_tickets_today = Ticket.query.filter(
+        db.func.date(Ticket.created_at) == today,
+        Ticket.priority == 2  # أولوية طارئة
+    ).count()
+    
+    total_waiting = Ticket.query.filter(
+        db.func.date(Ticket.created_at) == today,
+        Ticket.status.in_(["waiting", "called"])
+    ).count()
+    
+    return render_template(
+        "secretary/emergency_ticket.html",
+        title="تذكرة طارئة",
+        emergency_tickets_today=emergency_tickets_today,
+        total_waiting=total_waiting
+    )
+
+
+@secretary.route("/emergency-ticket/create/<int:patient_id>")
+@login_required
+@secretary_required
+def create_emergency_ticket(patient_id):
+    """إنشاء تذكرة طارئة للمريض المحدد"""
+    patient = Patient.query.get_or_404(patient_id)
+    
+    # التحقق من وجود تذكرة نشطة للمريض
+    today = datetime.now().date()
+    existing_ticket = Ticket.query.filter(
+        Ticket.patient_id == patient_id,
+        Ticket.created_at >= today,
+        Ticket.status.in_(["waiting", "called"])
+    ).first()
+    
+    if existing_ticket:
+        # إذا كانت التذكرة الموجودة ليست طارئة، نرفع أولويتها
+        if existing_ticket.priority < 2:
+            existing_ticket.priority = 2  # أولوية طارئة
+            existing_ticket.ticket_type = "emergency"
+            db.session.commit()
+            flash(f"تم رفع أولوية تذكرة المريض {patient.full_name} إلى طارئة (رقم {existing_ticket.number})", "success")
+        else:
+            flash(f"المريض {patient.full_name} لديه بالفعل تذكرة طارئة برقم {existing_ticket.number}", "info")
+        return redirect(url_for("secretary.dashboard"))
+    
+    # الحصول على آخر رقم تذكرة لهذا اليوم
+    last_ticket = Ticket.query.filter(Ticket.created_at >= today).order_by(Ticket.number.desc()).first()
+    next_number = 1 if not last_ticket else last_ticket.number + 1
+    
+    # إنشاء تذكرة طارئة جديدة
+    emergency_ticket = Ticket(
+        patient_id=patient.id,
+        number=next_number,
+        status="waiting",
+        ticket_type="emergency",
+        priority=2,  # أولوية طارئة (أعلى من العادية والحجز)
+        notes="تذكرة طارئة - أولوية عالية"
+    )
+    
+    db.session.add(emergency_ticket)
+    db.session.commit()
+    
+    flash(f"تم إنشاء تذكرة طارئة برقم {next_number} للمريض {patient.full_name} بأولوية عالية", "success")
+    return redirect(url_for("secretary.dashboard"))
+
+
+# ================ API Routes ================
+# تم حذف الدالة المكررة
+
+
+

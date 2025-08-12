@@ -1,23 +1,55 @@
 {% extends "layout.html" %}
+{% block extra_head %}
+<style>
+  /* Patients page enhancements */
+  .search-card { border: 1px solid #e9ecef; position: relative; z-index: 1055; overflow: visible !important; }
+  .search-card .card-body { overflow: visible !important; }
+  .search-input-group .form-control { padding-left: 2.4rem; }
+  .search-input-icon { position: absolute; left: .75rem; top: 50%; transform: translateY(-50%); color: #6c757d; }
+  .clear-btn { display: none; }
+  .search-has-text .clear-btn { display: inline-flex; }
+  #search-results { display: none; }
+  .results-popover { max-height: 360px; overflow-y: auto; border: 1px solid rgba(0,0,0,.08); top: calc(100% + .25rem); z-index: 1060; }
+  .results-popover .list-group-item { padding: .75rem 1rem; }
+  .results-popover .name { font-weight: 600; }
+  .results-popover .phone { color: #6c757d; font-size: .9rem; }
+  .results-popover .match { background: #fff3cd; border-radius: .25rem; padding: 0 .2rem; }
+  .results-empty, .results-error { padding: .75rem 1rem; color: #6c757d; }
+  .table thead th { position: sticky; top: 0; background: #f8f9fa; z-index: 1; }
+  @media (max-width: 576px) {
+    .search-actions { margin-top: .75rem; }
+  }
+</style>
+{% endblock %}
 {% block content %}
 <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1>قائمة المرضى</h1>
+        <h1>Liste des patients</h1>
     </div>
     
-    <!-- نموذج البحث الفوري -->
-    <div class="card mb-4">
+    <!-- Formulaire de recherche instantanée -->
+    <div class="card mb-4 search-card">
         <div class="card-body">
-            <div class="row g-3">
-                <div class="col-md-8">
-                    <input type="text" id="live-search" class="form-control" placeholder="ابحث بالاسم أو رقم الهاتف..." value="{{ search }}" autocomplete="off">
-                    <div id="search-results" class="position-absolute w-100 mt-1 shadow rounded" style="z-index: 1000; max-height: 300px; overflow-y: auto; display: none;"></div>
+            <div class="row g-3 align-items-center">
+                <div class="col-12 col-md-8 position-relative">
+                    <div class="search-input-group position-relative">
+                        <i class="fas fa-search search-input-icon"></i>
+                        <input type="text" id="live-search" class="form-control" placeholder="Rechercher par nom, téléphone ou adresse..." value="{{ search }}" autocomplete="off">
+                        <button type="button" id="clear-search" class="btn btn-sm btn-outline-secondary position-absolute end-0 top-50 translate-middle-y me-2 clear-btn">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div id="search-results" class="position-absolute w-100 shadow rounded bg-white results-popover"></div>
                 </div>
-                <div class="col-md-2">
-                    <button id="search-btn" class="btn btn-primary w-100">بحث</button>
+                <div class="col-6 col-md-2 search-actions">
+                    <button id="search-btn" class="btn btn-primary w-100">
+                        <i class="fas fa-search me-1"></i> Rechercher
+                    </button>
                 </div>
-                <div class="col-md-2">
-                    <a href="{{ url_for('doctor.list_patients') }}" class="btn btn-outline-secondary w-100">إعادة تعيين</a>
+                <div class="col-6 col-md-2">
+                    <a href="{{ url_for('doctor.list_patients') }}" class="btn btn-outline-secondary w-100">
+                        <i class="fas fa-rotate-left me-1"></i> Réinitialiser
+                    </a>
                 </div>
             </div>
             <form id="search-form" action="{{ url_for('doctor.list_patients') }}" method="get" class="d-none">
@@ -26,49 +58,64 @@
         </div>
     </div>
 
-    <!-- قائمة المرضى -->
+    <!-- Liste des patients -->
     <div class="card">
-        <div class="card-header bg-primary text-white">
-            <h5 class="mb-0">المرضى المسجلين</h5>
+        <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="fas fa-users me-2 text-primary"></i>Patients enregistrés</h5>
+            <span class="text-muted small">Page {{ patients.page }} / {{ patients.pages or 1 }}</span>
         </div>
         <div class="card-body">
             {% if patients.items %}
                 <div class="table-responsive">
-                    <table class="table table-hover table-bordered">
-                        <thead class="table-primary">
-                            <tr>
+                    <table class="table table-hover align-middle">
+                        <thead>
+                            <tr class="text-muted small">
                                 <th>#</th>
-                                <th>اسم المريض</th>
-                                <th>رقم الهاتف</th>
-                                <th>العمر</th>
-                                <th>تاريخ التسجيل</th>
-                                <th>الزيارات</th>
-                                <th>الإجراءات</th>
+                                <th>Nom</th>
+                                <th>Téléphone</th>
+                                <th>Âge</th>
+                                <th>Inscription</th>
+                                <th>Consultations</th>
+                                <th class="text-end">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for patient in patients.items %}
                                 <tr>
-                                    <td>{{ loop.index + (patients.page-1) * patients.per_page }}</td>
-                                    <td>{{ patient.full_name }}</td>
-                                    <td>{{ patient.phone }}</td>
-                                    <td>{{ patient.age }}</td>
+                                    <td class="text-muted">{{ loop.index + (patients.page-1) * patients.per_page }}</td>
+                                    <td>
+                                        <div class="fw-semibold">{{ patient.full_name }}</div>
+                                        <div class="text-muted small">ID: {{ patient.id }}</div>
+                                    </td>
+                                    <td>{{ patient.phone or '—' }}</td>
+                                    <td>
+                                        {% if patient.age %}
+                                            <span class="badge bg-light text-dark">{{ patient.age }} ans</span>
+                                        {% else %}
+                                            <span class="text-muted">Non spécifié</span>
+                                        {% endif %}
+                                    </td>
                                     <td>{{ patient.created_at.strftime('%Y-%m-%d') }}</td>
                                     <td>
                                         {% set visit_count = patient.visits|selectattr('doctor_id', 'eq', current_user.id)|list|length %}
                                         {% if visit_count > 0 %}
-                                            <span class="badge bg-success">{{ visit_count }} زيارة</span>
+                                            <span class="badge bg-success-subtle text-success"><i class="fas fa-check-circle me-1"></i>{{ visit_count }} visite{{ 's' if visit_count>1 else '' }}</span>
                                         {% else %}
-                                            <span class="badge bg-secondary">لا زيارات</span>
+                                            <span class="badge bg-secondary-subtle text-secondary">Aucune visite</span>
                                         {% endif %}
                                     </td>
-                                    <td>
-                                        <a href="{{ url_for('doctor.patient_details', patient_id=patient.id) }}" class="btn btn-sm btn-info">
-                                            <i class="fas fa-eye"></i> تفاصيل
-                                        </a>
-                                        <a href="{{ url_for('doctor.patient_visit', patient_id=patient.id) }}" class="btn btn-sm btn-primary">
-                                            <i class="fas fa-stethoscope"></i> فحص جديد
-                                        </a>
+                                    <td class="text-end">
+                                        <div class="btn-group" role="group">
+                                            <a href="{{ url_for('doctor.patient_details', patient_id=patient.id) }}" class="btn btn-sm btn-outline-primary" title="Détails">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a href="{{ url_for('doctor.edit_patient_from_doctor', patient_id=patient.id) }}" class="btn btn-sm btn-outline-secondary" title="Modifier">
+                                                <i class="fas fa-pen"></i>
+                                            </a>
+                                            <a href="{{ url_for('doctor.patient_visit', patient_id=patient.id) }}" class="btn btn-sm btn-primary" title="Nouvelle consultation">
+                                                <i class="fas fa-stethoscope me-1"></i>Examen
+                                            </a>
+                                        </div>
                                     </td>
                                 </tr>
                             {% endfor %}
@@ -76,16 +123,16 @@
                     </table>
                 </div>
 
-                <!-- أزرار التنقل بين الصفحات -->
+                <!-- Navigation entre les pages -->
                 <nav aria-label="Page navigation" class="mt-4">
                     <ul class="pagination justify-content-center">
                         {% if patients.has_prev %}
                             <li class="page-item">
-                                <a class="page-link" href="{{ url_for('doctor.list_patients', page=patients.prev_num, search=search) }}">السابق</a>
+                                <a class="page-link" href="{{ url_for('doctor.list_patients', page=patients.prev_num, search=search) }}">Précédent</a>
                             </li>
                         {% else %}
                             <li class="page-item disabled">
-                                <span class="page-link">السابق</span>
+                                <span class="page-link">Précédent</span>
                             </li>
                         {% endif %}
 
@@ -109,29 +156,29 @@
 
                         {% if patients.has_next %}
                             <li class="page-item">
-                                <a class="page-link" href="{{ url_for('doctor.list_patients', page=patients.next_num, search=search) }}">التالي</a>
+                                <a class="page-link" href="{{ url_for('doctor.list_patients', page=patients.next_num, search=search) }}">Suivant</a>
                             </li>
                         {% else %}
                             <li class="page-item disabled">
-                                <span class="page-link">التالي</span>
+                                <span class="page-link">Suivant</span>
                             </li>
                         {% endif %}
                     </ul>
                 </nav>
             {% else %}
                 <div class="alert alert-info text-center">
-                    لا توجد نتائج مطابقة للبحث
+                    <i class="fas fa-info-circle me-2"></i>Aucun résultat correspondant à la recherche
                 </div>
             {% endif %}
         </div>
     </div>
 
     <div class="mt-4">
-        <a href="{{ url_for('doctor.dashboard') }}" class="btn btn-secondary">العودة للوحة التحكم</a>
+        <a href="{{ url_for('doctor.dashboard') }}" class="btn btn-secondary">Retour au tableau de bord</a>
     </div>
 </div>
 
-<!-- إضافة كود البحث الفوري -->
+<!-- Code de recherche instantanée -->
 <script>
 document.addEventListener("DOMContentLoaded", function() {
     const searchInput = document.getElementById('live-search');
@@ -141,30 +188,51 @@ document.addEventListener("DOMContentLoaded", function() {
     const searchHidden = document.getElementById('search-hidden');
     let searchTimeout;
 
-    // عند كتابة أي حرف في خانة البحث
+    // Move results popover to body to avoid clipping and stacking issues
+    if (searchResults && searchResults.parentElement !== document.body) {
+        document.body.appendChild(searchResults);
+    }
+    searchResults.style.position = 'fixed';
+    searchResults.style.zIndex = 99999;
+
+    function positionResults() {
+        const rect = searchInput.getBoundingClientRect();
+        searchResults.style.width = `${rect.width}px`;
+        searchResults.style.left = `${Math.round(rect.left)}px`;
+        searchResults.style.top = `${Math.round(rect.bottom + 6)}px`; // 6px gap
+    }
+
+    window.addEventListener('resize', () => {
+        if (searchResults.style.display !== 'none') positionResults();
+    });
+    window.addEventListener('scroll', () => {
+        if (searchResults.style.display !== 'none') positionResults();
+    }, true);
+
+    // Lors de la saisie dans le champ de recherche
     searchInput.addEventListener('input', function() {
         const term = searchInput.value.trim();
 
-        // مسح المؤقت السابق إذا وجد
+        // Effacer le délai précédent s'il existe
         clearTimeout(searchTimeout);
 
-        // إخفاء النتائج إذا كان البحث فارغًا
+        // Masquer les résultats si la recherche est vide
         if (!term || term.length < 2) {
             searchResults.style.display = 'none';
             return;
         }
 
-        // تأخير الطلب لتحسين الأداء (300 مللي ثانية بعد التوقف عن الكتابة)
+        // Retarder la requête pour améliorer les performances (300ms après l'arrêt de la saisie)
         searchTimeout = setTimeout(() => {
-            // استخدام واجهة API للبحث عن المرضى
+            // Utiliser l'API pour rechercher les patients
             fetch(`/doctor/api/search-patients?term=${encodeURIComponent(term)}`)
                 .then(response => response.json())
                 .then(patients => {
                     if (patients && patients.length > 0) {
-                        // إنشاء قائمة النتائج
+                        // Créer la liste des résultats
                         let resultsHTML = '<div class="list-group">';
 
-                        // تحويل بيانات JSON إلى عناصر قائمة
+                        // Convertir les données JSON en éléments de liste
                         for (let i = 0; i < patients.length; i++) {
                             const patient = patients[i];
                             resultsHTML += `
@@ -178,34 +246,63 @@ document.addEventListener("DOMContentLoaded", function() {
 
                         resultsHTML += '</div>';
                         searchResults.innerHTML = resultsHTML;
+                        positionResults();
                         searchResults.style.display = 'block';
                     } else {
-                        searchResults.innerHTML = '<div class="list-group"><div class="list-group-item">لا توجد نتائج مطابقة</div></div>';
+                        searchResults.innerHTML = '<div class="list-group"><div class="list-group-item">Aucun résultat trouvé</div></div>';
+                        positionResults();
                         searchResults.style.display = 'block';
                     }
                 })
                 .catch(error => {
-                    console.error('خطأ في البحث:', error);
-                    searchResults.innerHTML = '<div class="list-group"><div class="list-group-item text-danger">حدث خطأ في البحث</div></div>';
+                    console.error('Erreur de recherche:', error);
+                    searchResults.innerHTML = '<div class="list-group"><div class="list-group-item text-danger">Erreur lors de la recherche</div></div>';
+                    positionResults();
                     searchResults.style.display = 'block';
                 });
         }, 300);
     });
 
-    // إخفاء نتائج البحث عند النقر خارجها
+    // Masquer les résultats de recherche lors d'un clic à l'extérieur
     document.addEventListener('click', function(e) {
-        if (e.target !== searchInput && e.target !== searchResults) {
+        if (!searchResults.contains(e.target) && e.target !== searchInput) {
             searchResults.style.display = 'none';
         }
     });
 
-    // إرسال نموذج البحث عند النقر على زر البحث
+    // Reposition on input focus
+    searchInput.addEventListener('focus', function() {
+        if (searchResults.innerHTML.trim().length > 0) {
+            positionResults();
+            searchResults.style.display = 'block';
+        }
+    });
+
+    // Gérer l'état du bouton effacer
+    function updateClearBtn() {
+        if (searchInput.value.trim().length > 0) {
+            document.querySelector('.search-input-group').classList.add('search-has-text');
+        } else {
+            document.querySelector('.search-input-group').classList.remove('search-has-text');
+        }
+    }
+    updateClearBtn();
+    searchInput.addEventListener('input', updateClearBtn);
+
+    document.getElementById('clear-search').addEventListener('click', function() {
+        searchInput.value = '';
+        updateClearBtn();
+        searchResults.style.display = 'none';
+        searchInput.focus();
+    });
+
+    // Soumettre le formulaire de recherche lors du clic sur le bouton
     searchBtn.addEventListener('click', function() {
         searchHidden.value = searchInput.value;
         searchForm.submit();
     });
 
-    // إرسال النموذج عند الضغط على Enter
+    // Soumettre le formulaire lors de l'appui sur Entrée
     searchInput.addEventListener('keyup', function(e) {
         if (e.key === 'Enter') {
             searchHidden.value = searchInput.value;

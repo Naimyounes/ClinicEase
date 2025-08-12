@@ -38,6 +38,15 @@ class Patient(db.Model):
     tickets = db.relationship("Ticket", backref="patient", lazy=True)
     visits = db.relationship("Visit", backref="patient", lazy=True)
 
+    @property
+    def age(self):
+        """حساب عمر المريض بناءً على تاريخ الميلاد"""
+        if self.birth_date:
+            from datetime import date
+            today = date.today()
+            return today.year - self.birth_date.year - ((today.month, today.day) < (self.birth_date.month, self.birth_date.day))
+        return None
+
     def __repr__(self):
         return f"Patient('{self.full_name}', '{self.phone}')"
 
@@ -51,9 +60,10 @@ class Ticket(db.Model):
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.now)
     
     # حقول نظام الأولوية
-    ticket_type = db.Column(db.String(20), nullable=False, default="regular")  # regular, reservation
+    ticket_type = db.Column(db.String(20), nullable=False, default="regular")  # regular, reservation, emergency
     appointment_id = db.Column(db.Integer, db.ForeignKey("appointment.id"), nullable=True)  # ربط بالموعد
-    priority = db.Column(db.Integer, nullable=False, default=0)  # 0 = عادي، 1 = أولوية
+    priority = db.Column(db.Integer, nullable=False, default=0)  # 0 = عادي، 1 = أولوية، 2 = طارئة
+    notes = db.Column(db.Text, nullable=True)  # ملاحظات حول التذكرة (خاصة للطوارئ)
     
     # العلاقات
     appointment = db.relationship("Appointment", backref="tickets", lazy=True)
@@ -82,7 +92,7 @@ class Visit(db.Model):
     notes = db.Column(db.Text, nullable=True)
     status = db.Column(db.String(20), nullable=False, default="مستقر")  # مستقر، متابعة، طارئ، معلقة
     price = db.Column(db.Float, nullable=True)  # سعر الزيارة
-    payment_status = db.Column(db.String(20), default="غير مدفوع")  # مدفوع، غير مدفوع، مدفوع جزئياً
+    payment_status = db.Column(db.String(20), default="non_payé")  # payé، non_payé، partiellement_payé
 
     # العلاقات
     prescription = db.relationship("Prescription", backref="visit", uselist=False, lazy=True)
@@ -94,8 +104,11 @@ class Visit(db.Model):
 
 class Medication(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), unique=True, nullable=False)
+    name = db.Column(db.String(100), nullable=False)
     dosage = db.Column(db.String(100), nullable=True)
+    
+    # قيد فريد مركب على الاسم والجرعة معاً
+    __table_args__ = (db.UniqueConstraint('name', 'dosage', name='unique_medication'),)
 
     def __repr__(self):
         return f"Medication('{self.name}', '{self.dosage}')"
@@ -112,6 +125,7 @@ class PredefinedPrescriptionMedication(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     predefined_prescription_id = db.Column(db.Integer, db.ForeignKey('predefined_prescription.id'), nullable=False)
     medication_id = db.Column(db.Integer, db.ForeignKey('medication.id'), nullable=False)
+    quantity = db.Column(db.String(100), nullable=True)  # الكمية/المدة (مثل: 3 أيام، 10 حبات)
     instructions = db.Column(db.String(200), nullable=True)
     medication = db.relationship('Medication', lazy=True)
 
@@ -149,7 +163,7 @@ class Appointment(db.Model):
     doctor_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     visit_id = db.Column(db.Integer, db.ForeignKey("visit.id"), nullable=True)  # الزيارة المرتبطة بالموعد
     appointment_date = db.Column(db.DateTime, nullable=False)  # تاريخ ووقت الموعد
-    status = db.Column(db.String(20), nullable=False, default="مجدول")  # مجدول، مكتمل، ملغي، فائت
+    status = db.Column(db.String(20), nullable=False, default="Programmé")  # Programmé، Terminé، Annulé، Manqué
     notes = db.Column(db.Text, nullable=True)  # ملاحظات حول الموعد
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -169,6 +183,16 @@ class DoctorSettings(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False, unique=True)
     default_visit_price = db.Column(db.Float, nullable=False, default=100.0)  # السعر الافتراضي للزيارة
+    
+    # إعدادات اسم الطبيب والعيادة
+    doctor_name_arabic = db.Column(db.String(100), nullable=True)  # اسم الطبيب بالعربية
+    doctor_name_latin = db.Column(db.String(100), nullable=True)   # اسم الطبيب باللاتينية
+    clinic_name = db.Column(db.String(100), nullable=True)         # اسم العيادة بالعربية
+    clinic_name_latin = db.Column(db.String(100), nullable=True)   # اسم العيادة باللاتينية
+    doctor_specialty = db.Column(db.String(100), nullable=True)    # تخصص الطبيب بالعربية
+    doctor_specialty_latin = db.Column(db.String(100), nullable=True)  # تخصص الطبيب باللاتينية
+    clinic_logo = db.Column(db.String(200), nullable=True)         # مسار شعار العيادة
+    
     updated_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     def __repr__(self):

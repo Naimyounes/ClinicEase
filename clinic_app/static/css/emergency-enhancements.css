@@ -1,0 +1,439 @@
+/* ===== AMÉLIORATIONS SUPPLÉMENTAIRES POUR LES TICKETS D'URGENCE ===== */
+
+/* Styles globaux pour tous les tickets d'urgence */
+.ticket-critical {
+    background: linear-gradient(135deg, rgba(220, 53, 69, 0.1) 0%, rgba(255, 255, 255, 1) 100%);
+    border: 2px solid #dc3545 !important;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(220, 53, 69, 0.3);
+    animation: critical-glow-global 1.5s ease-in-out infinite alternate;
+    position: relative;
+    overflow: hidden;
+}
+
+.ticket-priority {
+    background: linear-gradient(135deg, rgba(255, 193, 7, 0.1) 0%, rgba(255, 255, 255, 1) 100%);
+    border: 2px solid #ffc107 !important;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(255, 193, 7, 0.3);
+    animation: priority-glow-global 2s ease-in-out infinite alternate;
+    position: relative;
+}
+
+.ticket-regular {
+    background: #ffffff;
+    border: 1px solid #e9ecef !important;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Badges améliorés */
+.badge-critical {
+    background: linear-gradient(45deg, #dc3545, #c82333) !important;
+    color: white !important;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    animation: badge-critical-pulse 1s ease-in-out infinite;
+    border: 2px solid #fff;
+    box-shadow: 0 0 15px rgba(220, 53, 69, 0.7);
+}
+
+.badge-priority {
+    background: linear-gradient(45deg, #ffc107, #e0a800) !important;
+    color: #212529 !important;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    animation: badge-priority-pulse 2s ease-in-out infinite;
+    border: 2px solid #fff;
+    box-shadow: 0 0 10px rgba(255, 193, 7, 0.5);
+}
+
+/* Icônes spéciales */
+.icon-critical {
+    color: #dc3545;
+    animation: icon-critical-shake 1s ease-in-out infinite;
+    filter: drop-shadow(0 0 8px rgba(220, 53, 69, 0.8));
+}
+
+.icon-priority {
+    color: #ffc107;
+    animation: icon-priority-twinkle 2s ease-in-out infinite;
+    filter: drop-shadow(0 0 5px rgba(255, 193, 7, 0.8));
+}
+
+/* Indicateurs de statut */
+.status-critical {
+    position: relative;
+}
+
+.status-critical::before {
+    content: '';
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    width: 12px;
+    height: 12px;
+    background: #dc3545;
+    border-radius: 50%;
+    animation: status-critical-pulse 1s ease-in-out infinite;
+    border: 2px solid white;
+    box-shadow: 0 0 10px rgba(220, 53, 69, 0.8);
+}
+
+.status-priority {
+    position: relative;
+}
+
+.status-priority::before {
+    content: '';
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    width: 10px;
+    height: 10px;
+    background: #ffc107;
+    border-radius: 50%;
+    animation: status-priority-pulse 2s ease-in-out infinite;
+    border: 2px solid white;
+    box-shadow: 0 0 8px rgba(255, 193, 7, 0.6);
+}
+
+/* Effets de brillance */
+.ticket-critical::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    animation: shine-critical 3s ease-in-out infinite;
+}
+
+.ticket-priority::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    animation: shine-priority 4s ease-in-out infinite;
+}
+
+/* Animations globales */
+@keyframes critical-glow-global {
+    0% {
+        box-shadow: 0 4px 20px rgba(220, 53, 69, 0.3);
+    }
+    100% {
+        box-shadow: 0 6px 30px rgba(220, 53, 69, 0.6);
+    }
+}
+
+@keyframes priority-glow-global {
+    0% {
+        box-shadow: 0 4px 15px rgba(255, 193, 7, 0.3);
+    }
+    100% {
+        box-shadow: 0 6px 25px rgba(255, 193, 7, 0.5);
+    }
+}
+
+@keyframes badge-critical-pulse {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 0 15px rgba(220, 53, 69, 0.7);
+    }
+    50% {
+        transform: scale(1.1);
+        box-shadow: 0 0 25px rgba(220, 53, 69, 1);
+    }
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 15px rgba(220, 53, 69, 0.7);
+    }
+}
+
+@keyframes badge-priority-pulse {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 0 10px rgba(255, 193, 7, 0.5);
+    }
+    50% {
+        transform: scale(1.05);
+        box-shadow: 0 0 20px rgba(255, 193, 7, 0.8);
+    }
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 10px rgba(255, 193, 7, 0.5);
+    }
+}
+
+@keyframes icon-critical-shake {
+    0%, 100% {
+        transform: translateX(0) rotate(0deg);
+    }
+    25% {
+        transform: translateX(-2px) rotate(-3deg);
+    }
+    75% {
+        transform: translateX(2px) rotate(3deg);
+    }
+}
+
+@keyframes icon-priority-twinkle {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1) rotate(0deg);
+    }
+    50% {
+        opacity: 0.8;
+        transform: scale(1.2) rotate(180deg);
+    }
+}
+
+@keyframes status-critical-pulse {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.5);
+        opacity: 0.7;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes status-priority-pulse {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.3);
+        opacity: 0.8;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes shine-critical {
+    0% {
+        left: -100%;
+    }
+    50% {
+        left: 100%;
+    }
+    100% {
+        left: 100%;
+    }
+}
+
+@keyframes shine-priority {
+    0% {
+        left: -100%;
+    }
+    50% {
+        left: 100%;
+    }
+    100% {
+        left: 100%;
+    }
+}
+
+/* Styles pour les listes de patients */
+.patient-list-item.critical {
+    border-left: 6px solid #dc3545 !important;
+    background: linear-gradient(90deg, rgba(220, 53, 69, 0.1) 0%, rgba(255, 255, 255, 1) 100%);
+    animation: patient-critical-highlight 1.5s ease-in-out infinite alternate;
+}
+
+.patient-list-item.priority {
+    border-left: 4px solid #ffc107 !important;
+    background: linear-gradient(90deg, rgba(255, 193, 7, 0.08) 0%, rgba(255, 255, 255, 1) 100%);
+    animation: patient-priority-highlight 2s ease-in-out infinite alternate;
+}
+
+@keyframes patient-critical-highlight {
+    0% {
+        box-shadow: 0 2px 10px rgba(220, 53, 69, 0.2);
+    }
+    100% {
+        box-shadow: 0 4px 20px rgba(220, 53, 69, 0.4);
+    }
+}
+
+@keyframes patient-priority-highlight {
+    0% {
+        box-shadow: 0 2px 8px rgba(255, 193, 7, 0.2);
+    }
+    100% {
+        box-shadow: 0 4px 15px rgba(255, 193, 7, 0.4);
+    }
+}
+
+/* Styles pour les cartes de statistiques */
+.stat-card.critical {
+    background: linear-gradient(135deg, #dc3545, #c82333);
+    color: white;
+    animation: stat-critical-glow 2s ease-in-out infinite alternate;
+}
+
+.stat-card.priority {
+    background: linear-gradient(135deg, #ffc107, #e0a800);
+    color: #212529;
+    animation: stat-priority-glow 2s ease-in-out infinite alternate;
+}
+
+@keyframes stat-critical-glow {
+    0% {
+        box-shadow: 0 4px 20px rgba(220, 53, 69, 0.4);
+    }
+    100% {
+        box-shadow: 0 6px 30px rgba(220, 53, 69, 0.7);
+    }
+}
+
+@keyframes stat-priority-glow {
+    0% {
+        box-shadow: 0 4px 15px rgba(255, 193, 7, 0.4);
+    }
+    100% {
+        box-shadow: 0 6px 25px rgba(255, 193, 7, 0.6);
+    }
+}
+
+/* Responsive amélioré */
+@media (max-width: 768px) {
+    .ticket-critical, .ticket-priority {
+        margin-bottom: 1rem;
+        padding: 1rem;
+    }
+    
+    .badge-critical, .badge-priority {
+        font-size: 0.7rem;
+        padding: 0.3rem 0.6rem;
+    }
+    
+    .icon-critical, .icon-priority {
+        font-size: 1.2rem;
+    }
+    
+    .status-critical::before, .status-priority::before {
+        width: 8px;
+        height: 8px;
+        top: -3px;
+        right: -3px;
+    }
+}
+
+@media (max-width: 576px) {
+    .ticket-critical, .ticket-priority {
+        padding: 0.75rem;
+        border-radius: 8px;
+    }
+    
+    .badge-critical, .badge-priority {
+        font-size: 0.65rem;
+        padding: 0.25rem 0.5rem;
+    }
+    
+    .patient-list-item.critical {
+        border-left: 4px solid #dc3545 !important;
+    }
+    
+    .patient-list-item.priority {
+        border-left: 3px solid #ffc107 !important;
+    }
+}
+
+/* Styles pour les boutons d'action */
+.btn-call-critical {
+    background: linear-gradient(45deg, #dc3545, #c82333);
+    border: none;
+    color: white;
+    animation: btn-critical-pulse 1.5s ease-in-out infinite;
+    box-shadow: 0 4px 20px rgba(220, 53, 69, 0.4);
+}
+
+.btn-call-priority {
+    background: linear-gradient(45deg, #ffc107, #e0a800);
+    border: none;
+    color: #212529;
+    animation: btn-priority-pulse 2s ease-in-out infinite;
+    box-shadow: 0 4px 15px rgba(255, 193, 7, 0.4);
+}
+
+@keyframes btn-critical-pulse {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 4px 20px rgba(220, 53, 69, 0.4);
+    }
+    50% {
+        transform: scale(1.05);
+        box-shadow: 0 6px 30px rgba(220, 53, 69, 0.7);
+    }
+    100% {
+        transform: scale(1);
+        box-shadow: 0 4px 20px rgba(220, 53, 69, 0.4);
+    }
+}
+
+@keyframes btn-priority-pulse {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 4px 15px rgba(255, 193, 7, 0.4);
+    }
+    50% {
+        transform: scale(1.03);
+        box-shadow: 0 6px 25px rgba(255, 193, 7, 0.6);
+    }
+    100% {
+        transform: scale(1);
+        box-shadow: 0 4px 15px rgba(255, 193, 7, 0.4);
+    }
+}
+
+/* Styles pour les notifications */
+.notification-critical {
+    background: linear-gradient(135deg, rgba(220, 53, 69, 0.9), rgba(200, 35, 51, 0.9));
+    color: white;
+    border: 2px solid #dc3545;
+    animation: notification-critical-shake 0.5s ease-in-out;
+}
+
+.notification-priority {
+    background: linear-gradient(135deg, rgba(255, 193, 7, 0.9), rgba(224, 168, 0, 0.9));
+    color: #212529;
+    border: 2px solid #ffc107;
+    animation: notification-priority-bounce 0.5s ease-in-out;
+}
+
+@keyframes notification-critical-shake {
+    0%, 100% {
+        transform: translateX(0);
+    }
+    25% {
+        transform: translateX(-5px);
+    }
+    75% {
+        transform: translateX(5px);
+    }
+}
+
+@keyframes notification-priority-bounce {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-5px);
+    }
+}

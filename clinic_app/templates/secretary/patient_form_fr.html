@@ -1,0 +1,109 @@
+{% extends "layout.html" %}
+
+{% block extra_head %}
+<style>
+  /* Modern, responsive form styles */
+  .page-header {
+    display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+  }
+  .hint { color: #6c757d; font-size: .9rem; }
+  .card-modern { border: 1px solid #e9ecef; }
+  .card-modern .card-header { background: linear-gradient(90deg, #f8f9fa, #ffffff); }
+  .floating-label { position: relative; }
+  .floating-label > input.form-control,
+  .floating-label > select.form-select { padding-top: 1.25rem; padding-bottom: .5rem; }
+  .floating-label > label { position: absolute; top: .35rem; left: .75rem; font-size: .85rem; color: #6c757d; }
+  .input-icon { position: absolute; right: .75rem; top: 50%; transform: translateY(-50%); color: #adb5bd; }
+  .section-title { font-size: .95rem; color: #6c757d; margin-bottom: .5rem; text-transform: uppercase; letter-spacing: .5px; }
+  .required::after { content: " *"; color: #dc3545; }
+  .form-help { font-size: .85rem; color: #6c757d; }
+
+  @media (max-width: 576px) {
+    .page-header { flex-direction: column; align-items: flex-start; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-3">
+  <div class="page-header mb-3">
+    <h3 class="mb-0"><i class="fas fa-user-plus me-2 text-primary"></i>Ajouter un patient</h3>
+    <a href="{{ url_for('doctor.dashboard') if current_user.role == 'doctor' else url_for('secretary.dashboard') }}" class="btn btn-outline-secondary">
+      <i class="fas fa-arrow-left me-1"></i>Retour
+    </a>
+  </div>
+
+  <div class="card card-modern shadow-sm">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <div>
+        <div class="section-title">Informations générales</div>
+        <div class="hint">Veuillez compléter les informations du patient. Les champs marqués * sont obligatoires.</div>
+      </div>
+      <span class="badge bg-light text-dark"><i class="fas fa-shield-alt me-1"></i>Formulaire sécurisé</span>
+    </div>
+    <div class="card-body">
+      <form method="POST" novalidate>
+        {{ form.hidden_tag() }}
+
+        <div class="row g-3">
+          <div class="col-md-8">
+            <div class="floating-label">
+              <label class="required">{{ form.full_name.label.text }}</label>
+              {{ form.full_name(class="form-control", placeholder="Ex: Dupont Ahmed") }}
+            </div>
+            {% for error in form.full_name.errors %}
+              <div class="text-danger small">{{ error }}</div>
+            {% endfor %}
+          </div>
+          <div class="col-md-4">
+            <div class="floating-label">
+              <label class="required">{{ form.phone.label.text }}</label>
+              {{ form.phone(class="form-control", placeholder="Ex: 0555 00 00 00") }}
+            </div>
+            {% for error in form.phone.errors %}
+              <div class="text-danger small">{{ error }}</div>
+            {% endfor %}
+          </div>
+
+          <div class="col-md-4">
+            <div class="floating-label">
+              <label>{{ form.birth_date.label.text }}</label>
+              {{ form.birth_date(class="form-control") }}
+              <div class="form-help">Format: AAAA-MM-JJ</div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="floating-label">
+              <label>{{ form.gender.label.text }}</label>
+              {{ form.gender(class="form-select") }}
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="floating-label">
+              <label>{{ form.blood_group.label.text }}</label>
+              {{ form.blood_group(class="form-select") }}
+            </div>
+          </div>
+
+          <div class="col-12">
+            <div class="floating-label">
+              <label>{{ form.address.label.text }}</label>
+              {{ form.address(class="form-control", placeholder="Adresse complète du patient") }}
+            </div>
+          </div>
+        </div>
+
+        <hr class="my-4"/>
+        <div class="d-flex gap-2 justify-content-end">
+          <a href="{{ url_for('doctor.dashboard') if current_user.role == 'doctor' else url_for('secretary.dashboard') }}" class="btn btn-light">
+            Annuler
+          </a>
+          <button type="submit" class="btn btn-primary">
+            <i class="fas fa-save me-1"></i>Enregistrer
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

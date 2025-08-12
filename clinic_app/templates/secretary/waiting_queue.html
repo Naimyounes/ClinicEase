@@ -5,18 +5,18 @@
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1>إدارة قائمة الانتظار</h1>
+        <h1>Gestion de la liste d'attente</h1>
         <div>
-            <span class="badge bg-info fs-6">عدد المنتظرين: {{ waiting_tickets|length }}</span>
+            <span class="badge bg-info fs-6">Nombre en attente: {{ waiting_tickets|length }}</span>
         </div>
     </div>
 
-    <!-- المريض المستدعى حالياً -->
+    <!-- Patient actuellement appelé -->
     {% if called_ticket %}
     <div class="card mb-4 border-success">
         <div class="card-header bg-success text-white">
             <h5 class="mb-0">
-                <i class="fas fa-user-md"></i> المريض المستدعى حالياً
+                <i class="fas fa-user-md"></i> Patient actuellement appelé
             </h5>
         </div>
         <div class="card-body">
@@ -30,18 +30,18 @@
                             <h4 class="mb-1">
                                 {{ called_ticket.patient.full_name }}
                                 {% if called_ticket.ticket_type == 'reservation' %}
-                                    <span class="badge bg-warning text-dark ms-2">أولوية</span>
+                                    <span class="badge bg-warning text-dark ms-2">Priorité</span>
                                 {% endif %}
                             </h4>
                             <p class="text-muted mb-0">
                                 <i class="fas fa-phone me-1"></i>{{ called_ticket.patient.phone }}
                                 <span class="ms-3">
-                                    <i class="fas fa-ticket-alt me-1"></i>رقم التذكرة: {{ called_ticket.display_number }}
+                                    <i class="fas fa-ticket-alt me-1"></i>Numéro de ticket: {{ called_ticket.display_number }}
                                 </span>
                                 {% if called_ticket.ticket_type == 'reservation' and called_ticket.appointment %}
                                     <br><small class="text-info">
-                                        <i class="fas fa-calendar me-1"></i>وصل: {{ called_ticket.created_at.strftime('%H:%M') }} | 
-                                        موعد: {{ called_ticket.appointment.appointment_date.strftime('%H:%M') }}
+                                        <i class="fas fa-calendar me-1"></i>Arrivé: {{ called_ticket.created_at.strftime('%H:%M') }} | 
+                                        Rendez-vous: {{ called_ticket.appointment.appointment_date.strftime('%H:%M') }}
                                     </small>
                                 {% endif %}
                             </p>
@@ -52,11 +52,11 @@
                     <div class="mb-2">
                         <span class="badge bg-success fs-6 px-3 py-2">
                             <i class="fas fa-clock me-1"></i>
-                            مستدعى منذ: {{ called_ticket.created_at.strftime('%H:%M') }}
+                            Appelé depuis  {{ called_ticket.created_at.strftime('%H:%M') }}
                         </span>
                     </div>
                     <button type="button" class="btn btn-warning btn-sm" onclick="repeatAnnouncementForTicket('{{ called_ticket.display_number }}', '{{ called_ticket.patient.full_name }}')" title="إعادة المناداة">
-                        <i class="fas fa-volume-up me-1"></i> إعادة المناداة
+                        <i class="fas fa-volume-up me-1"></i> Rappeler
                     </button>
                 </div>
             </div>
@@ -68,7 +68,7 @@
     <div class="card">
         <div class="card-header bg-primary text-white">
             <h5 class="mb-0">
-                <i class="fas fa-users"></i> قائمة المنتظرين
+                <i class="fas fa-users"></i> Liste d’attente
             </h5>
         </div>
         <div class="card-body">
@@ -77,20 +77,25 @@
                     <table class="table table-hover table-striped">
                         <thead>
                             <tr>
-                                <th>رقم التذكرة</th>
-                                <th>اسم المريض</th>
-                                <th>رقم الهاتف</th>
-                                <th>النوع</th>
-                                <th>الأوقات</th>
-                                <th>مدة الانتظار</th>
-                                <th>الإجراءات</th>
+                                <th>Numéro du ticket</th>
+                                <th>Nom du patient</th>
+                                <th>Numéro de téléphone</th>
+                                <th>Genre</th>
+                                <th>Horaires</th>
+                                <th>Durée d’attente</th>
+                                <th>Actions</th>
+
                             </tr>
                         </thead>
                         <tbody>
                             {% for ticket in waiting_tickets %}
-                                <tr class="{% if ticket.ticket_type == 'reservation' %}table-warning{% endif %}">
+                                <tr class="{% if ticket.ticket_type == 'emergency' %}table-danger{% elif ticket.ticket_type == 'reservation' %}table-warning{% endif %}">
                                     <td>
-                                        {% if ticket.ticket_type == 'reservation' %}
+                                        {% if ticket.ticket_type == 'emergency' %}
+                                            <span class="badge bg-danger fs-6 emergency-badge">
+                                                <i class="fas fa-exclamation-triangle me-1"></i>{{ ticket.display_number }}
+                                            </span>
+                                        {% elif ticket.ticket_type == 'reservation' %}
                                             <span class="badge bg-warning text-dark fs-6">{{ ticket.display_number }}</span>
                                         {% else %}
                                             <span class="badge bg-primary fs-6">{{ ticket.display_number }}</span>
@@ -98,23 +103,29 @@
                                     </td>
                                     <td>
                                         <strong>{{ ticket.patient.full_name }}</strong>
-                                        {% if ticket.ticket_type == 'reservation' %}
-                                            <i class="fas fa-star text-warning ms-1" title="أولوية - لديه موعد"></i>
+                                        {% if ticket.ticket_type == 'emergency' %}
+                                            <i class="fas fa-exclamation-triangle text-danger ms-1 emergency-icon" title="URGENCE - Priorité absolue"></i>
+                                        {% elif ticket.ticket_type == 'reservation' %}
+                                            <i class="fas fa-star text-warning ms-1" title="Priorité - a un rendez-vous"></i>
                                         {% endif %}
                                     </td>
                                     <td>{{ ticket.patient.phone }}</td>
                                     <td>
-                                        {% if ticket.ticket_type == 'reservation' %}
-                                            <span class="badge bg-warning text-dark">أولوية</span>
+                                        {% if ticket.ticket_type == 'emergency' %}
+                                            <span class="badge bg-danger emergency-badge">
+                                                <i class="fas fa-ambulance me-1"></i>URGENCE
+                                            </span>
+                                        {% elif ticket.ticket_type == 'reservation' %}
+                                            <span class="badge bg-warning text-dark">Priorité</span>
                                         {% else %}
-                                            <span class="badge bg-secondary">عادي</span>
+                                            <span class="badge bg-secondary">Normal</span>
                                         {% endif %}
                                     </td>
                                     <td>
                                         {% if ticket.ticket_type == 'reservation' and ticket.appointment %}
                                             <div>
-                                                <span class="badge bg-info text-white">وصل: {{ ticket.created_at.strftime('%H:%M') }}</span>
-                                                <br><span class="badge bg-warning text-dark mt-1">موعد: {{ ticket.appointment.appointment_date.strftime('%H:%M') }}</span>
+                                                <span class="badge bg-info text-white"> Arrivé : {{ ticket.created_at.strftime('%H:%M') }}</span>
+                                                <br><span class="badge bg-warning text-dark mt-1">Rendez-vous : {{ ticket.appointment.appointment_date.strftime('%H:%M') }}</span>
                                             </div>
                                         {% else %}
                                             <span class="badge bg-primary">{{ ticket.created_at.strftime('%H:%M') }}</span>
@@ -134,15 +145,15 @@
                                         {% endif %}
                                         
                                         {% if waiting_time < 60 %}
-                                            <span class="text-success">{{ "%.0f"|format(waiting_time) }} دقيقة</span>
+                                            <span class="text-success">{{ "%.0f"|format(waiting_time) }} Minute</span>
                                         {% elif waiting_time < 120 %}
-                                            <span class="text-warning">{{ "%.0f"|format(waiting_time) }} دقيقة</span>
+                                            <span class="text-warning">{{ "%.0f"|format(waiting_time) }} Minute</span>
                                         {% else %}
-                                            <span class="text-danger">{{ "%.0f"|format(waiting_time) }} دقيقة</span>
+                                            <span class="text-danger">{{ "%.0f"|format(waiting_time) }} Minute</span>
                                         {% endif %}
                                         
                                         {% if ticket.ticket_type == 'reservation' %}
-                                            <br><small class="text-muted">منذ وقت الموعد</small>
+                                            <br><small class="text-muted">Depuis l’heure du rendez-vous</small>
                                         {% endif %}
                                     </td>
                                     <td>
@@ -168,8 +179,8 @@
             {% else %}
                 <div class="alert alert-info text-center">
                     <i class="fas fa-info-circle fa-2x mb-3"></i>
-                    <h5>لا يوجد مرضى في قائمة الانتظار</h5>
-                    <p class="mb-0">جميع المرضى تم فحصهم أو لم يصل أي مريض بعد</p>
+                    <h5>Aucun patient dans la liste d’attente</h5>
+                    <p class="mb-0">Tous les patients ont été examinés ou aucun patient n’est encore arriv</p>
                 </div>
             {% endif %}
         </div>
@@ -180,26 +191,30 @@
         <div class="col-md-6">
             <div class="card">
                 <div class="card-header bg-success text-white">
-                    <h6 class="mb-0"><i class="fas fa-microphone"></i> استدعاء التذكرة التالية</h6>
+                    <h6 class="mb-0"><i class="fas fa-microphone"></i> Appeler le ticket suivant</h6>
                 </div>
                 <div class="card-body text-center">
                     <form method="POST" action="{{ url_for('secretary.call_next_ticket') }}">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                         <button type="submit" class="btn btn-success btn-lg">
-                            <i class="fas fa-bullhorn"></i> استدعاء التالي
+                            <i class="fas fa-bullhorn"></i> Appeler le suivant
                         </button>
                     </form>
                     {% if waiting_tickets %}
                         <small class="text-muted mt-2 d-block">
-                            التالي: 
+                            Suivant : 
                             {% set next_ticket = waiting_tickets|selectattr("status", "equalto", "waiting")|list|first %}
                             {% if next_ticket %}
                                 {{ next_ticket.display_number }} - {{ next_ticket.patient.full_name }}
-                                {% if next_ticket.ticket_type == 'reservation' %}
-                                    <span class="badge bg-warning text-dark ms-1">أولوية</span>
+                                {% if next_ticket.ticket_type == 'emergency' %}
+                                    <span class="badge bg-danger ms-1">
+                                        <i class="fas fa-exclamation-triangle me-1"></i>URGENCE
+                                    </span>
+                                {% elif next_ticket.ticket_type == 'reservation' %}
+                                    <span class="badge bg-warning text-dark ms-1">Priorité</span>
                                 {% endif %}
                             {% else %}
-                                لا توجد تذاكر منتظرة
+                                Aucun ticket en attente
                             {% endif %}
                         </small>
                     {% endif %}
@@ -210,25 +225,31 @@
         <div class="col-md-6">
             <div class="card">
                 <div class="card-header bg-info text-white">
-                    <h6 class="mb-0"><i class="fas fa-chart-bar"></i> إحصائيات اليوم</h6>
+                    <h6 class="mb-0"><i class="fas fa-chart-bar"></i> Statistiques du jour</h6>
                 </div>
                 <div class="card-body">
                     <div class="row text-center">
                         <div class="col-4">
                             <div class="border-end">
                                 <h4 class="text-primary mb-0">{{ waiting_tickets|length }}</h4>
-                                <small class="text-muted">منتظر</small>
+                                <small class="text-muted">En attente</small>
                             </div>
                         </div>
-                        <div class="col-4">
+                        <div class="col-3">
+                            <div class="border-end">
+                                <h4 class="text-danger mb-0">{{ waiting_tickets|selectattr("ticket_type", "equalto", "emergency")|list|length }}</h4>
+                                <small class="text-muted">Urgence</small>
+                            </div>
+                        </div>
+                        <div class="col-3">
                             <div class="border-end">
                                 <h4 class="text-warning mb-0">{{ waiting_tickets|selectattr("ticket_type", "equalto", "reservation")|list|length }}</h4>
-                                <small class="text-muted">أولوية</small>
+                                <small class="text-muted">Priorité</small>
                             </div>
                         </div>
-                        <div class="col-4">
+                        <div class="col-3">
                             <h4 class="text-success mb-0">{{ 1 if called_ticket else 0 }}</h4>
-                            <small class="text-muted">مستدعى</small>
+                            <small class="text-muted">Appelé</small>
                         </div>
                     </div>
                 </div>
@@ -238,10 +259,10 @@
 
     <div class="mt-4">
         <a href="{{ url_for('secretary.dashboard') }}" class="btn btn-secondary">
-            <i class="fas fa-arrow-left"></i> العودة للوحة التحكم
+            <i class="fas fa-arrow-left"></i> Retour au tableau de bord
         </a>
         <a href="{{ url_for('secretary.list_patients') }}" class="btn btn-primary ms-2">
-            <i class="fas fa-user-plus"></i> إضافة مريض للقائمة
+            <i class="fas fa-user-plus"></i> Ajouter un patient à la liste
         </a>
     </div>
 </div>
@@ -256,6 +277,79 @@
     justify-content: center;
     font-size: 1.5rem;
     font-weight: bold;
+}
+
+/* تحسين التذاكر الطارئة */
+.table-danger {
+    background-color: rgba(220, 53, 69, 0.1) !important;
+    border-left: 4px solid #dc3545 !important;
+}
+
+.emergency-badge {
+    animation: emergency-pulse 2s infinite !important;
+    box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3) !important;
+}
+
+.emergency-icon {
+    animation: emergency-shake 1.5s infinite !important;
+    filter: drop-shadow(0 2px 4px rgba(220, 53, 69, 0.3)) !important;
+}
+
+@keyframes emergency-pulse {
+    0%, 100% { 
+        transform: scale(1);
+        box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
+    }
+    50% { 
+        transform: scale(1.05);
+        box-shadow: 0 4px 15px rgba(220, 53, 69, 0.5);
+    }
+}
+
+@keyframes emergency-shake {
+    0%, 100% { 
+        transform: rotate(0deg);
+    }
+    25% { 
+        transform: rotate(-3deg);
+    }
+    75% { 
+        transform: rotate(3deg);
+    }
+}
+
+/* تحسين الصف الطارئ */
+.table-danger td {
+    font-weight: 600 !important;
+    color: #721c24 !important;
+}
+
+.table-danger:hover {
+    background-color: rgba(220, 53, 69, 0.15) !important;
+    transform: translateX(2px);
+    transition: all 0.3s ease;
+}
+
+/* إضافة تأثير وميض للتذاكر الطارئة */
+.table-danger::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: linear-gradient(to bottom, #dc3545, #ff6b6b, #dc3545);
+    animation: emergency-glow 2s infinite;
+}
+
+@keyframes emergency-glow {
+    0%, 100% { 
+        opacity: 0.7;
+    }
+    50% { 
+        opacity: 1;
+        box-shadow: 0 0 10px rgba(220, 53, 69, 0.5);
+    }
 }
 </style>
 

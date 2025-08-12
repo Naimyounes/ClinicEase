@@ -1,20 +1,48 @@
-from flask import current_app, render_template, url_for
+from flask import current_app
 import os
 from datetime import datetime
-from reportlab.lib.pagesizes import letter, A4, inch
+from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
 from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Image, PageBreak, KeepTogether
-from reportlab.lib.units import mm, cm
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Image, PageBreak, KeepTogether, HRFlowable
+from reportlab.lib.units import mm
 from reportlab.lib.enums import TA_RIGHT, TA_CENTER, TA_LEFT
-from reportlab.platypus.flowables import HRFlowable
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
+from arabic_reshaper import reshape
+from bidi.algorithm import get_display
 
 def generate_prescription_pdf(prescription, visit):
-    # إنشاء مجلد للوصفات الطبية إذا لم يكن موجودًا
-    static_folder = os.path.join(current_app.root_path, "static")
-    os.makedirs(static_folder, exist_ok=True)
+    from clinic_app.models import DoctorSettings
     
+    # تسجيل الخط العربي
+    arabic_font = 'Helvetica'  # افتراضي
+    try:
+        arabic_font_path = os.path.join(current_app.root_path, 'static', 'fonts', 'DroidArabicKufi.ttf')
+        if os.path.exists(arabic_font_path):
+            # تسجيل الخط العادي والغامق
+            pdfmetrics.registerFont(TTFont('Arabic', arabic_font_path))
+            pdfmetrics.registerFont(TTFont('Arabic-Bold', arabic_font_path))
+            arabic_font = 'Arabic'
+    except Exception as e:
+        print(f"خطأ في تسجيل الخط العربي: {e}")
+    
+    # دالة لمعالجة النصوص العربية
+    def process_arabic_text(text):
+        if text and any('\u0600' <= c <= '\u06FF' for c in text):
+            try:
+                reshaped_text = reshape(text)
+                return get_display(reshaped_text)
+            except:
+                return text
+        return text
+    
+    # الحصول على إعدادات الطبيب
+    doctor_settings = DoctorSettings.query.filter_by(user_id=visit.doctor_id).first()
+    
+    # إنشاء مجلد للوصفات الطبية
+    static_folder = os.path.join(current_app.root_path, "static")
     prescriptions_dir = os.path.join(static_folder, "prescriptions")
     os.makedirs(prescriptions_dir, exist_ok=True)
 
@@ -27,184 +55,184 @@ def generate_prescription_pdf(prescription, visit):
     doc = SimpleDocTemplate(
         file_path, 
         pagesize=A4, 
-        rightMargin=20*mm, 
-        leftMargin=20*mm, 
-        topMargin=20*mm, 
-        bottomMargin=20*mm
+        rightMargin=15*mm, 
+        leftMargin=15*mm, 
+        topMargin=10*mm, 
+        bottomMargin=15*mm
     )
-    styles = getSampleStyleSheet()
+    base_styles = getSampleStyleSheet()
     story = []
-
-    # إعدادات الخطوط المحسنة
-    clinic_title = ParagraphStyle(
-        'ClinicTitle',
-        parent=styles['Title'],
-        alignment=TA_CENTER,
-        fontName='Helvetica-Bold',
-        fontSize=16,
-        spaceAfter=2,
-        leading=20,
-        textColor=colors.black
+    
+    # إعدادات الخطوط والألوان
+    navy_blue = colors.Color(0.1, 0.2, 0.4)
+    
+    # أنماط الخطوط العربية (بدون bold)
+    def create_arabic_style(size, alignment=TA_RIGHT):
+        return ParagraphStyle(
+            f'ArabicStyle{size}{alignment}',
+            parent=base_styles['Normal'],
+            alignment=alignment,
+            fontName=arabic_font,
+            fontSize=size,
+            textColor=colors.black,
+            wordWrap='RTL' if alignment == TA_RIGHT else None
+        )
+    
+    # أنماط الخطوط اللاتينية
+    def create_latin_style(size, alignment=TA_LEFT, bold=False):
+        font_name = 'Helvetica-Bold' if bold else 'Helvetica'
+        return ParagraphStyle(
+            f'LatinStyle{size}{alignment}',
+            parent=base_styles['Normal'],
+            alignment=alignment,
+            fontName=font_name,
+            fontSize=size,
+            textColor=colors.black
+        )
+    
+    # إنشاء الأنماط
+    custom_styles = {
+        'doctor_name_latin': create_latin_style(14, TA_LEFT, True),
+        'doctor_name_arabic': create_arabic_style(14, TA_RIGHT),
+        'specialty_latin': create_latin_style(11),
+        'specialty_arabic': create_arabic_style(11),
+        'order_number': create_latin_style(10, TA_CENTER, True),
+        'patient_info': create_latin_style(12, TA_LEFT, True),
+        'date_location': create_latin_style(11, TA_RIGHT),
+        'prescription_title': create_latin_style(24, TA_CENTER, True),
+        'medication_number': create_latin_style(12, TA_LEFT, True),
+        'medication_name': create_latin_style(11, TA_LEFT, True),
+        'medication_instructions': create_latin_style(10, TA_LEFT),
+        'qsp': create_latin_style(11, TA_RIGHT, True),
+        'footer_warning': create_arabic_style(10, TA_CENTER),
+        'footer_contact': create_arabic_style(9, TA_CENTER)
+    }
+    
+    # رأس الوصفة - معلومات الطبيب
+    # جمع بيانات الطبيب
+    doctor_name_latin = getattr(doctor_settings, 'doctor_name_latin', None) or f"Dr. {visit.doctor.username}"
+    doctor_name_arabic = process_arabic_text(
+        getattr(doctor_settings, 'doctor_name', None) or f"الدكتور {visit.doctor.username}"
     )
     
-    subtitle_style = ParagraphStyle(
-        'SubtitleStyle',
-        parent=styles['Normal'],
-        alignment=TA_CENTER,
-        fontName='Helvetica',
-        fontSize=12,
-        spaceAfter=5,
-        leading=14,
-        textColor=colors.black
+    specialty_latin = getattr(doctor_settings, 'doctor_specialty_latin', None) or "Specialist"
+    specialty_arabic = process_arabic_text(
+        getattr(doctor_settings, 'doctor_specialty', None) or "أخصائي"
     )
     
-    date_location_style = ParagraphStyle(
-        'DateLocationStyle',
-        parent=styles['Normal'],
-        alignment=TA_LEFT,
-        fontName='Helvetica',
-        fontSize=11,
-        spaceAfter=15,
-        leading=14,
-        textColor=colors.black
-    )
+    order_number = getattr(doctor_settings, 'order_number', None) or "N/A"
     
-    patient_label_style = ParagraphStyle(
-        'PatientLabelStyle',
-        parent=styles['Normal'],
-        alignment=TA_LEFT,
-        fontName='Helvetica',
-        fontSize=11,
-        spaceAfter=0,
-        leading=14,
-        textColor=colors.black
-    )
+    # إنشاء جدول الرأس
+    header_table = Table([
+        [
+            Paragraph(doctor_name_latin, custom_styles['doctor_name_latin']),
+            Paragraph(process_arabic_text(f"رقم الأمر: {order_number}"), custom_styles['order_number']),
+            Paragraph(doctor_name_arabic, custom_styles['doctor_name_arabic'])
+        ],
+        [
+            Paragraph(specialty_latin, custom_styles['specialty_latin']),
+            "",
+            Paragraph(specialty_arabic, custom_styles['specialty_arabic'])
+        ]
+    ], colWidths=[160, 100, 160])
     
-    patient_value_style = ParagraphStyle(
-        'PatientValueStyle',
-        parent=styles['Normal'],
-        alignment=TA_LEFT,
-        fontName='Helvetica',
-        fontSize=11,
-        spaceAfter=8,
-        leftIndent=50,
-        leading=14,
-        textColor=colors.black
-    )
-    
-    prescription_title = ParagraphStyle(
-        'PrescriptionTitle',
-        parent=styles['Title'],
-        alignment=TA_CENTER,
-        fontName='Helvetica-Bold',
-        fontSize=14,
-        spaceAfter=15,
-        spaceBefore=25,
-        leading=18,
-        textColor=colors.black
-    )
-    
-    medication_style = ParagraphStyle(
-        'MedicationStyle',
-        parent=styles['Normal'],
-        alignment=TA_LEFT,
-        fontName='Helvetica',
-        fontSize=11,
-        spaceAfter=15,
-        leftIndent=25,
-        leading=16,
-        textColor=colors.black
-    )
-    
-    # رأس الوصفة - معلومات العيادة
-    story.append(Paragraph(f"cabinet Dentaire {visit.doctor.username}", clinic_title))
-    story.append(Paragraph("7/7j", subtitle_style))
-    story.append(Spacer(1, 30))
-    
-    # التاريخ والموقع
-    location = "Oran"  # يمكنك تغيير هذا حسب موقع العيادة
-    date_text = f"{location} le : {visit.date.strftime('%d/%m/%Y')}"
-    story.append(Paragraph(date_text, date_location_style))
-    
-    # معلومات المريض في نفس السطر
-    # الاسم
-    patient_name = visit.patient.last_name.upper() if hasattr(visit.patient, 'last_name') else visit.patient.full_name.split()[-1].upper()
-    name_table = Table([["Nom :", patient_name]], colWidths=[50, 200])
-    name_table.setStyle(TableStyle([
-        ('ALIGN', (0, 0), (0, 0), 'LEFT'),
-        ('ALIGN', (1, 0), (1, 0), 'LEFT'),
-        ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
-        ('FONTSIZE', (0, 0), (-1, -1), 11),
-        ('TOPPADDING', (0, 0), (-1, -1), 0),
+    header_table.setStyle(TableStyle([
+        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+        ('ALIGN', (0, 0), (0, -1), 'LEFT'),
+        ('ALIGN', (1, 0), (1, -1), 'CENTER'),
+        ('ALIGN', (2, 0), (2, -1), 'RIGHT'),
         ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
-        ('LEFTPADDING', (0, 0), (-1, -1), 0),
-        ('RIGHTPADDING', (0, 0), (-1, -1), 0),
+        ('TOPPADDING', (0, 0), (-1, 0), 0),
+        ('TOPPADDING', (0, 1), (-1, 1), 2),
     ]))
-    story.append(name_table)
     
-    # الأسماء
-    patient_firstname = visit.patient.first_name.upper() if hasattr(visit.patient, 'first_name') else visit.patient.full_name.split()[0].upper()
-    prenom_table = Table([["Prénoms :", patient_firstname]], colWidths=[50, 200])
-    prenom_table.setStyle(TableStyle([
-        ('ALIGN', (0, 0), (0, 0), 'LEFT'),
-        ('ALIGN', (1, 0), (1, 0), 'LEFT'),
-        ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
-        ('FONTSIZE', (0, 0), (-1, -1), 11),
-        ('TOPPADDING', (0, 0), (-1, -1), 0),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
-        ('LEFTPADDING', (0, 0), (-1, -1), 0),
-        ('RIGHTPADDING', (0, 0), (-1, -1), 0),
-    ]))
-    story.append(prenom_table)
+    story.append(header_table)
+    story.append(Spacer(1, 15))
     
-    # حساب العمر
+    # معلومات المريض
+    patient_name = ""
+    if hasattr(visit.patient, 'first_name') and hasattr(visit.patient, 'last_name'):
+        patient_name = f"{visit.patient.first_name} {visit.patient.last_name}"
+    elif hasattr(visit.patient, 'full_name'):
+        patient_name = visit.patient.full_name
+    else:
+        patient_name = "غير محدد"
+    
     patient_age = ""
-    if visit.patient.birth_date:
-        from datetime import date
-        today = date.today()
-        age = today.year - visit.patient.birth_date.year - ((today.month, today.day) < (visit.patient.birth_date.month, visit.patient.birth_date.day))
-        patient_age = f"{age} an(s)"
+    if hasattr(visit.patient, 'birth_date') and visit.patient.birth_date:
+        today = datetime.now().date()
+        birth_date = visit.patient.birth_date
+        age = today.year - birth_date.year - ((today.month, today.day) < (birth_date.month, birth_date.day))
+        patient_age = f"{age} ans"
+    else:
+        patient_age = "غير محدد"
     
-    age_table = Table([["Age :", patient_age]], colWidths=[50, 200])
-    age_table.setStyle(TableStyle([
-        ('ALIGN', (0, 0), (0, 0), 'LEFT'),
-        ('ALIGN', (1, 0), (1, 0), 'LEFT'),
-        ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
-        ('FONTSIZE', (0, 0), (-1, -1), 11),
-        ('TOPPADDING', (0, 0), (-1, -1), 0),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
-        ('LEFTPADDING', (0, 0), (-1, -1), 0),
-        ('RIGHTPADDING', (0, 0), (-1, -1), 0),
+    # جدول معلومات المريض
+    patient_info_table = Table([
+        [
+            Paragraph(f"Nom & Prénom: {patient_name.upper()}", custom_styles['patient_info']),
+            Paragraph(f"Oued Rhiou, le: {visit.date.strftime('%d/%m/%Y')}", custom_styles['date_location'])
+        ],
+        [
+            Paragraph(f"Age: {patient_age}", custom_styles['patient_info']),
+            ""
+        ]
+    ], colWidths=[300, 200])
+    
+    patient_info_table.setStyle(TableStyle([
+        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 10),
     ]))
-    story.append(age_table)
+    
+    story.append(patient_info_table)
+    
+    # خط فاصل
+    story.append(HRFlowable(width="100%", thickness=1, spaceBefore=5, spaceAfter=10, color=colors.black))
     
     # عنوان الوصفة
-    story.append(Paragraph("ORDONNANCE", prescription_title))
+    story.append(Paragraph("ORDONNANCE", custom_styles['prescription_title']))
+    story.append(Spacer(1, 15))
     
     # قائمة الأدوية
-    medications_text = ""
     for i, med in enumerate(prescription.prescription_medications, 1):
-        # بناء نص الدواء
-        med_text = f"{i}.<br/>"
-        med_text += f"&nbsp;&nbsp;&nbsp;&nbsp;{med.medication.name.upper()}"
-        
+        # اسم الدواء والجرعة
+        med_name = med.medication.name.upper()
         if med.quantity:
-            med_text += f" {med.quantity.upper()}"
+            med_name += f" {med.quantity.upper()}"
         
-        med_text += "<br/>"
+        story.append(Paragraph(f"{i}. {med_name}", custom_styles['medication_name']))
         
+        # تعليمات الاستخدام
         if med.instructions:
-            med_text += f"&nbsp;&nbsp;&nbsp;&nbsp;{med.instructions.upper()}"
+            story.append(Paragraph(med.instructions, custom_styles['medication_instructions']))
         
-        if i < len(prescription.prescription_medications):
-            med_text += "<br/><br/>"
-        
-        medications_text += med_text
+        # QSP
+        story.append(Paragraph("QSP 7 Jour(s)", custom_styles['qsp']))
+        story.append(Spacer(1, 10))
     
-    story.append(Paragraph(medications_text, medication_style))
+    # مساحة للتوقيع
+    story.append(Spacer(1, 50))
     
-    # مساحة للتوقيع والختم
-    story.append(Spacer(1, 100))
+    # خط فاصل سفلي
+    story.append(HRFlowable(width="100%", thickness=1, spaceBefore=10, spaceAfter=10, color=colors.black))
+    
+    # تحذير
+    warning_text = process_arabic_text("لا تتركوا الأدوية في متناول الأطفال")
+    story.append(Paragraph(warning_text, custom_styles['footer_warning']))
+    story.append(Spacer(1, 5))
+    
+    # معلومات الاتصال
+    email = getattr(doctor_settings, 'email', None) or "drhamerassorl@gmail.com"
+    phone = getattr(doctor_settings, 'phone', None) or "0560 08 95 61"
+    address = process_arabic_text(
+        getattr(doctor_settings, 'address', None) or 
+        "العنوان : حي 20 مسكن ترقوي إقامة النور عمارة ط الطابق الأرضي - بناب الملعب البلدي القديم - وادي الرايو - غليزان"
+    )
+    
+    # إضافة معلومات الاتصال بشكل عمودي
+    story.append(Paragraph(process_arabic_text(f"✉ {email}"), custom_styles['footer_contact']))
+    story.append(Paragraph(process_arabic_text(f"📱 {phone}"), custom_styles['footer_contact']))
+    story.append(Paragraph(process_arabic_text(f"📍 {address}"), custom_styles['footer_contact']))
     
     # إنشاء الملف النهائي
     doc.build(story)

@@ -2,11 +2,11 @@
 
 {% block content %}
 <div class="container mt-4">
-    <h1 class="mb-4">سجل الزيارات</h1>
+    <h1 class="mb-4">Historique des consultations</h1>
 
     <div class="card mb-4">
         <div class="card-header bg-primary text-white">
-            <h4 class="mb-0">جميع الزيارات</h4>
+            <h4 class="mb-0">Toutes les consultations</h4>
         </div>
         <div class="card-body">
             {% if visits %}
@@ -15,11 +15,11 @@
                         <thead>
                             <tr>
                                 <th>#</th>
-                                <th>المريض</th>
-                                <th>التاريخ</th>
-                                <th>التشخيص</th>
-                                <th>الحالة</th>
-                                <th>الإجراءات</th>
+                                <th>Patient</th>
+                                <th>Date</th>
+                                <th>Diagnostic</th>
+                                <th>Statut</th>
+                                <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -27,27 +27,34 @@
                             <tr>
                                 <td>{{ loop.index }}</td>
                                 <td>{{ visit.patient.full_name }}</td>
-                                <td>{{ visit.date.strftime('%Y-%m-%d %H:%M') }}</td>
+                                <td>{{ visit.date.strftime('%d/%m/%Y %H:%M') }}</td>
                                 <td>{{ visit.diagnosis[:30] + '...' if visit.diagnosis and visit.diagnosis|length > 30 else visit.diagnosis }}</td>
                                 <td>
                                     {% if visit.status == "pending" %}
-                                        <span class="badge bg-warning">قيد الانتظار</span>
+                                        <span class="badge bg-warning">En attente</span>
                                     {% elif visit.status == "completed" %}
-                                        <span class="badge bg-success">مكتمل</span>
+                                        <span class="badge bg-success">Terminé</span>
                                     {% elif visit.status == "cancelled" %}
-                                        <span class="badge bg-danger">ملغي</span>
+                                        <span class="badge bg-danger">Annulé</span>
                                     {% else %}
                                         <span class="badge bg-secondary">{{ visit.status }}</span>
                                     {% endif %}
                                 </td>
                                 <td>
                                     <a href="{{ url_for('doctor.view_visit', visit_id=visit.id) }}" class="btn btn-sm btn-primary">
-                                        <i class="fas fa-eye"></i> عرض
+                                        <i class="fas fa-eye"></i> Voir
                                     </a>
 
-                                    {% if not visit.prescriptions %}
+                                    {% if not visit.prescription %}
                                         <a href="{{ url_for('doctor.create_prescription', visit_id=visit.id) }}" class="btn btn-sm btn-success">
-                                            <i class="fas fa-prescription"></i> وصفة طبية
+                                            <i class="fas fa-prescription"></i> Ordonnance
+                                        </a>
+                                    {% else %}
+                                        <a href="{{ url_for('doctor.view_prescription', prescription_id=visit.prescription.id) }}" class="btn btn-sm btn-info">
+                                            <i class="fas fa-prescription-bottle-alt"></i> Voir Ordonnance
+                                        </a>
+                                        <a href="{{ url_for('doctor.print_prescription', prescription_id=visit.prescription.id) }}" class="btn btn-sm btn-secondary" target="_blank">
+                                            <i class="fas fa-print"></i> Imprimer
                                         </a>
                                     {% endif %}
                                 </td>
@@ -62,13 +69,13 @@
                 <nav aria-label="Page navigation">
                     <ul class="pagination justify-content-center">
                         <li class="page-item disabled">
-                            <a class="page-link" href="#" tabindex="-1">السابق</a>
+                            <a class="page-link" href="#" tabindex="-1">Précédent</a>
                         </li>
                         <li class="page-item active"><a class="page-link" href="#">1</a></li>
                         <li class="page-item"><a class="page-link" href="#">2</a></li>
                         <li class="page-item"><a class="page-link" href="#">3</a></li>
                         <li class="page-item">
-                            <a class="page-link" href="#">التالي</a>
+                            <a class="page-link" href="#">Suivant</a>
                         </li>
                     </ul>
                 </nav>
@@ -76,7 +83,7 @@
 
             {% else %}
                 <div class="alert alert-info">
-                    <h5 class="text-center">لا توجد زيارات مسجلة حتى الآن</h5>
+                    <h5 class="text-center">Aucune visite enregistrée pour le moment</h5>
                 </div>
             {% endif %}
         </div>
@@ -84,7 +91,7 @@
 
     <div class="mt-4">
         <a href="{{ url_for('doctor.dashboard') }}" class="btn btn-secondary">
-            <i class="fas fa-arrow-left"></i> العودة للوحة التحكم
+            <i class="fas fa-arrow-left"></i> Retour au tableau de bord
         </a>
     </div>
 </div>

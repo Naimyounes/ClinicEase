@@ -3,30 +3,30 @@
 <div class="container-fluid">
     <div class="row">
         <div class="col-12">
-            <!-- البحث عن المريض -->
+            <!-- Recherche de patient -->
             <div class="search-container">
                 <div class="row">
                     <div class="col-md-8">
                         <div class="position-relative">
                             <label class="form-label fw-bold text-primary mb-2">
-                                <i class="fas fa-search me-2"></i>البحث عن المريض
+                                <i class="fas fa-search me-2"></i>Rechercher un patient
                             </label>
                             <div class="input-group input-group-lg">
                                 <span class="input-group-text bg-info text-white">
                                     <i class="fas fa-search"></i>
                                 </span>
                                 <input type="text" id="live-search" class="form-control form-control-lg" 
-                                       placeholder="ابدأ بكتابة اسم المريض أو رقم الهاتف..." 
+                                       placeholder="Commencez à taper le nom du patient ou le numéro de téléphone..." 
                                        autocomplete="off" autofocus>
-                                <button class="btn btn-outline-secondary" type="button" onclick="clearSearch()" title="مسح البحث">
+                                <button class="btn btn-outline-secondary" type="button" onclick="clearSearch()" title="Effacer la recherche">
                                     <i class="fas fa-times"></i>
                                 </button>
                             </div>
                             <small class="form-text text-muted mt-2 d-block">
-                                <i class="fas fa-info-circle me-1"></i>ستظهر النتائج تلقائياً بعد كتابة حرفين على الأقل
+                                <i class="fas fa-info-circle me-1"></i>Les résultats apparaîtront automatiquement après avoir tapé au moins deux caractères
                             </small>
                             
-                            <!-- نتائج البحث المباشر -->
+                            <!-- Résultats de recherche en direct -->
                             <div id="search-results" class="position-absolute w-100 mt-1 shadow rounded bg-white border" 
                                  style="z-index: 1000; max-height: 400px; overflow-y: auto; display: none;">
                             </div>
@@ -35,14 +35,14 @@
                     <div class="col-md-4">
                         <div class="text-center">
                             <label class="form-label fw-bold text-success mb-2">
-                                <i class="fas fa-user-plus me-2"></i>مريض جديد؟
+                                <i class="fas fa-user-plus me-2"></i>Nouveau patient?
                             </label>
                             <div class="d-grid">
                                 <a href="{{ url_for('secretary.new_patient') }}" class="btn btn-success btn-lg">
-                                    <i class="fas fa-user-plus me-2"></i>تسجيل مريض جديد
+                                    <i class="fas fa-user-plus me-2"></i>Enregistrer un nouveau patient
                                 </a>
                             </div>
-                            <small class="text-muted mt-2 d-block">إذا كان المريض غير مسجل في النظام</small>
+                            <small class="text-muted mt-2 d-block">Si le patient n'est pas enregistré dans le système</small>
                         </div>
                     </div>
                 </div>
@@ -353,7 +353,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // تأخير الطلب لتحسين الأداء
         searchTimeout = setTimeout(() => {
             // استخدام API للبحث
-            fetch(`/secretary/api/search-patients-for-ticket?term=${encodeURIComponent(term)}`, {
+            fetch(`{{ url_for('secretary.api_search_patients_for_ticket') }}?term=${encodeURIComponent(term)}`, {
                 method: 'GET',
                 headers: {
                     'Accept': 'application/json',

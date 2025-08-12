@@ -61,8 +61,8 @@ def create_app():
 
     # تسجيل المسارات
     app.register_blueprint(auth)
-    app.register_blueprint(doctor)
-    app.register_blueprint(secretary)
+    app.register_blueprint(doctor, url_prefix='/doctor')
+    app.register_blueprint(secretary, url_prefix='/secretary')
     app.register_blueprint(main)
     
     # معالج أخطاء CSRF لتجنب تسجيل الخروج التلقائي
@@ -165,13 +165,13 @@ def create_app():
             # مواعيد اليوم
             today_appointments = Appointment.query.filter(
                 db.func.date(Appointment.appointment_date) == today,
-                Appointment.status == "مجدول"
+                Appointment.status == "Programmé"
             ).all()
             
             # مواعيد الغد
             tomorrow_appointments = Appointment.query.filter(
                 db.func.date(Appointment.appointment_date) == tomorrow,
-                Appointment.status == "مجدول"
+                Appointment.status == "Programmé"
             ).all()
             
             # حساب المواعيد التي لم يتم الاتصال بها

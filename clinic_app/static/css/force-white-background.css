@@ -1,0 +1,435 @@
+/* ملف CSS لفرض الخلفية البيضاء بأولوية قصوى */
+
+/* فرض الخلفية البيضاء على جميع العناصر الأساسية */
+html {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    background-image: none !important;
+    background-attachment: scroll !important;
+    background-repeat: no-repeat !important;
+    background-position: center !important;
+    background-size: auto !important;
+}
+
+body {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    background-image: none !important;
+    background-attachment: scroll !important;
+    background-repeat: no-repeat !important;
+    background-position: center !important;
+    background-size: auto !important;
+}
+
+/* إزالة جميع العناصر الوهمية التي قد تحتوي على خلفيات */
+html::before,
+html::after,
+body::before,
+body::after {
+    display: none !important;
+    content: none !important;
+    background: none !important;
+    background-image: none !important;
+    background-color: transparent !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    position: absolute !important;
+    top: -9999px !important;
+    left: -9999px !important;
+    width: 0 !important;
+    height: 0 !important;
+    z-index: -9999 !important;
+}
+
+/* فرض الخلفية البيضاء على جميع الحاويات */
+.container,
+.container-sm,
+.container-md,
+.container-lg,
+.container-xl,
+.container-xxl,
+.container-fluid {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    background-image: none !important;
+}
+
+/* فرض الخلفية البيضاء على العناصر الرئيسية */
+main,
+section,
+article,
+aside,
+header,
+footer,
+div,
+span,
+p,
+h1, h2, h3, h4, h5, h6 {
+    background-image: none !important;
+}
+
+/* فرض الخلفية البيضاء على العناصر التي قد تحتوي على خلفيات متدرجة */
+*:not(.bg-gradient-primary):not(.bg-gradient-success):not(.bg-gradient-warning):not(.bg-gradient-info):not(.bg-gradient-danger):not(.bg-gradient-secondary) {
+    background-image: none !important;
+}
+
+/* فرض الخلفية البيضاء على العناصر المخصصة */
+.main-content,
+.content-wrapper,
+.page-wrapper,
+.app-wrapper,
+.layout-wrapper {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    background-image: none !important;
+}
+
+/* فرض الخلفية البيضاء على navbar */
+.navbar:not(.bg-primary):not(.bg-secondary):not(.bg-success):not(.bg-warning):not(.bg-danger):not(.bg-info):not(.bg-dark) {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    background-image: none !important;
+}
+
+/* فرض الخلفية البيضاء على البطاقات */
+.card:not(.bg-primary):not(.bg-secondary):not(.bg-success):not(.bg-warning):not(.bg-danger):not(.bg-info):not(.bg-dark):not(.bg-gradient-primary):not(.bg-gradient-success):not(.bg-gradient-warning):not(.bg-gradient-info):not(.bg-gradient-danger):not(.bg-gradient-secondary) {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    background-image: none !important;
+}
+
+.card-body:not(.bg-primary):not(.bg-secondary):not(.bg-success):not(.bg-warning):not(.bg-danger):not(.bg-info):not(.bg-dark) {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    background-image: none !important;
+}
+
+/* فرض الخلفية البيضاء على الجداول */
+.table:not(.table-primary):not(.table-secondary):not(.table-success):not(.table-warning):not(.table-danger):not(.table-info):not(.table-dark) {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    background-image: none !important;
+}
+
+.table td:not(.table-primary):not(.table-secondary):not(.table-success):not(.table-warning):not(.table-danger):not(.table-info):not(.table-dark) {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    background-image: none !important;
+}
+
+/* فرض الخلفية البيضاء على النماذج */
+.form-control:not(.is-invalid):not(.is-valid) {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    background-image: none !important;
+}
+
+.form-select:not(.is-invalid):not(.is-valid) {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    background-image: none !important;
+}
+
+/* فرض الخلفية البيضاء على القوائم المنسدلة */
+.dropdown-menu {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    background-image: none !important;
+}
+
+.dropdown-item:not(.active):not(:active) {
+    background: transparent !important;
+    background-color: transparent !important;
+    background-image: none !important;
+}
+
+/* فرض الخلفية البيضاء على الـ modals */
+.modal-content {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    background-image: none !important;
+}
+
+.modal-body {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    background-image: none !important;
+}
+
+/* فرض الخلفية البيضاء على الـ list groups */
+.list-group-item:not(.active):not(.list-group-item-primary):not(.list-group-item-secondary):not(.list-group-item-success):not(.list-group-item-warning):not(.list-group-item-danger):not(.list-group-item-info):not(.list-group-item-dark) {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    background-image: none !important;
+}
+
+/* فرض الخلفية البيضاء على الـ pagination */
+.page-link:not(.active) {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    background-image: none !important;
+}
+
+/* فرض الخلفية البيضاء على الـ tabs */
+.nav-tabs {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    background-image: none !important;
+}
+
+.nav-tabs .nav-link:not(.active) {
+    background: transparent !important;
+    background-color: transparent !important;
+    background-image: none !important;
+}
+
+.nav-tabs .nav-link.active {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    background-image: none !important;
+}
+
+/* فرض الخلفية البيضاء على الـ accordions */
+.accordion-item {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    background-image: none !important;
+}
+
+.accordion-body {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    background-image: none !important;
+}
+
+/* فرض الخلفية البيضاء على الـ offcanvas */
+.offcanvas {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    background-image: none !important;
+}
+
+.offcanvas-body {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    background-image: none !important;
+}
+
+/* فرض الخلفية البيضاء على الـ popovers */
+.popover {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    background-image: none !important;
+}
+
+.popover-body {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    background-image: none !important;
+}
+
+/* فرض الخلفية البيضاء على العناصر المخصصة للتطبيق */
+.dashboard-stats-card:not(.bg-gradient-primary):not(.bg-gradient-success):not(.bg-gradient-warning):not(.bg-gradient-info):not(.bg-gradient-danger):not(.bg-gradient-secondary) {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    background-image: none !important;
+}
+
+.patient-card,
+.current-patient-card,
+.waiting-list-card {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    background-image: none !important;
+}
+
+.patient-card .card-body,
+.current-patient-card .card-body,
+.waiting-list-card .card-body {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    background-image: none !important;
+}
+
+/* فرض الخلفية البيضاء على العناصر الأخرى */
+.sidebar:not(.bg-primary):not(.bg-secondary):not(.bg-success):not(.bg-warning):not(.bg-danger):not(.bg-info):not(.bg-dark) {
+    background: #f8fafc !important;
+    background-color: #f8fafc !important;
+    background-image: none !important;
+}
+
+.footer:not(.bg-primary):not(.bg-secondary):not(.bg-success):not(.bg-warning):not(.bg-danger):not(.bg-info):not(.bg-dark) {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    background-image: none !important;
+}
+
+/* إزالة جميع العناصر الوهمية من العناصر المخصصة */
+.dashboard-stats-card::before,
+.dashboard-stats-card::after,
+.patient-card::before,
+.patient-card::after,
+.current-patient-card::before,
+.current-patient-card::after,
+.waiting-list-card::before,
+.waiting-list-card::after {
+    background-image: none !important;
+    background-color: transparent !important;
+}
+
+/* فرض الخلفية البيضاء في جميع الحالات */
+@media screen {
+    html, body {
+        background: #ffffff !important;
+        background-color: #ffffff !important;
+        background-image: none !important;
+    }
+}
+
+@media print {
+    html, body {
+        background: #ffffff !important;
+        background-color: #ffffff !important;
+        background-image: none !important;
+    }
+    
+    * {
+        background-image: none !important;
+    }
+}
+
+@media (max-width: 1200px) {
+    html, body {
+        background: #ffffff !important;
+        background-color: #ffffff !important;
+        background-image: none !important;
+    }
+}
+
+@media (max-width: 992px) {
+    html, body {
+        background: #ffffff !important;
+        background-color: #ffffff !important;
+        background-image: none !important;
+    }
+}
+
+@media (max-width: 768px) {
+    html, body {
+        background: #ffffff !important;
+        background-color: #ffffff !important;
+        background-image: none !important;
+    }
+}
+
+@media (max-width: 576px) {
+    html, body {
+        background: #ffffff !important;
+        background-color: #ffffff !important;
+        background-image: none !important;
+    }
+}
+
+/* فرض الخلفية البيضاء في الوضع المظلم */
+@media (prefers-color-scheme: dark) {
+    html, body {
+        background: #ffffff !important;
+        background-color: #ffffff !important;
+        background-image: none !important;
+    }
+}
+
+/* فرض الخلفية البيضاء مع التباين العالي */
+@media (prefers-contrast: high) {
+    html, body {
+        background: #ffffff !important;
+        background-color: #ffffff !important;
+        background-image: none !important;
+    }
+}
+
+/* فرض الخلفية البيضاء مع تقليل الحركة */
+@media (prefers-reduced-motion: reduce) {
+    html, body {
+        background: #ffffff !important;
+        background-color: #ffffff !important;
+        background-image: none !important;
+    }
+}
+
+/* فرض الخلفية البيضاء في جميع الاتجاهات */
+@media (orientation: portrait) {
+    html, body {
+        background: #ffffff !important;
+        background-color: #ffffff !important;
+        background-image: none !important;
+    }
+}
+
+@media (orientation: landscape) {
+    html, body {
+        background: #ffffff !important;
+        background-color: #ffffff !important;
+        background-image: none !important;
+    }
+}
+
+/* إعادة تعيين نهائية شاملة */
+* {
+    background-attachment: scroll !important;
+}
+
+*:not(.bg-gradient-primary):not(.bg-gradient-success):not(.bg-gradient-warning):not(.bg-gradient-info):not(.bg-gradient-danger):not(.bg-gradient-secondary):not(.bg-primary):not(.bg-secondary):not(.bg-success):not(.bg-warning):not(.bg-danger):not(.bg-info):not(.bg-dark):not(.table-primary):not(.table-secondary):not(.table-success):not(.table-warning):not(.table-danger):not(.table-info):not(.table-dark):not(.list-group-item-primary):not(.list-group-item-secondary):not(.list-group-item-success):not(.list-group-item-warning):not(.list-group-item-danger):not(.list-group-item-info):not(.list-group-item-dark):not(.alert-primary):not(.alert-secondary):not(.alert-success):not(.alert-warning):not(.alert-danger):not(.alert-info):not(.alert-dark):not(.badge):not(.btn):not(.active):not(:active) {
+    background-image: none !important;
+}
+
+/* تأكيد نهائي للخلفية البيضاء */
+html {
+    background: white !important;
+}
+
+body {
+    background: white !important;
+}
+
+.container,
+.container-fluid {
+    background: white !important;
+}
+
+main {
+    background: white !important;
+}
+
+/* إزالة أي تأثيرات خلفية أخرى */
+.fade-in,
+.slide-in-right,
+.animate-in {
+    background-image: none !important;
+}
+
+/* تأكيد أن الخلفية البيضاء تطبق حتى مع JavaScript */
+[style*="background"] {
+    background: white !important;
+}
+
+[style*="background-image"] {
+    background-image: none !important;
+}
+
+[style*="background-color"] {
+    background-color: white !important;
+}
+
+/* تأكيد نهائي للخلفية البيضاء مع أولوية قصوى */
+html, body, .container, .container-fluid, main, .card, .table, .form-control, .dropdown-menu, .modal-content, .list-group-item, .nav-tabs, .accordion-item, .offcanvas, .popover {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    background-image: none !important;
+    background-attachment: scroll !important;
+    background-repeat: no-repeat !important;
+    background-position: center !important;
+    background-size: auto !important;
+    background-origin: padding-box !important;
+    background-clip: border-box !important;
+}

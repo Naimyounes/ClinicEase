@@ -2,127 +2,478 @@
 
 {% block content %}
 <div class="container-fluid">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1><i class="fas fa-list-ul me-2"></i>حالة قائمة الانتظار</h1>
+    <!-- Header moderne avec animations -->
+    <div class="d-flex justify-content-between align-items-center mb-4 animate__animated animate__fadeInDown">
         <div>
+            <h1 class="text-gradient mb-1">
+                <i class="fas fa-list-ul me-2 text-primary"></i>État de la file d'attente
+            </h1>
+            <p class="text-muted mb-0">
+                <i class="fas fa-clock me-1"></i>Gestion en temps réel des patients
+                <span class="ms-3">
+                    <i class="fas fa-calendar me-1"></i><span id="current-date"></span>
+                </span>
+                <span class="ms-3 badge bg-info">
+                    <i class="fas fa-sync-alt me-1"></i>Mise à jour automatique
+                </span>
+            </p>
+        </div>
+        <div class="d-flex gap-2">
+            <button class="btn btn-outline-primary btn-refresh" onclick="refreshPage()" title="Actualiser">
+                <i class="fas fa-sync-alt"></i>
+                <span class="d-none d-md-inline ms-1">Actualiser</span>
+            </button>
             <a href="{{ url_for('doctor.dashboard') }}" class="btn btn-secondary">
-                <i class="fas fa-arrow-left me-1"></i>العودة للوحة التحكم
+                <i class="fas fa-arrow-left me-1"></i>Retour
             </a>
         </div>
     </div>
 
-    <!-- المريض الحالي -->
-    {% if called_ticket %}
-    <div class="card mb-4 border-primary">
-        <div class="card-header bg-primary text-white">
-            <h5 class="mb-0">
-                <i class="fas fa-user-md me-2"></i>المريض الحالي
-            </h5>
+    <!-- Statistiques rapides améliorées -->
+    <div class="row mb-4">
+        <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 mb-3">
+            <div class="stat-card bg-gradient-primary">
+                <div class="stat-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>{{ (priority_tickets|length) + (regular_tickets|length) }}</h3>
+                    <p>Total en attente</p>
+                </div>
+            </div>
         </div>
-        <div class="card-body">
+        <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 mb-3">
+            <div class="stat-card bg-gradient-danger">
+                <div class="stat-icon">
+                    <i class="fas fa-exclamation-circle"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>{{ (priority_tickets|selectattr('priority', 'equalto', 2)|list)|length }}</h3>
+                    <p>Patients critiques</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 mb-3">
+            <div class="stat-card bg-gradient-warning">
+                <div class="stat-icon">
+                    <i class="fas fa-star"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>{{ (priority_tickets|selectattr('priority', 'equalto', 1)|list)|length }}</h3>
+                    <p>Patients prioritaires</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 mb-3">
+            <div class="stat-card bg-gradient-info">
+                <div class="stat-icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>{{ regular_tickets|length }}</h3>
+                    <p>Patients réguliers</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 mb-3">
+            <div class="stat-card bg-gradient-success">
+                <div class="stat-icon">
+                    <i class="fas fa-user-md"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>{{ '1' if called_ticket else '0' }}</h3>
+                    <p>Patient actuel</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 mb-3">
+            <div class="stat-card bg-gradient-secondary">
+                <div class="stat-icon">
+                    <i class="fas fa-hourglass-half"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 id="waiting-time">--</h3>
+                    <p>Temps d'attente moyen</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Patient actuel amélioré -->
+    {% if called_ticket %}
+    <div class="card mb-4 current-patient-card shadow-lg">
+        <div class="card-header {% if called_ticket.priority == 2 %}bg-gradient-danger text-white{% elif called_ticket.priority == 1 %}bg-gradient-warning text-dark{% else %}bg-gradient-primary text-white{% endif %}">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fas fa-user-md me-2"></i>Patient en consultation
+                    {% if called_ticket.priority == 2 %}
+                        <span class="badge bg-danger ms-2 pulse-badge critical-pulse-badge">
+                            <i class="fas fa-exclamation-circle me-1"></i>CRITIQUE
+                        </span>
+                    {% elif called_ticket.priority == 1 %}
+                        <span class="badge bg-warning text-dark ms-2 pulse-badge priority-pulse-badge">
+                            <i class="fas fa-star me-1"></i>PRIORITÉ
+                        </span>
+                    {% endif %}
+                </h5>
+                <div class="status-indicator">
+                    <div class="pulse-dot {% if called_ticket.priority == 2 %}critical-pulse-dot{% elif called_ticket.priority == 1 %}priority-pulse-dot{% endif %}"></div>
+                    <small class="ms-2 fw-bold">EN COURS</small>
+                </div>
+            </div>
+        </div>
+        <div class="card-body bg-light">
             <div class="row align-items-center">
                 <div class="col-md-8">
                     <div class="d-flex align-items-center">
-                        <div class="avatar-circle bg-primary text-white me-3">
+                        <div class="avatar-circle {% if called_ticket.priority == 2 %}bg-gradient-danger text-white{% elif called_ticket.priority == 1 %}bg-gradient-warning text-dark{% else %}bg-gradient-primary text-white{% endif %} me-3">
                             {{ called_ticket.patient.full_name[0] }}
+                            {% if called_ticket.priority == 2 %}
+                                <div class="avatar-overlay critical-overlay">
+                                    <i class="fas fa-exclamation-circle"></i>
+                                </div>
+                            {% elif called_ticket.priority == 1 %}
+                                <div class="avatar-overlay priority-overlay">
+                                    <i class="fas fa-star"></i>
+                                </div>
+                            {% endif %}
                         </div>
                         <div>
-                            <h4 class="mb-1">{{ called_ticket.patient.full_name }}</h4>
-                            <p class="text-muted mb-0">
-                                <i class="fas fa-phone me-1"></i>{{ called_ticket.patient.phone }}
-                            </p>
+                            <h4 class="mb-1 {% if called_ticket.priority == 2 %}text-danger{% elif called_ticket.priority == 1 %}text-warning{% else %}text-primary{% endif %}">
+                                {{ called_ticket.patient.full_name }}
+                                {% if called_ticket.priority == 2 %}
+                                    <i class="fas fa-exclamation-circle text-danger ms-2 critical-glow"></i>
+                                {% elif called_ticket.priority == 1 %}
+                                    <i class="fas fa-star text-warning ms-2 star-glow"></i>
+                                {% endif %}
+                            </h4>
+                            <div class="patient-details">
+                                <p class="text-muted mb-1">
+                                    <i class="fas fa-phone me-1"></i>{{ called_ticket.patient.phone }}
+                                    {% if called_ticket.patient.gender %}
+                                        <span class="ms-3">
+                                            <i class="fas fa-{{ 'mars' if called_ticket.patient.gender == 'male' else 'venus' if called_ticket.patient.gender == 'female' else 'genderless' }} me-1"></i>
+                                            {{ 'Homme' if called_ticket.patient.gender == 'male' else 'Femme' if called_ticket.patient.gender == 'female' else 'Non spécifié' }}
+                                        </span>
+                                    {% endif %}
+                                </p>
+                                {% if called_ticket.patient.age %}
+                                <p class="text-muted mb-0">
+                                    <i class="fas fa-birthday-cake me-1"></i>{{ called_ticket.patient.age }} ans
+                                    {% if called_ticket.patient.blood_group %}
+                                        <span class="ms-3">
+                                            <i class="fas fa-tint me-1"></i>{{ called_ticket.patient.blood_group }}
+                                        </span>
+                                    {% endif %}
+                                </p>
+                                {% endif %}
+                            </div>
                         </div>
                     </div>
                 </div>
                 <div class="col-md-4 text-center">
-                    {% if called_ticket.priority == 1 %}
-                        <span class="badge bg-warning text-dark fs-6 px-3 py-2">
-                            <i class="fas fa-star me-1"></i>{{ called_ticket.display_number }} - أولوية
-                        </span>
+                    {% if called_ticket.priority == 2 %}
+                        <div class="priority-display mb-3">
+                            <div class="critical-badge">
+                                <span class="badge bg-danger fs-3 px-4 py-3 rounded-pill critical-pulse-strong">
+                                    <i class="fas fa-exclamation-circle me-2"></i>N° {{ called_ticket.display_number }}
+                                    <br><small class="fs-6">PATIENT CRITIQUE</small>
+                                </span>
+                            </div>
+                            <div class="mt-2">
+                                <small class="text-danger fw-bold">
+                                    <i class="fas fa-ambulance me-1"></i>Urgence médicale
+                                </small>
+                            </div>
+                        </div>
+                    {% elif called_ticket.priority == 1 %}
+                        <div class="priority-display mb-3">
+                            <div class="priority-badge">
+                                <span class="badge bg-warning text-dark fs-4 px-4 py-3 rounded-pill priority-pulse-strong">
+                                    <i class="fas fa-star me-2"></i>N° {{ called_ticket.display_number }}
+                                    <br><small class="fs-6">PATIENT PRIORITAIRE</small>
+                                </span>
+                            </div>
+                            <div class="mt-2">
+                                <small class="text-warning fw-bold">
+                                    <i class="fas fa-calendar-check me-1"></i>Patient avec rendez-vous
+                                </small>
+                            </div>
+                        </div>
                     {% else %}
-                        <span class="badge bg-primary fs-6 px-3 py-2">
-                            رقم {{ called_ticket.display_number }}
-                        </span>
+                        <div class="priority-display mb-3">
+                            <span class="badge bg-primary fs-4 px-4 py-3 rounded-pill">
+                                N° {{ called_ticket.display_number }}
+                            </span>
+                            <div class="mt-2">
+                                <small class="text-primary fw-bold">
+                                    <i class="fas fa-user me-1"></i>Patient sans rendez-vous
+                                </small>
+                            </div>
+                        </div>
                     {% endif %}
-                    <br><small class="text-muted mt-2 d-block">
-                        مستدعى منذ: {{ called_ticket.created_at.strftime('%H:%M') }}
+                    <div class="consultation-time">
+                        <small class="text-muted">
+                            <i class="fas fa-clock me-1"></i>Appelé à: {{ called_ticket.created_at.strftime('%H:%M') }}
+                        </small>
+                        {% if called_ticket.appointment %}
+                            <br>
+                            <small class="text-info">
+                                <i class="fas fa-calendar-alt me-1"></i>RDV prévu: {{ called_ticket.appointment.appointment_date.strftime('%H:%M') }}
+                            </small>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="card mb-4 border-info shadow">
+        <div class="card-body text-center py-5">
+            <div class="empty-consultation">
+                <i class="fas fa-user-slash fa-4x text-muted mb-3 opacity-50"></i>
+                <h5 class="text-muted">Aucun patient en consultation</h5>
+                <p class="text-muted">Appelez le prochain patient pour commencer la consultation</p>
+                {% if waiting_tickets %}
+                <div class="mt-3">
+                    <small class="text-info">
+                        <i class="fas fa-users me-1"></i>{{ waiting_tickets|length }} patient(s) en attente
                     </small>
                 </div>
+                {% endif %}
             </div>
         </div>
     </div>
     {% endif %}
 
     <div class="row">
-        <!-- تذاكر الأولوية -->
-        <div class="col-lg-6 mb-4">
-            <div class="card border-warning">
-                <div class="card-header bg-warning text-dark">
-                    <h5 class="mb-0">
-                        <i class="fas fa-star me-2"></i>تذاكر الأولوية (المواعيد)
-                        <span class="badge bg-dark ms-2">{{ priority_tickets|length }}</span>
-                    </h5>
+        <!-- Patients critiques -->
+        {% set critical_tickets = priority_tickets|selectattr('priority', 'equalto', 2)|list %}
+        {% if critical_tickets %}
+        <div class="col-lg-4 mb-4">
+            <div class="card critical-card animate__animated animate__fadeInLeft">
+                <div class="card-header bg-gradient-danger text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="fas fa-exclamation-circle me-2"></i>Patients critiques
+                        </h5>
+                        <div class="d-flex align-items-center">
+                            <span class="badge bg-light text-danger ms-2 px-3 py-2 rounded-pill fw-bold">{{ critical_tickets|length }}</span>
+                            <div class="critical-indicator ms-2"></div>
+                        </div>
+                    </div>
+                    <small class="text-white opacity-75">
+                        <i class="fas fa-ambulance me-1"></i>Urgences médicales
+                    </small>
                 </div>
                 <div class="card-body p-0">
-                    {% if priority_tickets %}
-                        <div class="list-group list-group-flush">
-                            {% for ticket in priority_tickets %}
-                                <div class="list-group-item d-flex justify-content-between align-items-center">
-                                    <div class="d-flex align-items-center">
-                                        <span class="badge bg-warning text-dark rounded-pill me-2">{{ ticket.display_number }}</span>
-                                        <div>
-                                            <div class="fw-bold">{{ ticket.patient.full_name }}</div>
-                                            <small class="text-muted">
-                                                وصل: {{ ticket.created_at.strftime('%H:%M') }}
-                                                {% if ticket.appointment %}
-                                                    | موعد: {{ ticket.appointment.appointment_date.strftime('%H:%M') }}
-                                                {% endif %}
-                                            </small>
+                    <div class="list-group list-group-flush">
+                        {% for ticket in critical_tickets %}
+                            <div class="list-group-item critical-item emergency-item d-flex justify-content-between align-items-center">
+                                <div class="d-flex align-items-center w-100">
+                                    <div class="critical-indicator me-3">
+                                        <div class="critical-number">
+                                            <span class="badge bg-danger text-white rounded-pill px-3 py-2 fs-5 critical-badge-strong">
+                                                <i class="fas fa-exclamation-circle me-1"></i>{{ ticket.display_number }}
+                                            </span>
                                         </div>
                                     </div>
-                                    <i class="fas fa-star text-warning"></i>
+                                    <div class="patient-info flex-grow-1">
+                                        <div class="d-flex justify-content-between align-items-start">
+                                            <div>
+                                                <h6 class="fw-bold text-danger mb-1">
+                                                    {{ ticket.patient.full_name }}
+                                                    <span class="badge bg-danger text-white ms-2 critical-badge">
+                                                        <i class="fas fa-exclamation-circle me-1"></i>CRITIQUE
+                                                    </span>
+                                                </h6>
+                                                <div class="patient-details">
+                                                    <small class="text-muted d-block">
+                                                        <i class="fas fa-clock me-1"></i>Arrivé: {{ ticket.created_at.strftime('%H:%M') }}
+                                                    </small>
+                                                    {% if ticket.patient.phone %}
+                                                    <small class="text-muted d-block">
+                                                        <i class="fas fa-phone me-1"></i>{{ ticket.patient.phone }}
+                                                    </small>
+                                                    {% endif %}
+                                                    {% if ticket.notes %}
+                                                    <small class="text-danger d-block fw-bold">
+                                                        <i class="fas fa-sticky-note me-1"></i>{{ ticket.notes }}
+                                                    </small>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                            <div class="critical-status text-center">
+                                                <div class="critical-icon">
+                                                    <i class="fas fa-exclamation-circle text-danger fa-2x critical-pulse"></i>
+                                                </div>
+                                                <div class="position-badge">
+                                                    <span class="badge bg-danger text-white">
+                                                        {{ loop.index }}{{ 'er' if loop.index == 1 else 'ème' }}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Patients prioritaires -->
+        {% set priority_only_tickets = priority_tickets|selectattr('priority', 'equalto', 1)|list %}
+        <div class="col-lg-{% if critical_tickets %}4{% else %}6{% endif %} mb-4">
+            <div class="card priority-card animate__animated animate__fadeInLeft">
+                <div class="card-header bg-gradient-warning text-dark">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="fas fa-star me-2"></i>Patients prioritaires
+                        </h5>
+                        <div class="d-flex align-items-center">
+                            <span class="badge bg-dark ms-2 px-3 py-2 rounded-pill">{{ priority_only_tickets|length }}</span>
+                            {% if priority_only_tickets %}
+                                <div class="priority-indicator ms-2"></div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <small class="text-dark opacity-75">
+                        <i class="fas fa-calendar-check me-1"></i>Patients avec rendez-vous
+                    </small>
+                </div>
+                <div class="card-body p-0">
+                    {% if priority_only_tickets %}
+                        <div class="list-group list-group-flush scrollable-list">
+                            {% for ticket in priority_only_tickets %}
+                                <div class="list-group-item priority-item d-flex justify-content-between align-items-center">
+                                    <div class="d-flex align-items-center w-100">
+                                        <div class="priority-indicators me-3">
+                                            <div class="priority-number">
+                                                <span class="badge bg-warning text-dark rounded-pill px-3 py-2 fs-5 urgent-badge">
+                                                    <i class="fas fa-star me-1 star-pulse"></i>{{ ticket.display_number }}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="patient-info flex-grow-1">
+                                            <div class="d-flex justify-content-between align-items-start">
+                                                <div>
+                                                    <h6 class="fw-bold text-warning mb-1">
+                                                        {{ ticket.patient.full_name }}
+                                                        <span class="badge bg-warning text-dark ms-2 urgent-badge">
+                                                            <i class="fas fa-star me-1"></i>PRIORITÉ
+                                                        </span>
+                                                    </h6>
+                                                    <div class="patient-details">
+                                                        <small class="text-muted d-block">
+                                                            <i class="fas fa-clock me-1"></i>Arrivé: {{ ticket.created_at.strftime('%H:%M') }}
+                                                        </small>
+                                                        {% if ticket.patient.phone %}
+                                                        <small class="text-muted d-block">
+                                                            <i class="fas fa-phone me-1"></i>{{ ticket.patient.phone }}
+                                                        </small>
+                                                        {% endif %}
+                                                        {% if ticket.appointment %}
+                                                        <small class="text-info d-block">
+                                                            <i class="fas fa-calendar-check me-1"></i>RDV: {{ ticket.appointment.appointment_date.strftime('%H:%M') }}
+                                                        </small>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                                <div class="priority-status text-center">
+                                                    <div class="priority-icon">
+                                                        <i class="fas fa-star text-warning fa-2x star-glow"></i>
+                                                    </div>
+                                                    <div class="position-badge">
+                                                        <span class="badge bg-warning text-dark">
+                                                            {{ loop.index }}{{ 'er' if loop.index == 1 else 'ème' }}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             {% endfor %}
                         </div>
                     {% else %}
-                        <div class="text-center py-4">
-                            <i class="fas fa-star fa-2x text-muted mb-2"></i>
-                            <p class="text-muted mb-0">لا توجد تذاكر أولوية</p>
+                        <div class="empty-state text-center py-5">
+                            <div class="empty-icon mb-3">
+                                <i class="fas fa-star fa-3x text-muted opacity-50"></i>
+                            </div>
+                            <h6 class="text-muted">Aucun patient prioritaire</h6>
+                            <p class="text-muted small mb-0">Les patients avec rendez-vous apparaîtront ici</p>
                         </div>
                     {% endif %}
                 </div>
             </div>
         </div>
 
-        <!-- التذاكر العادية -->
-        <div class="col-lg-6 mb-4">
-            <div class="card border-primary">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0">
-                        <i class="fas fa-users me-2"></i>التذاكر العادية
-                        <span class="badge bg-light text-primary ms-2">{{ regular_tickets|length }}</span>
-                    </h5>
+        <!-- Patients réguliers -->
+        <div class="col-lg-{% if critical_tickets %}4{% else %}6{% endif %} mb-4">
+            <div class="card regular-card animate__animated animate__fadeInRight">
+                <div class="card-header bg-gradient-primary text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="fas fa-users me-2"></i>Patients réguliers
+                        </h5>
+                        <span class="badge bg-light text-primary ms-2 px-3 py-2 rounded-pill">{{ regular_tickets|length }}</span>
+                    </div>
+                    <small class="text-white opacity-75">
+                        <i class="fas fa-user-plus me-1"></i>Patients sans rendez-vous
+                    </small>
                 </div>
                 <div class="card-body p-0">
                     {% if regular_tickets %}
-                        <div class="list-group list-group-flush" style="max-height: 400px; overflow-y: auto;">
+                        <div class="list-group list-group-flush scrollable-list">
                             {% for ticket in regular_tickets %}
-                                <div class="list-group-item d-flex justify-content-between align-items-center">
-                                    <div class="d-flex align-items-center">
-                                        <span class="badge bg-primary rounded-pill me-2">{{ ticket.display_number }}</span>
-                                        <div>
-                                            <div class="fw-bold">{{ ticket.patient.full_name }}</div>
-                                            <small class="text-muted">وصل: {{ ticket.created_at.strftime('%H:%M') }}</small>
+                                <div class="list-group-item regular-item d-flex justify-content-between align-items-center">
+                                    <div class="d-flex align-items-center w-100">
+                                        <div class="regular-indicator me-3">
+                                            <span class="badge bg-primary rounded-pill px-3 py-2 fs-6">
+                                                {{ ticket.display_number }}
+                                            </span>
+                                        </div>
+                                        <div class="patient-info flex-grow-1">
+                                            <div class="d-flex justify-content-between align-items-start">
+                                                <div>
+                                                    <h6 class="fw-bold text-dark mb-1">{{ ticket.patient.full_name }}</h6>
+                                                    <div class="patient-details">
+                                                        <small class="text-muted d-block">
+                                                            <i class="fas fa-clock me-1"></i>Arrivé: {{ ticket.created_at.strftime('%H:%M') }}
+                                                        </small>
+                                                        {% if ticket.patient.phone %}
+                                                        <small class="text-muted d-block">
+                                                            <i class="fas fa-phone me-1"></i>{{ ticket.patient.phone }}
+                                                        </small>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                                <div class="regular-status text-center">
+                                                    <div class="regular-icon">
+                                                        <i class="fas fa-user text-primary fa-lg"></i>
+                                                    </div>
+                                                    <div class="position-badge">
+                                                        <span class="badge bg-secondary text-white">
+                                                            {{ loop.index }}{{ 'er' if loop.index == 1 else 'ème' }}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
-                                    <i class="fas fa-clock text-muted"></i>
                                 </div>
                             {% endfor %}
                         </div>
                     {% else %}
-                        <div class="text-center py-4">
-                            <i class="fas fa-users fa-2x text-muted mb-2"></i>
-                            <p class="text-muted mb-0">لا توجد تذاكر عادية</p>
+                        <div class="empty-state text-center py-5">
+                            <div class="empty-icon mb-3">
+                                <i class="fas fa-users fa-3x text-muted opacity-50"></i>
+                            </div>
+                            <h6 class="text-muted">Aucun patient régulier</h6>
+                            <p class="text-muted small mb-0">Les patients sans rendez-vous apparaîtront ici</p>
                         </div>
                     {% endif %}
                 </div>
@@ -130,59 +481,1155 @@
         </div>
     </div>
 
-    <!-- أزرار التحكم -->
+    <!-- Actions rapides -->
     <div class="row">
         <div class="col-12">
-            <div class="card">
-                <div class="card-header bg-success text-white">
-                    <h5 class="mb-0">
-                        <i class="fas fa-cogs me-2"></i>إجراءات سريعة
-                    </h5>
+            <div class="card action-card animate__animated animate__fadeInUp">
+                <div class="card-header bg-gradient-success text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="fas fa-cogs me-2"></i>Actions rapides
+                        </h5>
+                        <div class="action-indicator"></div>
+                    </div>
                 </div>
-                <div class="card-body text-center">
+                <div class="card-body">
                     {% if waiting_tickets %}
-                        <form method="POST" action="{{ url_for('doctor.call_next_patient') }}" class="d-inline me-3">
-                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                            <button type="submit" class="btn btn-success btn-lg">
-                                <i class="fas fa-bullhorn me-2"></i>استدعاء التالي
-                            </button>
-                        </form>
-                        
                         {% set next_ticket = waiting_tickets[0] %}
-                        <div class="mt-3">
-                            <small class="text-muted">
-                                التالي: 
-                                {% if next_ticket.priority == 1 %}
-                                    <span class="badge bg-warning text-dark">{{ next_ticket.display_number }}</span>
-                                    {{ next_ticket.patient.full_name }} (أولوية - لديه موعد)
-                                {% else %}
-                                    <span class="badge bg-primary">{{ next_ticket.display_number }}</span>
-                                    {{ next_ticket.patient.full_name }}
-                                {% endif %}
-                            </small>
+                        <div class="row align-items-center">
+                            <div class="col-md-8">
+                                <div class="next-patient-info">
+                                    <h6 class="text-muted mb-3">
+                                        <i class="fas fa-arrow-right me-1"></i>Prochain patient à appeler:
+                                    </h6>
+                                    <div class="next-patient-card p-3 rounded {% if next_ticket.priority == 1 %}bg-warning bg-opacity-10 border border-warning{% else %}bg-primary bg-opacity-10 border border-primary{% endif %}">
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar-circle {% if next_ticket.priority == 1 %}bg-warning text-dark{% else %}bg-primary text-white{% endif %} me-3">
+                                                {{ next_ticket.patient.full_name[0] }}
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <h5 class="mb-2 {% if next_ticket.priority == 1 %}text-warning{% else %}text-primary{% endif %}">
+                                                    {{ next_ticket.patient.full_name }}
+                                                    {% if next_ticket.priority == 1 %}
+                                                        <i class="fas fa-star text-warning ms-2 star-glow"></i>
+                                                    {% endif %}
+                                                </h5>
+                                                <div class="patient-badges mb-2">
+                                                    {% if next_ticket.priority == 1 %}
+                                                        <span class="badge bg-danger text-white px-3 py-2 rounded-pill me-2 emergency-pulse">
+                                                            <i class="fas fa-exclamation-triangle me-1"></i>{{ next_ticket.display_number }} - URGENT
+                                                        </span>
+                                                        <span class="badge bg-warning text-dark px-2 py-1">
+                                                            <i class="fas fa-calendar-check me-1"></i>Avec RDV
+                                                        </span>
+                                                    {% else %}
+                                                        <span class="badge bg-primary px-3 py-2 rounded-pill">
+                                                            <i class="fas fa-user me-1"></i>N° {{ next_ticket.display_number }}
+                                                        </span>
+                                                        <span class="badge bg-secondary px-2 py-1">
+                                                            Sans rendez-vous
+                                                        </span>
+                                                    {% endif %}
+                                                </div>
+                                                <small class="text-muted">
+                                                    <i class="fas fa-clock me-1"></i>En attente depuis: {{ next_ticket.created_at.strftime('%H:%M') }}
+                                                    {% if next_ticket.patient.phone %}
+                                                        <span class="ms-3">
+                                                            <i class="fas fa-phone me-1"></i>{{ next_ticket.patient.phone }}
+                                                        </span>
+                                                    {% endif %}
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 text-center">
+                                <div class="call-action">
+                                    <form method="POST" action="{{ url_for('doctor.call_next_patient') }}" class="d-inline">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                        <button type="submit" class="btn {% if next_ticket.priority == 1 %}btn-danger{% else %}btn-success{% endif %} btn-lg px-4 py-3 call-button {% if next_ticket.priority == 1 %}emergency-call-btn{% endif %}">
+                                            <i class="fas fa-bullhorn me-2"></i>
+                                            {% if next_ticket.priority == 1 %}
+                                                Appeler URGENT
+                                            {% else %}
+                                                Appeler patient
+                                            {% endif %}
+                                        </button>
+                                    </form>
+                                    {% if next_ticket.priority == 1 %}
+                                    <div class="mt-2">
+                                        <small class="text-danger fw-bold">
+                                            <i class="fas fa-exclamation-triangle me-1"></i>Patient prioritaire
+                                        </small>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
                         </div>
                     {% else %}
-                        <div class="alert alert-info">
-                            <i class="fas fa-info-circle me-2"></i>
-                            لا توجد تذاكر في قائمة الانتظار
+                        <div class="empty-queue text-center py-4">
+                            <div class="empty-icon mb-3">
+                                <i class="fas fa-check-circle fa-4x text-success opacity-75"></i>
+                            </div>
+                            <h5 class="text-success mb-2">Excellente nouvelle !</h5>
+                            <p class="text-muted mb-0">Aucun patient en attente - Tous les patients ont été examinés</p>
                         </div>
                     {% endif %}
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Bouton d'actualisation automatique -->
+    <div class="row mt-3">
+        <div class="col-12 text-center">
+            <div class="auto-refresh-info">
+                <small class="text-muted">
+                    <i class="fas fa-sync-alt me-1"></i>
+                    Cette page se met à jour automatiquement toutes les 30 secondes
+                </small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Actions rapides -->
+    {% if waiting_tickets %}
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card action-card shadow-lg">
+                <div class="card-body text-center py-4">
+                    <h5 class="mb-3">
+                        <i class="fas fa-bullhorn me-2 text-primary"></i>Actions rapides
+                    </h5>
+                    <div class="d-flex justify-content-center gap-3 flex-wrap">
+                        <form method="POST" action="{{ url_for('doctor.call_next_patient') }}" class="d-inline">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                            {% if critical_tickets %}
+                                <button type="submit" class="btn btn-danger btn-lg px-4 py-3 emergency-call-btn">
+                                    <i class="fas fa-exclamation-circle me-2"></i>
+                                    Appeler le patient critique
+                                    <br><small class="opacity-75">{{ critical_tickets[0].patient.full_name }} - N° {{ critical_tickets[0].display_number }}</small>
+                                </button>
+                            {% elif priority_only_tickets %}
+                                <button type="submit" class="btn btn-warning btn-lg px-4 py-3 priority-call-btn">
+                                    <i class="fas fa-star me-2"></i>
+                                    Appeler le patient prioritaire
+                                    <br><small class="opacity-75">{{ priority_only_tickets[0].patient.full_name }} - N° {{ priority_only_tickets[0].display_number }}</small>
+                                </button>
+                            {% elif regular_tickets %}
+                                <button type="submit" class="btn btn-primary btn-lg px-4 py-3 call-button">
+                                    <i class="fas fa-user me-2"></i>
+                                    Appeler le prochain patient
+                                    <br><small class="opacity-75">{{ regular_tickets[0].patient.full_name }} - N° {{ regular_tickets[0].display_number }}</small>
+                                </button>
+                            {% endif %}
+                        </form>
+                        
+                        <a href="{{ url_for('doctor.dashboard') }}" class="btn btn-outline-secondary btn-lg px-4 py-3">
+                            <i class="fas fa-tachometer-alt me-2"></i>
+                            Retour au tableau de bord
+                        </a>
+                        
+                        <button class="btn btn-outline-info btn-lg px-4 py-3" onclick="refreshPage()">
+                            <i class="fas fa-sync-alt me-2"></i>
+                            Actualiser la liste
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
 </div>
 
 <style>
+/* Animations et effets */
+@import url('https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css');
+
+/* Variables CSS */
+:root {
+    --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --warning-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    --info-gradient: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+    --emergency-gradient: linear-gradient(135deg, #ff6b6b 0%, #feca57 100%);
+    --danger-gradient: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%);
+    --shadow-soft: 0 10px 30px rgba(0,0,0,0.1);
+    --shadow-hover: 0 15px 40px rgba(0,0,0,0.15);
+    --shadow-emergency: 0 0 20px rgba(220, 53, 69, 0.3);
+}
+
+/* Titre avec gradient */
+.text-gradient {
+    background: var(--primary-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Cartes de statistiques */
+.stat-card {
+    background: white;
+    border-radius: 15px;
+    padding: 1.5rem;
+    box-shadow: var(--shadow-soft);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: inherit;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-hover);
+}
+
+.stat-card .stat-icon {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    font-size: 2rem;
+    opacity: 0.3;
+}
+
+.stat-card .stat-content h3 {
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+    color: white;
+}
+
+.stat-card .stat-content p {
+    color: rgba(255,255,255,0.9);
+    margin: 0;
+    font-weight: 500;
+}
+
+.bg-gradient-primary { background: var(--primary-gradient); }
+.bg-gradient-warning { background: var(--warning-gradient); }
+.bg-gradient-success { background: var(--success-gradient); }
+.bg-gradient-info { background: var(--info-gradient); }
+.bg-gradient-emergency { background: var(--emergency-gradient); }
+.bg-gradient-danger { background: var(--danger-gradient); }
+
+/* Avatar circle amélioré */
 .avatar-circle {
-    width: 50px;
-    height: 50px;
+    width: 60px;
+    height: 60px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.2rem;
+    font-size: 1.5rem;
     font-weight: bold;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    position: relative;
+}
+
+.avatar-circle::after {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    border-radius: 50%;
+    background: inherit;
+    z-index: -1;
+    opacity: 0.3;
+}
+
+/* Carte patient actuel */
+.current-patient-card {
+    border: none;
+    box-shadow: var(--shadow-soft);
+    border-radius: 15px;
+    overflow: hidden;
+}
+
+.pulse-indicator {
+    width: 12px;
+    height: 12px;
+    background: #fff;
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.2); opacity: 0.7; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+/* Cartes de patients */
+.priority-card, .regular-card, .action-card {
+    border: none;
+    border-radius: 15px;
+    box-shadow: var(--shadow-soft);
+    transition: all 0.3s ease;
+}
+
+.priority-card:hover, .regular-card:hover, .action-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-hover);
+}
+
+.priority-indicator {
+    width: 8px;
+    height: 8px;
+    background: #ffc107;
+    border-radius: 50%;
+    animation: blink 1.5s infinite;
+}
+
+@keyframes blink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0.3; }
+}
+
+.action-indicator {
+    width: 10px;
+    height: 10px;
+    background: #fff;
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+}
+
+/* Items de liste améliorés */
+.priority-item, .regular-item {
+    border: none;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+    padding: 1rem;
+    transition: all 0.3s ease;
+}
+
+.priority-item:hover, .regular-item:hover {
+    background: rgba(0,0,0,0.02);
+    transform: translateX(5px);
+}
+
+.priority-item:last-child, .regular-item:last-child {
+    border-bottom: none;
+}
+
+.patient-info {
+    flex: 1;
+}
+
+.patient-details {
+    margin-top: 0.25rem;
+}
+
+.waiting-time {
+    text-align: center;
+    margin-top: 0.25rem;
+}
+
+/* Liste scrollable */
+.scrollable-list {
+    max-height: 450px;
+    overflow-y: auto;
+}
+
+.scrollable-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.scrollable-list::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.scrollable-list::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+}
+
+.scrollable-list::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+
+/* États vides */
+.empty-state {
+    padding: 3rem 1rem;
+}
+
+.empty-icon {
+    opacity: 0.5;
+}
+
+/* Bouton d'appel */
+.call-button {
+    border-radius: 25px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+}
+
+.call-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+}
+
+/* Badges améliorés */
+.badge {
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+/* Responsive Design Amélioré */
+@media (max-width: 1200px) {
+    .col-xl-2 {
+        flex: 0 0 auto;
+        width: 20%;
+    }
+}
+
+@media (max-width: 992px) {
+    .col-lg-4 {
+        flex: 0 0 auto;
+        width: 100%;
+        margin-bottom: 2rem;
+    }
+    
+    .stat-card {
+        margin-bottom: 1rem;
+    }
+    
+    .scrollable-list {
+        max-height: 300px;
+    }
+}
+
+@media (max-width: 768px) {
+    .stat-card {
+        margin-bottom: 1rem;
+    }
+    
+    .avatar-circle {
+        width: 50px;
+        height: 50px;
+        font-size: 1.2rem;
+    }
+    
+    .call-button, .priority-call-btn, .emergency-call-btn {
+        width: 100%;
+        margin-bottom: 1rem;
+    }
+    
+    .next-patient-info {
+        margin-bottom: 1rem;
+    }
+    
+    .patient-details small {
+        font-size: 0.75rem;
+    }
+    
+    .badge.fs-3, .badge.fs-4, .badge.fs-5 {
+        font-size: 1rem !important;
+    }
+    
+    .critical-item, .priority-item, .regular-item {
+        padding: 0.75rem;
+    }
+    
+    .d-flex.gap-3 {
+        flex-direction: column;
+        gap: 1rem !important;
+    }
+}
+
+@media (max-width: 576px) {
+    .container-fluid {
+        padding: 0.5rem;
+    }
+    
+    .card-header h5 {
+        font-size: 1rem;
+    }
+    
+    .stat-card h3 {
+        font-size: 1.5rem;
+    }
+    
+    .stat-card p {
+        font-size: 0.8rem;
+    }
+    
+    .avatar-circle {
+        width: 40px;
+        height: 40px;
+        font-size: 1rem;
+    }
+    
+    .scrollable-list {
+        max-height: 250px;
+    }
+    
+    .badge {
+        font-size: 0.7rem;
+    }
+    
+    .btn-lg {
+        padding: 0.75rem 1.5rem;
+        font-size: 1rem;
+    }
+}
+
+/* Auto-refresh info */
+.auto-refresh-info {
+    background: rgba(0,0,0,0.05);
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    display: inline-block;
+}
+
+/* Styles pour les patients critiques (priority = 2) */
+.critical-card {
+    border: 2px solid #dc3545;
+    box-shadow: 0 0 20px rgba(220, 53, 69, 0.3);
+    animation: critical-card-glow 2s ease-in-out infinite alternate;
+}
+
+.critical-item {
+    background: linear-gradient(90deg, rgba(220, 53, 69, 0.1) 0%, rgba(255, 255, 255, 1) 100%);
+    border-left: 6px solid #dc3545 !important;
+    animation: critical-glow 1.5s ease-in-out infinite alternate;
+    position: relative;
+}
+
+.critical-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, rgba(220, 53, 69, 0.05) 0%, transparent 70%);
+    pointer-events: none;
+}
+
+.critical-badge-strong {
+    animation: critical-pulse-strong 1s ease-in-out infinite;
+    box-shadow: 0 0 20px rgba(220, 53, 69, 0.8);
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.critical-indicator {
+    width: 12px;
+    height: 12px;
+    background: #dc3545;
+    border-radius: 50%;
+    animation: critical-indicator-pulse 1s ease-in-out infinite;
+}
+
+.critical-pulse-dot {
+    background: #dc3545;
+    animation: critical-dot-pulse 1s ease-in-out infinite;
+}
+
+.priority-pulse-dot {
+    background: #ffc107;
+    animation: priority-dot-pulse 2s ease-in-out infinite;
+}
+
+.critical-pulse-badge {
+    animation: critical-badge-pulse 1s ease-in-out infinite;
+}
+
+.priority-pulse-badge {
+    animation: priority-badge-pulse 2s ease-in-out infinite;
+}
+
+.avatar-overlay {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+}
+
+.critical-overlay {
+    background: #dc3545;
+    color: white;
+    animation: critical-overlay-pulse 1s ease-in-out infinite;
+}
+
+.priority-overlay {
+    background: #ffc107;
+    color: #212529;
+    animation: priority-overlay-pulse 2s ease-in-out infinite;
+}
+
+.critical-glow {
+    filter: drop-shadow(0 0 8px rgba(220, 53, 69, 0.8));
+    animation: critical-icon-glow 1s ease-in-out infinite alternate;
+}
+
+/* Styles pour les patients d'urgence (priority = 1) */
+.priority-card {
+    border: 2px solid #ffc107;
+    box-shadow: 0 0 15px rgba(255, 193, 7, 0.3);
+    animation: priority-card-glow 2s ease-in-out infinite alternate;
+}
+
+.emergency-item {
+    background: linear-gradient(90deg, rgba(255, 193, 7, 0.08) 0%, rgba(255, 255, 255, 1) 100%);
+    border-left: 4px solid #ffc107 !important;
+    animation: priority-glow 2s ease-in-out infinite alternate;
+    position: relative;
+}
+
+.emergency-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, rgba(220, 53, 69, 0.1) 0%, transparent 50%);
+    pointer-events: none;
+}
+
+.emergency-badge {
+    animation: emergency-pulse 1.5s ease-in-out infinite;
+    box-shadow: 0 0 15px rgba(220, 53, 69, 0.5);
+}
+
+.urgent-badge {
+    animation: urgent-flash 2s ease-in-out infinite;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.star-pulse {
+    animation: star-pulse 1.5s ease-in-out infinite;
+    filter: drop-shadow(0 0 5px rgba(255, 193, 7, 0.8));
+}
+
+.star-glow {
+    animation: star-glow 2s ease-in-out infinite alternate;
+    filter: drop-shadow(0 0 8px rgba(255, 193, 7, 0.9));
+}
+
+.emergency-pulse {
+    animation: emergency-pulse-strong 1s ease-in-out infinite;
+}
+
+.pulse-badge {
+    animation: pulse-badge 1.5s ease-in-out infinite;
+}
+
+.pulse-dot {
+    width: 10px;
+    height: 10px;
+    background: #28a745;
+    border-radius: 50%;
+    animation: pulse-dot 2s ease-in-out infinite;
+}
+
+.emergency-call-btn {
+    animation: emergency-btn-glow 2s ease-in-out infinite alternate;
+    box-shadow: 0 4px 20px rgba(220, 53, 69, 0.4);
+}
+
+.emergency-call-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(220, 53, 69, 0.6);
+}
+
+/* Animations pour les patients critiques */
+@keyframes critical-card-glow {
+    0% {
+        box-shadow: 0 0 20px rgba(220, 53, 69, 0.3);
+    }
+    100% {
+        box-shadow: 0 0 30px rgba(220, 53, 69, 0.6);
+    }
+}
+
+@keyframes critical-glow {
+    0% {
+        box-shadow: 0 0 15px rgba(220, 53, 69, 0.3);
+    }
+    100% {
+        box-shadow: 0 0 25px rgba(220, 53, 69, 0.6);
+    }
+}
+
+@keyframes critical-pulse-strong {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 0 20px rgba(220, 53, 69, 0.8);
+    }
+    50% {
+        transform: scale(1.1);
+        box-shadow: 0 0 30px rgba(220, 53, 69, 1);
+    }
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 20px rgba(220, 53, 69, 0.8);
+    }
+}
+
+@keyframes critical-indicator-pulse {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.5);
+        opacity: 0.7;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes critical-dot-pulse {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.8);
+        opacity: 0.5;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes critical-badge-pulse {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 0 15px rgba(220, 53, 69, 0.7);
+    }
+    50% {
+        transform: scale(1.05);
+        box-shadow: 0 0 25px rgba(220, 53, 69, 1);
+    }
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 15px rgba(220, 53, 69, 0.7);
+    }
+}
+
+@keyframes critical-overlay-pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.2);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+@keyframes critical-icon-glow {
+    0% {
+        filter: drop-shadow(0 0 8px rgba(220, 53, 69, 0.8));
+    }
+    100% {
+        filter: drop-shadow(0 0 15px rgba(220, 53, 69, 1));
+    }
+}
+
+/* Animations pour les patients prioritaires */
+@keyframes priority-card-glow {
+    0% {
+        box-shadow: 0 0 15px rgba(255, 193, 7, 0.3);
+    }
+    100% {
+        box-shadow: 0 0 25px rgba(255, 193, 7, 0.5);
+    }
+}
+
+@keyframes priority-glow {
+    0% {
+        box-shadow: 0 0 10px rgba(255, 193, 7, 0.3);
+    }
+    100% {
+        box-shadow: 0 0 20px rgba(255, 193, 7, 0.5);
+    }
+}
+
+@keyframes priority-dot-pulse {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.4);
+        opacity: 0.7;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes priority-badge-pulse {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 0 10px rgba(255, 193, 7, 0.5);
+    }
+    50% {
+        transform: scale(1.05);
+        box-shadow: 0 0 20px rgba(255, 193, 7, 0.8);
+    }
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 10px rgba(255, 193, 7, 0.5);
+    }
+}
+
+@keyframes priority-overlay-pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Animations d'urgence (legacy) */
+@keyframes emergency-glow {
+    0% {
+        box-shadow: 0 0 10px rgba(220, 53, 69, 0.2);
+    }
+    100% {
+        box-shadow: 0 0 20px rgba(220, 53, 69, 0.4);
+    }
+}
+
+@keyframes emergency-pulse {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 0 15px rgba(220, 53, 69, 0.5);
+    }
+    50% {
+        transform: scale(1.05);
+        box-shadow: 0 0 25px rgba(220, 53, 69, 0.8);
+    }
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 15px rgba(220, 53, 69, 0.5);
+    }
+}
+
+@keyframes emergency-pulse-strong {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 0 10px rgba(220, 53, 69, 0.6);
+    }
+    50% {
+        transform: scale(1.1);
+        box-shadow: 0 0 20px rgba(220, 53, 69, 1);
+    }
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 10px rgba(220, 53, 69, 0.6);
+    }
+}
+
+@keyframes urgent-flash {
+    0%, 50% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    25% {
+        opacity: 0.8;
+        transform: scale(1.05);
+    }
+    75% {
+        opacity: 0.9;
+        transform: scale(0.98);
+    }
+}
+
+@keyframes star-pulse {
+    0% {
+        transform: scale(1) rotate(0deg);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.2) rotate(180deg);
+        opacity: 0.8;
+    }
+    100% {
+        transform: scale(1) rotate(360deg);
+        opacity: 1;
+    }
+}
+
+@keyframes star-glow {
+    0% {
+        filter: drop-shadow(0 0 8px rgba(255, 193, 7, 0.9));
+        transform: scale(1);
+    }
+    100% {
+        filter: drop-shadow(0 0 15px rgba(255, 193, 7, 1));
+        transform: scale(1.1);
+    }
+}
+
+@keyframes pulse-badge {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.1);
+        opacity: 0.8;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes pulse-dot {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.3);
+        opacity: 0.7;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes emergency-btn-glow {
+    0% {
+        box-shadow: 0 4px 20px rgba(220, 53, 69, 0.4);
+    }
+    100% {
+        box-shadow: 0 4px 30px rgba(220, 53, 69, 0.7);
+    }
+}
+
+/* Carte du prochain patient */
+.next-patient-card {
+    transition: all 0.3s ease;
+}
+
+.next-patient-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+/* Bouton d'actualisation */
+.btn-refresh {
+    transition: all 0.3s ease;
+}
+
+.btn-refresh:hover {
+    transform: rotate(180deg);
+}
+
+/* Boutons d'action améliorés */
+.priority-call-btn {
+    animation: priority-btn-glow 2s ease-in-out infinite alternate;
+    box-shadow: 0 4px 20px rgba(255, 193, 7, 0.4);
+    transition: all 0.3s ease;
+}
+
+.priority-call-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(255, 193, 7, 0.6);
+}
+
+.emergency-call-btn {
+    animation: critical-btn-glow 1.5s ease-in-out infinite alternate;
+    box-shadow: 0 4px 25px rgba(220, 53, 69, 0.5);
+    transition: all 0.3s ease;
+}
+
+.emergency-call-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 30px rgba(220, 53, 69, 0.7);
+}
+
+.action-card {
+    border: 2px solid #e9ecef;
+    transition: all 0.3s ease;
+}
+
+.action-card:hover {
+    border-color: #007bff;
+    transform: translateY(-2px);
+}
+
+/* Animations pour les boutons */
+@keyframes priority-btn-glow {
+    0% {
+        box-shadow: 0 4px 20px rgba(255, 193, 7, 0.4);
+    }
+    100% {
+        box-shadow: 0 4px 30px rgba(255, 193, 7, 0.6);
+    }
+}
+
+@keyframes critical-btn-glow {
+    0% {
+        box-shadow: 0 4px 25px rgba(220, 53, 69, 0.5);
+    }
+    100% {
+        box-shadow: 0 4px 35px rgba(220, 53, 69, 0.8);
+    }
+}
+
+/* Indicateurs de priorité spéciaux */
+.priority-indicators {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.regular-indicators {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+/* Animation pour les cartes au chargement */
+.card {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.5s ease;
+}
+
+.card.loaded {
+    opacity: 1;
+    transform: translateY(0);
 }
 </style>
+
+<script>
+// Auto-refresh de la page toutes les 30 secondes
+setTimeout(function() {
+    location.reload();
+}, 30000);
+
+// Fonction pour actualiser manuellement
+function refreshPage() {
+    location.reload();
+}
+
+// Animation au chargement et calcul du temps d'attente
+document.addEventListener('DOMContentLoaded', function() {
+    // Afficher la date actuelle
+    updateCurrentDate();
+    
+    // Ajouter des animations d'entrée
+    const cards = document.querySelectorAll('.card');
+    cards.forEach((card, index) => {
+        setTimeout(() => {
+            card.classList.add('loaded');
+        }, index * 100);
+    });
+    
+    // Calculer le temps d'attente moyen
+    calculateAverageWaitingTime();
+    
+    // Mettre à jour le temps d'attente toutes les minutes
+    setInterval(calculateAverageWaitingTime, 60000);
+});
+
+function updateCurrentDate() {
+    const now = new Date();
+    const dateString = now.toLocaleDateString('fr-FR', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    });
+    const dateElement = document.getElementById('current-date');
+    if (dateElement) {
+        dateElement.textContent = dateString;
+    }
+}
+
+function calculateAverageWaitingTime() {
+    const waitingItems = document.querySelectorAll('.priority-item, .regular-item, .critical-item');
+    let totalWaitingMinutes = 0;
+    let count = 0;
+    
+    waitingItems.forEach(item => {
+        const timeText = item.querySelector('small').textContent;
+        const timeMatch = timeText.match(/(\d{2}):(\d{2})/);
+        if (timeMatch) {
+            const arrivalHour = parseInt(timeMatch[1]);
+            const arrivalMinute = parseInt(timeMatch[2]);
+            const now = new Date();
+            const currentHour = now.getHours();
+            const currentMinute = now.getMinutes();
+            
+            const arrivalTime = arrivalHour * 60 + arrivalMinute;
+            const currentTime = currentHour * 60 + currentMinute;
+            const waitingMinutes = currentTime - arrivalTime;
+            
+            if (waitingMinutes >= 0) {
+                totalWaitingMinutes += waitingMinutes;
+                count++;
+            }
+        }
+    });
+    
+    const averageWaitingTime = count > 0 ? Math.round(totalWaitingMinutes / count) : 0;
+    const waitingTimeElement = document.getElementById('waiting-time');
+    
+    if (averageWaitingTime > 0) {
+        if (averageWaitingTime >= 60) {
+            const hours = Math.floor(averageWaitingTime / 60);
+            const minutes = averageWaitingTime % 60;
+            waitingTimeElement.textContent = `${hours}h ${minutes}min`;
+        } else {
+            waitingTimeElement.textContent = `${averageWaitingTime} min`;
+        }
+        
+        // Changer la couleur selon le temps d'attente
+        const statCard = waitingTimeElement.closest('.stat-card');
+        if (averageWaitingTime > 60) {
+            statCard.className = 'stat-card bg-gradient-danger';
+        } else if (averageWaitingTime > 30) {
+            statCard.className = 'stat-card bg-gradient-warning';
+        } else {
+            statCard.className = 'stat-card bg-gradient-secondary';
+        }
+    } else {
+        waitingTimeElement.textContent = '--';
+    }
+}
+</script>
 {% endblock %}

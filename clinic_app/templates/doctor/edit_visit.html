@@ -5,10 +5,10 @@
         <div class="col-md-12">
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="{{ url_for('doctor.dashboard') }}">لوحة التحكم</a></li>
-                    <li class="breadcrumb-item"><a href="{{ url_for('doctor.visit_history') }}">سجل الزيارات</a></li>
-                    <li class="breadcrumb-item"><a href="{{ url_for('doctor.view_visit', visit_id=visit.id) }}">تفاصيل الزيارة</a></li>
-                    <li class="breadcrumb-item active">تعديل الزيارة</li>
+                    <li class="breadcrumb-item"><a href="{{ url_for('doctor.dashboard') }}">Tableau de bord</a></li>
+                    <li class="breadcrumb-item"><a href="{{ url_for('doctor.visit_history') }}">Historique des consultations</a></li>
+                    <li class="breadcrumb-item"><a href="{{ url_for('doctor.view_visit', visit_id=visit.id) }}">Détails de la consultation</a></li>
+                    <li class="breadcrumb-item active">Modifier la consultation</li>
                 </ol>
             </nav>
         </div>
@@ -18,9 +18,9 @@
         <div class="col-md-12">
             <div class="card">
                 <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                    <h3 class="mb-0">تعديل زيارة المريض - {{ visit.patient.full_name }}</h3>
+                    <h3 class="mb-0">Modifier la consultation du patient - {{ visit.patient.full_name }}</h3>
                     <div>
-                        <span class="badge bg-light text-primary">{{ visit.date.strftime('%Y-%m-%d %H:%M') }}</span>
+                        <span class="badge bg-light text-primary">{{ visit.date.strftime('%d/%m/%Y %H:%M') }}</span>
                     </div>
                 </div>
                 <div class="card-body">

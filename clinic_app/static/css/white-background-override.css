@@ -1,0 +1,396 @@
+/* ملف CSS لضمان الخلفية البيضاء في جميع أنحاء التطبيق */
+
+/* إعادة تعيين الخلفية الأساسية */
+html {
+    background: #ffffff !important;
+}
+
+body {
+    background: #ffffff !important;
+    background-image: none !important;
+    background-attachment: scroll !important;
+}
+
+/* إزالة أي خلفيات متدرجة من العناصر الأساسية */
+body::before,
+body::after,
+html::before,
+html::after {
+    display: none !important;
+    background: none !important;
+}
+
+/* التأكد من أن الحاوي الرئيسي له خلفية بيضاء */
+.container,
+.container-fluid,
+main,
+.main-content {
+    background: #ffffff !important;
+}
+
+/* التأكد من أن navbar له خلفية بيضاء */
+.navbar {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    background-image: none !important;
+}
+
+/* التأكد من أن البطاقات لها خلفية بيضاء - باستثناء كروت الداشبورد */
+.card:not(.dashboard-card) {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    background-image: none !important;
+}
+
+.card-header {
+    background: #f8fafc !important;
+    background-color: #f8fafc !important;
+    background-image: none !important;
+}
+
+.card-body:not(.dashboard-card .card-body) {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    background-image: none !important;
+}
+
+.card-footer {
+    background: #f1f5f9 !important;
+    background-color: #f1f5f9 !important;
+    background-image: none !important;
+}
+
+/* التأكد من أن الجداول لها خلفية بيضاء */
+.table {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    background-image: none !important;
+}
+
+.table th {
+    background: #f8fafc !important;
+    background-color: #f8fafc !important;
+    background-image: none !important;
+}
+
+.table td {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    background-image: none !important;
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+    background: #f8fafc !important;
+    background-color: #f8fafc !important;
+    background-image: none !important;
+}
+
+/* التأكد من أن النماذج لها خلفية بيضاء */
+.form-control,
+.form-select {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    background-image: none !important;
+}
+
+/* التأكد من أن القوائم المنسدلة لها خلفية بيضاء */
+.dropdown-menu {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    background-image: none !important;
+}
+
+.dropdown-item {
+    background: transparent !important;
+    background-color: transparent !important;
+    background-image: none !important;
+}
+
+.dropdown-item:hover {
+    background: #f8fafc !important;
+    background-color: #f8fafc !important;
+    background-image: none !important;
+}
+
+/* التأكد من أن الـ modals لها خلفية بيضاء */
+.modal-content {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    background-image: none !important;
+}
+
+.modal-header {
+    background: #f8fafc !important;
+    background-color: #f8fafc !important;
+    background-image: none !important;
+}
+
+.modal-body {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    background-image: none !important;
+}
+
+.modal-footer {
+    background: #f1f5f9 !important;
+    background-color: #f1f5f9 !important;
+    background-image: none !important;
+}
+
+/* التأكد من أن الـ alerts لها خلفيات مناسبة */
+.alert-primary {
+    background: rgba(37, 99, 235, 0.1) !important;
+    background-color: rgba(37, 99, 235, 0.1) !important;
+    background-image: none !important;
+}
+
+.alert-success {
+    background: rgba(5, 150, 105, 0.1) !important;
+    background-color: rgba(5, 150, 105, 0.1) !important;
+    background-image: none !important;
+}
+
+.alert-warning {
+    background: rgba(217, 119, 6, 0.1) !important;
+    background-color: rgba(217, 119, 6, 0.1) !important;
+    background-image: none !important;
+}
+
+.alert-danger {
+    background: rgba(220, 38, 38, 0.1) !important;
+    background-color: rgba(220, 38, 38, 0.1) !important;
+    background-image: none !important;
+}
+
+.alert-info {
+    background: rgba(8, 145, 178, 0.1) !important;
+    background-color: rgba(8, 145, 178, 0.1) !important;
+    background-image: none !important;
+}
+
+/* التأكد من أن الـ list groups لها خلفية بيضاء */
+.list-group-item {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    background-image: none !important;
+}
+
+.list-group-item:hover {
+    background: #f8fafc !important;
+    background-color: #f8fafc !important;
+    background-image: none !important;
+}
+
+/* التأكد من أن الـ progress bars لها خلفية مناسبة */
+.progress {
+    background: #f8fafc !important;
+    background-color: #f8fafc !important;
+    background-image: none !important;
+}
+
+/* إزالة أي خلفيات متدرجة من العناصر المخصصة */
+.bg-gradient-primary,
+.bg-gradient-success,
+.bg-gradient-warning,
+.bg-gradient-info,
+.bg-gradient-danger,
+.bg-gradient-secondary {
+    /* هذه العناصر تحتفظ بخلفياتها المتدرجة لأنها مقصودة */
+}
+
+/* التأكد من أن العناصر الأخرى لها خلفية بيضاء */
+.breadcrumb {
+    background: #f8fafc !important;
+    background-color: #f8fafc !important;
+    background-image: none !important;
+}
+
+.pagination .page-link {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    background-image: none !important;
+}
+
+.pagination .page-link:hover {
+    background: #2563eb !important;
+    background-color: #2563eb !important;
+    background-image: none !important;
+}
+
+.pagination .page-item.active .page-link {
+    background: #2563eb !important;
+    background-color: #2563eb !important;
+    background-image: none !important;
+}
+
+/* التأكد من أن الـ tabs لها خلفية بيضاء */
+.nav-tabs {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    background-image: none !important;
+}
+
+.nav-tabs .nav-link {
+    background: transparent !important;
+    background-color: transparent !important;
+    background-image: none !important;
+}
+
+.nav-tabs .nav-link:hover {
+    background: #f8fafc !important;
+    background-color: #f8fafc !important;
+    background-image: none !important;
+}
+
+.nav-tabs .nav-link.active {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    background-image: none !important;
+}
+
+/* التأكد من أن الـ accordions لها خلفية بيضاء */
+.accordion-item {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    background-image: none !important;
+}
+
+.accordion-header {
+    background: #f8fafc !important;
+    background-color: #f8fafc !important;
+    background-image: none !important;
+}
+
+.accordion-body {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    background-image: none !important;
+}
+
+/* التأكد من أن الـ offcanvas لها خلفية بيضاء */
+.offcanvas {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    background-image: none !important;
+}
+
+.offcanvas-header {
+    background: #f8fafc !important;
+    background-color: #f8fafc !important;
+    background-image: none !important;
+}
+
+.offcanvas-body {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    background-image: none !important;
+}
+
+/* التأكد من أن الـ tooltips لها خلفية مناسبة */
+.tooltip-inner {
+    background: #1f2937 !important;
+    background-color: #1f2937 !important;
+    background-image: none !important;
+}
+
+/* التأكد من أن الـ popovers لها خلفية بيضاء */
+.popover {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    background-image: none !important;
+}
+
+.popover-header {
+    background: #f8fafc !important;
+    background-color: #f8fafc !important;
+    background-image: none !important;
+}
+
+.popover-body {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    background-image: none !important;
+}
+
+/* إزالة أي تأثيرات خلفية من العناصر المخصصة */
+.dashboard-stats-card:not(.bg-gradient-primary):not(.bg-gradient-success):not(.bg-gradient-warning):not(.bg-gradient-info):not(.bg-gradient-danger):not(.bg-gradient-secondary) {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    background-image: none !important;
+}
+
+/* التأكد من أن العناصر الأخرى لها خلفية مناسبة */
+.sidebar {
+    background: #f8fafc !important;
+    background-color: #f8fafc !important;
+    background-image: none !important;
+}
+
+.footer {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    background-image: none !important;
+}
+
+/* إعادة تعيين أي خلفيات أخرى قد تكون موجودة */
+section,
+article,
+aside,
+header,
+footer,
+div:not([class*="bg-gradient"]) {
+    background-image: none !important;
+}
+
+/* التأكد من أن الخلفية تبقى بيضاء حتى مع التمرير */
+html,
+body {
+    background-attachment: scroll !important;
+    background-repeat: no-repeat !important;
+    background-position: center !important;
+    background-size: cover !important;
+}
+
+/* إزالة أي تأثيرات خلفية من الـ pseudo elements */
+*:not(.bg-gradient-primary):not(.bg-gradient-success):not(.bg-gradient-warning):not(.bg-gradient-info):not(.bg-gradient-danger):not(.bg-gradient-secondary)::before,
+*:not(.bg-gradient-primary):not(.bg-gradient-success):not(.bg-gradient-warning):not(.bg-gradient-info):not(.bg-gradient-danger):not(.bg-gradient-secondary)::after {
+    background-image: none !important;
+}
+
+/* التأكد من أن الخلفية البيضاء تطبق على جميع الشاشات */
+@media (max-width: 1200px) {
+    html, body {
+        background: #ffffff !important;
+    }
+}
+
+@media (max-width: 992px) {
+    html, body {
+        background: #ffffff !important;
+    }
+}
+
+@media (max-width: 768px) {
+    html, body {
+        background: #ffffff !important;
+    }
+}
+
+@media (max-width: 576px) {
+    html, body {
+        background: #ffffff !important;
+    }
+}
+
+/* التأكد من أن الخلفية البيضاء تطبق في وضع الطباعة */
+@media print {
+    html, body {
+        background: #ffffff !important;
+        background-color: #ffffff !important;
+        background-image: none !important;
+    }
+    
+    * {
+        background-image: none !important;
+    }
+}

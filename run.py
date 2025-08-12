@@ -2,6 +2,11 @@ from clinic_app import create_app, db
 import socket
 import os
 import sys
+import codecs
+
+# Set UTF-8 encoding for console output
+sys.stdout = codecs.getwriter('utf-8')(sys.stdout.buffer)
+
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 app = create_app()  # ✅ هذا موجود في المستوى الأعلى، جيد!

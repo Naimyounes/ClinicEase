@@ -5,13 +5,13 @@ from clinic_app.auth.forms import LoginForm, ChangePasswordForm
 from clinic_app.models import User
 from clinic_app import db
 
-# إنشاء بلوبرينت للمصادقة
+# Création du blueprint pour l'authentification
 auth = Blueprint("auth", __name__)
 
 
 @auth.route("/login", methods=["GET", "POST"])
 def login():
-    """صفحة تسجيل الدخول"""
+    """Page de connexion"""
     if current_user.is_authenticated:
         if current_user.role == "doctor":
             return redirect(url_for("doctor.dashboard"))
@@ -26,49 +26,49 @@ def login():
             login_user(user)
             next_page = request.args.get("next")
 
-            flash(f"مرحبًا بعودتك {user.username}!", "success")
+            flash(f"Bon retour {user.username}!", "success")
 
             if user.role == "doctor":
                 return redirect(next_page or url_for("doctor.dashboard"))
             else:
                 return redirect(next_page or url_for("secretary.dashboard"))
         else:
-            flash("فشل تسجيل الدخول. يرجى التحقق من اسم المستخدم وكلمة المرور", "danger")
+            flash("Échec de la connexion. Veuillez vérifier le nom d'utilisateur et le mot de passe", "danger")
 
-    return render_template("auth/login.html", title="تسجيل الدخول", form=form)
+    return render_template("auth/login.html", title="Connexion", form=form)
 
 
 @auth.route("/logout")
 @login_required
 def logout():
-    """تسجيل الخروج"""
+    """Déconnexion"""
     logout_user()
-    flash("تم تسجيل خروجك بنجاح", "info")
+    flash("Vous avez été déconnecté avec succès", "info")
     return redirect(url_for("auth.login"))
 
 
 @auth.route("/change-password", methods=["GET", "POST"])
 @login_required
 def change_password():
-    """تغيير كلمة المرور"""
+    """Changer le mot de passe"""
     form = ChangePasswordForm()
     
     if form.validate_on_submit():
-        # التحقق من كلمة المرور الحالية
+        # Vérification du mot de passe actuel
         if not check_password_hash(current_user.password, form.current_password.data):
-            flash("كلمة المرور الحالية غير صحيحة", "danger")
-            return render_template("auth/change_password.html", title="تغيير كلمة المرور", form=form)
+            flash("Le mot de passe actuel est incorrect", "danger")
+            return render_template("auth/change_password.html", title="Changer le mot de passe", form=form)
         
-        # تحديث كلمة المرور
+        # Mise à jour du mot de passe
         current_user.password = generate_password_hash(form.new_password.data)
         db.session.commit()
         
-        flash("تم تغيير كلمة المرور بنجاح", "success")
+        flash("Le mot de passe a été changé avec succès", "success")
         
-        # إعادة توجيه حسب نوع المستخدم
+        # Redirection selon le type d'utilisateur
         if current_user.role == "doctor":
             return redirect(url_for("doctor.dashboard"))
         else:
             return redirect(url_for("secretary.dashboard"))
     
-    return render_template("auth/change_password.html", title="تغيير كلمة المرور", form=form)
+    return render_template("auth/change_password.html", title="Changer le mot de passe", form=form)

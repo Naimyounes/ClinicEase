@@ -1,43 +1,51 @@
 {% extends "layout.html" %}
 {% block content %}
+<!-- Container منفصل للقوائم المنسدلة -->
+<div id="dropdown-container" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10000;">
+    <!-- ستتم إضافة القوائم المنسدلة هنا ديناميكياً -->
+</div>
+
 <div class="container">
     <div class="row mb-4">
         <div class="col-md-12">
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="{{ url_for('doctor.dashboard') }}">لوحة التحكم</a></li>
-                    <li class="breadcrumb-item active">الوصفات المحددة مسبقاً</li>
+                    <li class="breadcrumb-item"><a href="{{ url_for('doctor.dashboard') }}">Tableau de bord médecin</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Ordonnances prédéfinies</li>
                 </ol>
             </nav>
         </div>
     </div>
 
+    <!-- إضافة وصفة جديدة -->
     <div class="row mb-4">
         <div class="col-md-12">
             <div class="card">
                 <div class="card-header bg-primary text-white">
-                    <h3 class="mb-0">إضافة وصفة محددة مسبقاً</h3>
+                    <h3 class="mb-0">
+                        <i class="fas fa-plus-circle me-2"></i>
+                        Ajouter une ordonnance prédéfinie
+                    </h3>
                 </div>
                 <div class="card-body">
-                    <form method="POST" action="">
-                        {{ form.hidden_tag() }}
+                    <form id="add_prescription_form">
                         <div class="row">
                             <div class="col-md-8">
-                                <div class="form-group mb-3">
-                                    {{ form.name.label(class="form-control-label") }}
-                                    {{ form.name(class="form-control") }}
-                                    {% if form.name.errors %}
-                                        <div class="invalid-feedback d-block">
-                                            {% for error in form.name.errors %}
-                                                <span>{{ error }}</span>
-                                            {% endfor %}
-                                        </div>
-                                    {% endif %}
+                                <div class="form-group">
+                                    <label class="form-control-label mb-2">
+                                        <i class="fas fa-prescription-bottle me-1"></i>
+                                        Nom de l'ordonnance
+                                    </label>
+                                    <input type="text" 
+                                           id="prescription_name" 
+                                           class="form-control" 
+                                           placeholder="Ex: Ordonnance pour grippe, Traitement hypertension..."
+                                           required>
                                 </div>
                             </div>
                             <div class="col-md-4 d-flex align-items-end">
-                                <button type="submit" class="btn btn-success w-100">
-                                    <i class="fas fa-plus"></i> إضافة الوصفة
+                                <button type="submit" class="btn btn-success w-100 btn-lg" id="add_prescription_btn">
+                                    <i class="fas fa-plus"></i> Ajouter l'ordonnance
                                 </button>
                             </div>
                         </div>
@@ -47,96 +55,25 @@
         </div>
     </div>
 
+    <!-- قائمة الوصفات المحددة مسبقاً -->
     <div class="row">
         <div class="col-md-12">
             <div class="card">
                 <div class="card-header bg-info text-white">
-                    <h3 class="mb-0">قائمة الوصفات المحددة مسبقاً</h3>
+                    <h3 class="mb-0">
+                        <i class="fas fa-list me-2"></i>
+                        قائمة الوصفات المحددة مسبقاً
+                    </h3>
                 </div>
                 <div class="card-body">
-                    {% if predefined_prescriptions %}
-                        {% for prescription in predefined_prescriptions %}
-                        <div class="card mb-3">
-                            <div class="card-header d-flex justify-content-between align-items-center">
-                                <h5 class="mb-0">{{ prescription.name }}</h5>
-                                <div>
-                                    <button class="btn btn-sm btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#prescription-{{ prescription.id }}" aria-expanded="false">
-                                        <i class="fas fa-eye"></i> عرض الأدوية
-                                    </button>
-                                    <form method="POST" action="{{ url_for('doctor.delete_predefined_prescription', predefined_prescription_id=prescription.id) }}" style="display: inline;" onsubmit="return confirm('هل أنت متأكد من حذف هذه الوصفة؟')">
-                                        <button type="submit" class="btn btn-sm btn-danger">
-                                            <i class="fas fa-trash"></i> حذف
-                                        </button>
-                                    </form>
-                                </div>
+                    <div id="prescriptions_list">
+                        <div class="text-center">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">جاري التحميل...</span>
                             </div>
-                            <div class="collapse" id="prescription-{{ prescription.id }}">
-                                <div class="card-body">
-                                    <h6>الأدوية المضافة:</h6>
-                                    {% if prescription.medications %}
-                                        <div class="table-responsive">
-                                            <table class="table table-sm table-bordered">
-                                                <thead>
-                                                    <tr>
-                                                        <th>الدواء</th>
-                                                        <th>الجرعة</th>
-                                                        <th>التعليمات</th>
-                                                        <th>الإجراءات</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    {% for ppm in prescription.medications %}
-                                                    <tr>
-                                                        <td>{{ ppm.medication.name }}</td>
-                                                        <td>{{ ppm.medication.dosage }}</td>
-                                                        <td>{{ ppm.instructions or 'غير محدد' }}</td>
-                                                        <td>
-                                                            <form method="POST" action="{{ url_for('doctor.remove_medication_from_predefined', predefined_prescription_id=prescription.id, medication_id=ppm.medication.id) }}" style="display: inline;" onsubmit="return confirm('هل أنت متأكد من حذف هذا الدواء؟')">
-                                                                <button type="submit" class="btn btn-sm btn-danger">
-                                                                    <i class="fas fa-times"></i>
-                                                                </button>
-                                                            </form>
-                                                        </td>
-                                                    </tr>
-                                                    {% endfor %}
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    {% else %}
-                                        <p class="text-muted">لا توجد أدوية مضافة لهذه الوصفة</p>
-                                    {% endif %}
-                                    
-                                    <hr>
-                                    <h6>إضافة دواء جديد:</h6>
-                                    <form method="POST" action="{{ url_for('doctor.add_medication_to_predefined', predefined_prescription_id=prescription.id) }}">
-                                        <div class="row">
-                                            <div class="col-md-4">
-                                                <select name="medication_id" class="form-select" required>
-                                                    <option value="">اختر الدواء</option>
-                                                    {% for medication in medications %}
-                                                    <option value="{{ medication.id }}">{{ medication.name }} ({{ medication.dosage }})</option>
-                                                    {% endfor %}
-                                                </select>
-                                            </div>
-                                            <div class="col-md-6">
-                                                <input type="text" name="instructions" class="form-control" placeholder="التعليمات (اختياري)">
-                                            </div>
-                                            <div class="col-md-2">
-                                                <button type="submit" class="btn btn-success w-100">
-                                                    <i class="fas fa-plus"></i> إضافة
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </form>
-                                </div>
-                            </div>
+                            <p class="mt-2">جاري تحميل الوصفات...</p>
                         </div>
-                        {% endfor %}
-                    {% else %}
-                        <div class="alert alert-info text-center">
-                            <i class="fas fa-info-circle fa-lg me-2"></i> لا توجد وصفات محددة مسبقاً
-                        </div>
-                    {% endif %}
+                    </div>
                 </div>
             </div>
         </div>
@@ -146,15 +83,747 @@
 
 {% block scripts %}
 <script>
-    // Get all medications for JavaScript use
-    const medications = [
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🚀 تم تحميل الصفحة - بدء التهيئة');
+    
+    // Variables globales
+    const addPrescriptionForm = document.getElementById('add_prescription_form');
+    const prescriptionNameInput = document.getElementById('prescription_name');
+    const prescriptionsList = document.getElementById('prescriptions_list');
+    const addPrescriptionBtn = document.getElementById('add_prescription_btn');
+    const dropdownContainer = document.getElementById('dropdown-container');
+    
+    // بيانات الوصفات والأدوية
+    let predefinedPrescriptions = [];
+    let availableMedications = [
         {% for medication in medications %}
         {
             id: {{ medication.id }},
             name: "{{ medication.name }}",
-            dosage: "{{ medication.dosage }}"
+            dosage: "{{ medication.dosage or '' }}"
         }{% if not loop.last %},{% endif %}
         {% endfor %}
     ];
+
+    console.log('💊 الأدوية المتاحة:', availableMedications.length);
+
+    // ==================== Event Delegation ====================
+    // استخدام event delegation للأزرار الديناميكية
+    
+    // زر إضافة الوصفة (ثابت)
+    if (addPrescriptionForm) {
+        addPrescriptionForm.addEventListener('submit', function(e) {
+            console.log('📝 إرسال نموذج إضافة الوصفة');
+            e.preventDefault();
+            const name = prescriptionNameInput.value.trim();
+            if (name) {
+                addPrescription(name);
+            } else {
+                showAlert('يرجى إدخال اسم الوصفة', 'warning');
+            }
+        });
+    }
+
+    // Event delegation للأزرار الديناميكية
+    document.addEventListener('click', function(e) {
+        console.log('🖱️ نقر على:', e.target.className);
+        
+        // زر عرض/إخفاء الوصفة
+        if (e.target.closest('.toggle-prescription-btn')) {
+            console.log('👁️ نقر على زر عرض/إخفاء');
+            const btn = e.target.closest('.toggle-prescription-btn');
+            const prescriptionId = btn.getAttribute('data-prescription-id');
+            const details = document.getElementById(`prescription-${prescriptionId}`);
+            const icon = btn.querySelector('i');
+            
+            if (details.style.display === 'none' || !details.style.display) {
+                details.style.display = 'block';
+                icon.className = 'fas fa-eye-slash';
+                btn.innerHTML = '<i class="fas fa-eye-slash"></i> إخفاء الأدوية';
+            } else {
+                details.style.display = 'none';
+                icon.className = 'fas fa-eye';
+                btn.innerHTML = '<i class="fas fa-eye"></i> عرض الأدوية';
+            }
+        }
+        
+        // زر حذف الوصفة
+        else if (e.target.closest('.delete-prescription-btn')) {
+            console.log('🗑️ نقر على زر حذف الوصفة');
+            const btn = e.target.closest('.delete-prescription-btn');
+            const prescriptionId = btn.getAttribute('data-prescription-id');
+            deletePrescription(prescriptionId);
+        }
+        
+        // زر حذف الدواء
+        else if (e.target.closest('.remove-medication-btn')) {
+            console.log('❌ نقر على زر حذف الدواء');
+            const btn = e.target.closest('.remove-medication-btn');
+            const prescriptionId = btn.getAttribute('data-prescription-id');
+            const medicationId = btn.getAttribute('data-medication-id');
+            removeMedicationFromPrescription(prescriptionId, medicationId);
+        }
+        
+        // زر إضافة الدواء
+        else if (e.target.closest('.add-medication-btn')) {
+            console.log('➕ نقر على زر إضافة الدواء');
+            const btn = e.target.closest('.add-medication-btn');
+            const prescriptionId = btn.getAttribute('data-prescription-id');
+            addMedicationToPrescription(prescriptionId);
+        }
+        
+        // زر مسح الاختيار
+        else if (e.target.closest('.clear-selection')) {
+            console.log('🧹 نقر على زر مسح الاختيار');
+            const btn = e.target.closest('.clear-selection');
+            const form = btn.closest('.add-medication-form');
+            clearMedicationSelection(form);
+        }
+        
+        // اختيار دواء من القائمة المنسدلة
+        else if (e.target.closest('.medication-option')) {
+            console.log('💊 اختيار دواء من القائمة');
+            const option = e.target.closest('.medication-option');
+            const prescriptionId = option.getAttribute('data-prescription-id');
+            selectMedication(option, prescriptionId);
+        }
+        
+        // إغلاق القوائم المنسدلة عند النقر خارجها
+        else if (!e.target.closest('.medication-search-wrapper') && !e.target.closest('.medication-dropdown')) {
+            document.querySelectorAll('.medication-dropdown').forEach(dropdown => {
+                dropdown.remove();
+            });
+        }
+    });
+
+    // Event delegation للبحث في الأدوية
+    document.addEventListener('input', function(e) {
+        if (e.target.classList.contains('medication-search')) {
+            console.log('🔍 البحث في الأدوية:', e.target.value);
+            const prescriptionId = e.target.getAttribute('data-prescription-id');
+            searchMedications(e.target, prescriptionId);
+        }
+    });
+
+    document.addEventListener('focus', function(e) {
+        if (e.target.classList.contains('medication-search')) {
+            if (e.target.value.length >= 2) {
+                const prescriptionId = e.target.getAttribute('data-prescription-id');
+                searchMedications(e.target, prescriptionId);
+            }
+        }
+    }, true);
+
+    // ==================== Functions ====================
+
+    // تحميل الوصفات المحددة مسبقاً من الخادم
+    function loadPredefinedPrescriptions() {
+        console.log('📥 جاري تحميل الوصفات...');
+        
+        fetch('/doctor/api/predefined_prescriptions')
+            .then(response => {
+                console.log('📡 استجابة الخادم:', response.status);
+                return response.json();
+            })
+            .then(data => {
+                console.log('📊 البيانات المستلمة:', data);
+                predefinedPrescriptions = data;
+                renderPrescriptions();
+            })
+            .catch(error => {
+                console.error('❌ خطأ في تحميل الوصفات:', error);
+                showAlert('خطأ في تحميل الوصفات المحددة مسبقاً', 'danger');
+                prescriptionsList.innerHTML = `
+                    <div class="alert alert-danger text-center">
+                        <i class="fas fa-exclamation-triangle fa-2x mb-3"></i>
+                        <h5>خطأ في تحميل البيانات</h5>
+                        <p class="mb-0">تعذر تحميل الوصفات المحددة مسبقاً</p>
+                    </div>
+                `;
+            });
+    }
+
+    // عرض الوصفات
+    function renderPrescriptions() {
+        console.log('🎨 عرض الوصفات:', predefinedPrescriptions.length);
+        
+        if (predefinedPrescriptions.length === 0) {
+            prescriptionsList.innerHTML = `
+                <div class="alert alert-info text-center">
+                    <i class="fas fa-info-circle fa-2x mb-3"></i>
+                    <h5>لا توجد وصفات محددة مسبقاً</h5>
+                    <p class="mb-0">قم بإضافة وصفة جديدة باستخدام النموذج أعلاه</p>
+                </div>
+            `;
+            return;
+        }
+
+        let html = '';
+        predefinedPrescriptions.forEach(prescription => {
+            html += createPrescriptionCard(prescription);
+        });
+        
+        prescriptionsList.innerHTML = html;
+        console.log('✅ تم عرض الوصفات بنجاح');
+    }
+
+    // إنشاء بطاقة وصفة
+    function createPrescriptionCard(prescription) {
+        const medicationsHtml = prescription.medications.map(med => `
+            <tr>
+                <td><strong>${med.medication.name}</strong></td>
+                <td>${med.medication.dosage || 'غير محدد'}</td>
+                <td>${med.quantity || 'غير محدد'}</td>
+                <td>${med.instructions || 'غير محدد'}</td>
+                <td>
+                    <button type="button" 
+                            class="btn btn-sm btn-danger remove-medication-btn" 
+                            data-prescription-id="${prescription.id}" 
+                            data-medication-id="${med.medication.id}"
+                            title="حذف الدواء">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </td>
+            </tr>
+        `).join('');
+
+        return `
+            <div class="card mb-3 prescription-card" data-prescription-id="${prescription.id}">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="fas fa-prescription-bottle me-2 text-primary"></i>
+                        ${prescription.name}
+                    </h5>
+                    <div>
+                        <button class="btn btn-sm btn-outline-primary toggle-prescription-btn" 
+                                type="button" 
+                                data-prescription-id="${prescription.id}">
+                            <i class="fas fa-eye"></i> عرض الأدوية
+                        </button>
+                        <button type="button" 
+                                class="btn btn-sm btn-danger delete-prescription-btn" 
+                                data-prescription-id="${prescription.id}"
+                                title="حذف الوصفة">
+                            <i class="fas fa-trash"></i> حذف
+                        </button>
+                    </div>
+                </div>
+                <div class="prescription-details" id="prescription-${prescription.id}" style="display: none;">
+                    <div class="card-body">
+                        <h6 class="mb-3">
+                            <i class="fas fa-pills me-2"></i>
+                            الأدوية المضافة (${prescription.medications.length}):
+                        </h6>
+                        
+                        ${prescription.medications.length > 0 ? `
+                            <div class="table-responsive mb-4">
+                                <table class="table table-hover table-bordered">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>الدواء</th>
+                                            <th>الجرعة</th>
+                                            <th>الكمية/المدة</th>
+                                            <th>التعليمات</th>
+                                            <th width="80">الإجراءات</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${medicationsHtml}
+                                    </tbody>
+                                </table>
+                            </div>
+                        ` : `
+                            <div class="alert alert-warning text-center mb-4">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                لا توجد أدوية مضافة لهذه الوصفة
+                            </div>
+                        `}
+                        
+                        <hr>
+                        <h6 class="mb-3">
+                            <i class="fas fa-plus me-2"></i>
+                            إضافة دواء جديد:
+                        </h6>
+                        <div class="add-medication-form" data-prescription-id="${prescription.id}">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <label class="form-label">الدواء:</label>
+                                    <div class="medication-search-wrapper">
+                                        <input type="text" 
+                                               class="form-control medication-search" 
+                                               placeholder="البحث عن دواء..."
+                                               data-prescription-id="${prescription.id}"
+                                               autocomplete="off">
+                                        <div class="selected-medication mt-1" style="display: none;">
+                                            <small class="text-muted">الدواء المختار: </small>
+                                            <span class="badge bg-primary selected-med-name"></span>
+                                            <button type="button" class="btn btn-sm btn-outline-secondary ms-1 clear-selection">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label">الكمية/المدة:</label>
+                                    <input type="text" 
+                                           class="form-control quantity-input" 
+                                           placeholder="مثل: 3 أيام، 10 حبات"
+                                           data-prescription-id="${prescription.id}">
+                                </div>
+                                <div class="col-md-5">
+                                    <label class="form-label">التعليمات:</label>
+                                    <input type="text" 
+                                           class="form-control instructions-input" 
+                                           placeholder="مثل: حبة واحدة كل 8 ساعات بعد الأكل"
+                                           data-prescription-id="${prescription.id}">
+                                </div>
+                                <div class="col-md-2 d-flex align-items-end">
+                                    <button type="button" 
+                                            class="btn btn-success w-100 add-medication-btn" 
+                                            data-prescription-id="${prescription.id}">
+                                        <i class="fas fa-plus"></i> إضافة
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    // إضافة وصفة جديدة
+    function addPrescription(name) {
+        console.log('➕ إضافة وصفة جديدة:', name);
+        
+        // تعطيل الزر أثناء الإرسال
+        addPrescriptionBtn.disabled = true;
+        addPrescriptionBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الإضافة...';
+        
+        const data = { name: name };
+        
+        fetch('/doctor/api/predefined_prescriptions', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('📥 استجابة إضافة الوصفة:', data);
+            if (data.success) {
+                showAlert('تم إضافة الوصفة بنجاح!', 'success');
+                prescriptionNameInput.value = '';
+                loadPredefinedPrescriptions();
+            } else {
+                showAlert(data.message || 'خطأ في إضافة الوصفة', 'danger');
+            }
+        })
+        .catch(error => {
+            console.error('❌ خطأ:', error);
+            showAlert('خطأ في إضافة الوصفة', 'danger');
+        })
+        .finally(() => {
+            // إعادة تفعيل الزر
+            addPrescriptionBtn.disabled = false;
+            addPrescriptionBtn.innerHTML = '<i class="fas fa-plus"></i> Ajouter l\'ordonnance';
+        });
+    }
+
+    // حذف وصفة
+    function deletePrescription(prescriptionId) {
+        console.log('🗑️ حذف وصفة:', prescriptionId);
+        
+        if (!confirm('هل أنت متأكد من حذف هذه الوصفة؟ سيتم حذف جميع الأدوية المرتبطة بها.')) {
+            return;
+        }
+
+        fetch(`/doctor/api/predefined_prescriptions/${prescriptionId}`, {
+            method: 'DELETE'
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('📥 استجابة حذف الوصفة:', data);
+            if (data.success) {
+                showAlert('تم حذف الوصفة بنجاح!', 'success');
+                loadPredefinedPrescriptions();
+            } else {
+                showAlert(data.message || 'خطأ في حذف الوصفة', 'danger');
+            }
+        })
+        .catch(error => {
+            console.error('❌ خطأ:', error);
+            showAlert('خطأ في حذف الوصفة', 'danger');
+        });
+    }
+
+    // البحث في الأدوية
+    function searchMedications(searchInput, prescriptionId) {
+        const searchTerm = searchInput.value.toLowerCase().trim();
+        
+        // إزالة القائمة السابقة
+        const existingDropdown = document.getElementById(`medication-dropdown-${prescriptionId}`);
+        if (existingDropdown) {
+            existingDropdown.remove();
+        }
+        
+        if (searchTerm.length < 2) {
+            return;
+        }
+
+        const filteredMeds = availableMedications.filter(med => 
+            med.name.toLowerCase().includes(searchTerm) || 
+            (med.dosage && med.dosage.toLowerCase().includes(searchTerm))
+        );
+
+        if (filteredMeds.length > 0) {
+            createMedicationDropdown(searchInput, filteredMeds, prescriptionId);
+        }
+    }
+
+    // إنشاء القائمة المنسدلة للأدوية
+    function createMedicationDropdown(searchInput, medications, prescriptionId) {
+        const dropdown = document.createElement('div');
+        dropdown.id = `medication-dropdown-${prescriptionId}`;
+        dropdown.className = 'medication-dropdown';
+        
+        let dropdownHTML = '';
+        medications.slice(0, 10).forEach(med => {
+            const displayName = med.dosage ? `${med.name} (${med.dosage})` : med.name;
+            dropdownHTML += `
+                <div class="dropdown-item medication-option p-2 border-bottom" 
+                     data-id="${med.id}" 
+                     data-name="${med.name}"
+                     data-dosage="${med.dosage || ''}"
+                     data-prescription-id="${prescriptionId}"
+                     style="cursor: pointer;">
+                    <div class="fw-bold">${med.name}</div>
+                    ${med.dosage ? `<small class="text-muted">${med.dosage}</small>` : ''}
+                </div>
+            `;
+        });
+        
+        if (medications.length > 10) {
+            dropdownHTML += `
+                <div class="p-2 text-center text-muted">
+                    <small>... و ${medications.length - 10} نتائج أخرى</small>
+                </div>
+            `;
+        }
+        
+        dropdown.innerHTML = dropdownHTML;
+        
+        // حساب الموضع
+        const inputRect = searchInput.getBoundingClientRect();
+        dropdown.style.position = 'fixed';
+        dropdown.style.top = inputRect.bottom + 'px';
+        dropdown.style.left = inputRect.left + 'px';
+        dropdown.style.width = inputRect.width + 'px';
+        dropdown.style.zIndex = '10001';
+        dropdown.style.display = 'block';
+        dropdown.style.pointerEvents = 'auto';
+        
+        dropdownContainer.appendChild(dropdown);
+    }
+
+    // اختيار دواء
+    function selectMedication(option, prescriptionId) {
+        const form = document.querySelector(`.add-medication-form[data-prescription-id="${prescriptionId}"]`);
+        const searchInput = form.querySelector('.medication-search');
+        const selectedDiv = form.querySelector('.selected-medication');
+        const selectedName = form.querySelector('.selected-med-name');
+        
+        const medicationData = {
+            id: option.getAttribute('data-id'),
+            name: option.getAttribute('data-name'),
+            dosage: option.getAttribute('data-dosage')
+        };
+        
+        const displayName = medicationData.dosage ? 
+            `${medicationData.name} (${medicationData.dosage})` : 
+            medicationData.name;
+        
+        selectedName.textContent = displayName;
+        selectedDiv.style.display = 'block';
+        searchInput.style.display = 'none';
+        searchInput.setAttribute('data-selected-id', medicationData.id);
+        
+        // إزالة القائمة المنسدلة
+        const dropdown = document.getElementById(`medication-dropdown-${prescriptionId}`);
+        if (dropdown) {
+            dropdown.remove();
+        }
+    }
+
+    // مسح اختيار الدواء
+    function clearMedicationSelection(form) {
+        const searchInput = form.querySelector('.medication-search');
+        const selectedDiv = form.querySelector('.selected-medication');
+        
+        selectedDiv.style.display = 'none';
+        searchInput.style.display = 'block';
+        searchInput.value = '';
+        searchInput.removeAttribute('data-selected-id');
+        searchInput.focus();
+    }
+
+    // إضافة دواء للوصفة
+    function addMedicationToPrescription(prescriptionId) {
+        console.log('➕ إضافة دواء للوصفة:', prescriptionId);
+        
+        const form = document.querySelector(`.add-medication-form[data-prescription-id="${prescriptionId}"]`);
+        const searchInput = form.querySelector('.medication-search');
+        const quantityInput = form.querySelector('.quantity-input');
+        const instructionsInput = form.querySelector('.instructions-input');
+        const addBtn = form.querySelector('.add-medication-btn');
+        
+        const medicationId = searchInput.getAttribute('data-selected-id');
+        const quantity = quantityInput.value.trim();
+        const instructions = instructionsInput.value.trim();
+        
+        console.log('📊 بيانات الدواء:', { medicationId, quantity, instructions });
+        
+        if (!medicationId) {
+            showAlert('يرجى اختيار دواء', 'warning');
+            return;
+        }
+        
+        if (!instructions) {
+            showAlert('يرجى إدخال التعليمات', 'warning');
+            return;
+        }
+        
+        // تعطيل الزر أثناء الإرسال
+        addBtn.disabled = true;
+        addBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الإضافة...';
+        
+        const data = {
+            medication_id: medicationId,
+            quantity: quantity,
+            instructions: instructions
+        };
+        
+        fetch(`/doctor/api/predefined_prescriptions/${prescriptionId}/medications`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('📥 استجابة إضافة الدواء:', data);
+            if (data.success) {
+                showAlert('تم إضافة الدواء بنجاح!', 'success');
+                clearMedicationSelection(form);
+                quantityInput.value = '';
+                instructionsInput.value = '';
+                loadPredefinedPrescriptions();
+            } else {
+                showAlert(data.message || 'خطأ في إضافة الدواء', 'danger');
+            }
+        })
+        .catch(error => {
+            console.error('❌ خطأ:', error);
+            showAlert('خطأ في إضافة الدواء', 'danger');
+        })
+        .finally(() => {
+            // إعادة تفعيل الزر
+            addBtn.disabled = false;
+            addBtn.innerHTML = '<i class="fas fa-plus"></i> إضافة';
+        });
+    }
+
+    // حذف دواء من الوصفة
+    function removeMedicationFromPrescription(prescriptionId, medicationId) {
+        console.log('❌ حذف دواء من الوصفة:', prescriptionId, medicationId);
+        
+        if (!confirm('هل أنت متأكد من حذف هذا الدواء؟')) {
+            return;
+        }
+
+        fetch(`/doctor/api/predefined_prescriptions/${prescriptionId}/medications/${medicationId}`, {
+            method: 'DELETE'
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('📥 استجابة حذف الدواء:', data);
+            if (data.success) {
+                showAlert('تم حذف الدواء بنجاح!', 'success');
+                loadPredefinedPrescriptions();
+            } else {
+                showAlert(data.message || 'خطأ في حذف الدواء', 'danger');
+            }
+        })
+        .catch(error => {
+            console.error('❌ خطأ:', error);
+            showAlert('خطأ في حذف الدواء', 'danger');
+        });
+    }
+
+    // عرض رسالة تنبيه
+    function showAlert(message, type) {
+        console.log('🔔 عرض تنبيه:', message, type);
+        
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+        alertDiv.style.top = '20px';
+        alertDiv.style.right = '20px';
+        alertDiv.style.zIndex = '10002';
+        alertDiv.style.minWidth = '300px';
+        
+        alertDiv.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        
+        document.body.appendChild(alertDiv);
+        
+        // إزالة التنبيه تلقائياً بعد 5 ثوان
+        setTimeout(() => {
+            if (alertDiv.parentNode) {
+                alertDiv.remove();
+            }
+        }, 5000);
+    }
+
+    // تحميل البيانات عند تحميل الصفحة
+    console.log('🔄 بدء تحميل البيانات...');
+    loadPredefinedPrescriptions();
+});
 </script>
 {% endblock scripts %}
+
+{% block styles %}
+<style>
+.card {
+    border: none;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    transition: box-shadow 0.15s ease-in-out;
+}
+
+.card:hover {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+.card-header {
+    font-weight: 600;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+}
+
+.table th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+    border-top: none;
+}
+
+.table td {
+    vertical-align: middle;
+}
+
+.btn-lg {
+    font-size: 1.1rem;
+    font-weight: 500;
+}
+
+.alert {
+    border: none;
+    border-radius: 0.5rem;
+}
+
+.breadcrumb-item a {
+    text-decoration: none;
+}
+
+.breadcrumb-item a:hover {
+    text-decoration: underline;
+}
+
+/* Styles pour la recherche de médicaments */
+.medication-search-wrapper {
+    position: relative;
+}
+
+.medication-dropdown {
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    background-color: white;
+    max-height: 200px;
+    overflow-y: auto;
+    position: fixed;
+    z-index: 10001;
+    pointer-events: auto;
+}
+
+.medication-option {
+    transition: background-color 0.15s ease-in-out;
+    border-bottom: 1px solid #f8f9fa;
+}
+
+.medication-option:hover {
+    background-color: #f8f9fa !important;
+}
+
+.medication-option:last-child {
+    border-bottom: none;
+}
+
+.selected-medication .badge {
+    font-size: 0.875rem;
+    padding: 0.5rem 0.75rem;
+}
+
+.prescription-card {
+    transition: transform 0.2s ease-in-out;
+}
+
+.prescription-card:hover {
+    transform: translateY(-2px);
+}
+
+.form-control:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+.table-responsive {
+    border-radius: 0.375rem;
+    overflow: hidden;
+}
+
+.btn-sm {
+    font-size: 0.875rem;
+}
+
+.alert-dismissible {
+    padding-right: 3rem;
+}
+
+.form-label {
+    font-weight: 600;
+    color: #495057;
+}
+
+.spinner-border {
+    width: 3rem;
+    height: 3rem;
+}
+
+/* تحسين الأزرار */
+.btn {
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+}
+
+.btn:disabled {
+    cursor: not-allowed;
+    transform: none;
+}
+</style>
+{% endblock styles %}

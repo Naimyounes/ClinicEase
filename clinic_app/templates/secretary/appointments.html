@@ -3,50 +3,50 @@
 {% block content %}
 <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1>إدارة المواعيد</h1>
+        <h1>Gestion des rendez-vous</h1>
         <div>
             <a href="{{ url_for('secretary.create_appointment') }}" class="btn btn-primary">
-                <i class="fas fa-calendar-plus"></i> حجز موعد جديد
+                <i class="fas fa-calendar-plus"></i> Nouveau rendez-vous
             </a>
         </div>
     </div>
 
-    <!-- فلاتر البحث -->
+    <!-- Filtres de recherche -->
     <div class="card mb-4">
         <div class="card-body">
             <div class="row">
                 <div class="col-md-4">
-                    <label class="form-label">فلترة حسب الحالة:</label>
+                    <label class="form-label">Filtrer par statut:</label>
                     <select class="form-select" id="status-filter" onchange="applyFilters()">
-                        <option value="all" {{ 'selected' if status_filter == 'all' else '' }}>جميع الحالات</option>
-                        <option value="مجدول" {{ 'selected' if status_filter == 'مجدول' else '' }}>مجدول</option>
-                        <option value="مكتمل" {{ 'selected' if status_filter == 'مكتمل' else '' }}>مكتمل</option>
-                        <option value="ملغي" {{ 'selected' if status_filter == 'ملغي' else '' }}>ملغي</option>
-                        <option value="فائت" {{ 'selected' if status_filter == 'فائت' else '' }}>فائت</option>
+                        <option value="all" {{ 'selected' if status_filter == 'all' else '' }}>Tous les statuts</option>
+                        <option value="Programmé" {{ 'selected' if status_filter == 'Programmé' else '' }}>Programmé</option>
+                        <option value="Terminé" {{ 'selected' if status_filter == 'Terminé' else '' }}>Terminé</option>
+                        <option value="Annulé" {{ 'selected' if status_filter == 'Annulé' else '' }}>Annulé</option>
+                        <option value="Manqué" {{ 'selected' if status_filter == 'Manqué' else '' }}>Manqué</option>
                     </select>
                 </div>
                 <div class="col-md-4">
-                    <label class="form-label">فلترة حسب الطبيب:</label>
+                    <label class="form-label">Filtrer par médecin:</label>
                     <select class="form-select" id="doctor-filter" onchange="applyFilters()">
-                        <option value="all" {{ 'selected' if doctor_filter == 'all' else '' }}>جميع الأطباء</option>
+                        <option value="all" {{ 'selected' if doctor_filter == 'all' else '' }}>Tous les médecins</option>
                         {% for doctor in doctors %}
                             <option value="{{ doctor.id }}" {{ 'selected' if doctor_filter == doctor.id|string else '' }}>
-                                د. {{ doctor.username }}
+                                Dr. {{ doctor.username }}
                             </option>
                         {% endfor %}
                     </select>
                 </div>
                 <div class="col-md-4 d-flex align-items-end">
-                    <span class="badge bg-info fs-6">إجمالي المواعيد: {{ appointments.total }}</span>
+                    <span class="badge bg-info fs-6">Total des rendez-vous: {{ appointments.total }}</span>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- قائمة المواعيد -->
+    <!-- Liste des rendez-vous -->
     <div class="card">
         <div class="card-header bg-primary text-white">
-            <h5 class="mb-0">المواعيد المجدولة</h5>
+            <h5 class="mb-0">Rendez-vous programmés</h5>
         </div>
         <div class="card-body">
             {% if appointments.items %}

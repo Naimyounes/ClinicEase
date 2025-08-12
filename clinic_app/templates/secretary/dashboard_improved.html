@@ -1,13 +1,13 @@
 {% extends "layout.html" %}
 {% block content %}
-<div class="container-fluid px-3">
-    <!-- ترحيب وإحصائيات سريعة -->
+<div class="container-fluid secretary-dashboard px-3">
+    <!-- Accueil et statistiques rapides -->
     <div class="row mb-3">
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center">
                 <div>
-                    <h2 class="text-primary mb-1">مرحباً، {{ current_user.username }}</h2>
-                    <p class="text-muted mb-0">{{ get_arabic_date() }}</p>
+                    <h2 class="text-primary mb-1">Bienvenue, {{ current_user.username }}</h2>
+                    <p class="text-muted mb-0" id="current-date"></p>
                 </div>
                 <div class="text-end">
                     <span class="badge bg-primary fs-6 px-3 py-2">
@@ -20,260 +20,261 @@
     </div>
 
     <!-- الإحصائيات اليومية المحسنة -->
-    <div class="row mb-3">
+    <div class="row mb-3 dashboard-stats-row">
         <div class="col-xl-2 col-lg-3 col-md-4 col-6 mb-2">
-            <div class="card bg-gradient-primary text-white h-100">
-                <div class="card-body p-2">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="card-title text-white-50 mb-1 small">مرضى اليوم</h6>
-                            <h4 class="mb-0">{{ daily_stats.patients_today or 0 }}</h4>
-                        </div>
-                        <i class="fas fa-user-plus fa-lg"></i>
+            <div class="card dashboard-card card-patients text-white">
+                <div class="card-body">
+                    <div>
+                        <h6 class="card-title">Patients du jour</h6>
+                        <h4 class="mb-0">{{ daily_stats.patients_today or 0 }}</h4>
                     </div>
+                    <i class="fas fa-user-plus"></i>
                 </div>
             </div>
         </div>
         
         <div class="col-xl-2 col-lg-3 col-md-4 col-6 mb-2">
-            <div class="card bg-gradient-warning text-white h-100">
-                <div class="card-body p-2">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="card-title text-white-50 mb-1 small">في الانتظار</h6>
-                            <h4 class="mb-0">{{ waiting_tickets|length }}</h4>
-                        </div>
-                        <i class="fas fa-hourglass-half fa-lg"></i>
+            <div class="card dashboard-card card-waiting text-white">
+                <div class="card-body">
+                    <div>
+                        <h6 class="card-title">En attente</h6>
+                        <h4 class="mb-0">{{ waiting_tickets|length }}</h4>
                     </div>
+                    <i class="fas fa-hourglass-half"></i>
                 </div>
             </div>
         </div>
         
         <div class="col-xl-2 col-lg-3 col-md-4 col-6 mb-2">
             {% if last_unpaid_visit %}
-                <div class="card bg-gradient-orange text-white h-100 clickable-card" 
-                     onclick="markLastVisitAsPaid({{ last_unpaid_visit.id }})" 
-                     style="cursor: pointer;" 
-                     title="انقر لتحديد كمدفوع"
+                <div class="card dashboard-card card-unpaid text-white clickable-card" 
+                     onclick="markLastVisitAsPaid({{ last_unpaid_visit.id }})"
+                     title="Cliquer pour marquer comme payé"
                      id="unpaid-visit-card-{{ last_unpaid_visit.id }}">
-                    <div class="card-body p-2">
-                        <div class="text-center">
-                            <h6 class="card-title text-white-50 mb-1 small">آخر مريض غير مدفوع</h6>
-                            <h6 class="mb-1 text-white">{{ last_unpaid_visit.patient.full_name }}</h6>
-                            <h5 class="mb-2 text-white">
+                    <div class="card-body">
+                        <div>
+                            <h6 class="card-title">Patient non payé</h6>
+                            <h4 class="mb-0">
                                 {% if last_unpaid_visit.price %}
-                                    {{ last_unpaid_visit.price }} ل.س
+                                    {{ last_unpaid_visit.price }} <small>DA</small>
                                 {% else %}
-                                    غير محدد
+                                    Non défini
                                 {% endif %}
-                            </h5>
-                            <small class="text-white-75">
-                                <i class="fas fa-hand-pointer me-1"></i>انقر للتحديد كمدفوع
-                            </small>
+                            </h4>
+                            <small class="text-white-75">{{ last_unpaid_visit.patient.full_name }}</small>
                         </div>
+                        <i class="fas fa-money-bill-wave"></i>
                     </div>
                 </div>
             {% else %}
-                <div class="card bg-gradient-success text-white h-100">
-                    <div class="card-body p-2">
-                        <div class="text-center">
-                            <h6 class="card-title text-white-50 mb-1 small">آخر مريض غير مدفوع</h6>
-                            <div class="mb-2">
-                                <i class="fas fa-check-circle fa-2x text-white-75"></i>
-                            </div>
-                            <p class="mb-0 text-white-75">جميع المدفوعات محدثة</p>
+                <div class="card dashboard-card card-revenue text-white">
+                    <div class="card-body">
+                        <div>
+                            <h6 class="card-title">Dernier patient non payé</h6>
+                            <h4 class="mb-0">Tous payés</h4>
+                            <small class="text-white-75">Paiements à jour</small>
                         </div>
+                        <i class="fas fa-check-circle"></i>
                     </div>
                 </div>
             {% endif %}
         </div>
         
         <div class="col-xl-2 col-lg-3 col-md-4 col-6 mb-2">
-            <div class="card bg-gradient-danger text-white h-100">
-                <div class="card-body p-2">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="card-title text-white-50 mb-1 small">مدفوعات مستحقة</h6>
-                            <h4 class="mb-0">{{ total_pending_amount or 0 }} <small>ريال</small></h4>
-                        </div>
-                        <i class="fas fa-exclamation-triangle fa-lg"></i>
+            <div class="card dashboard-card card-pending-payments text-white">
+                <div class="card-body">
+                    <div>
+                        <h6 class="card-title">Paiements en attente</h6>
+                        <h4 class="mb-0">{{ total_pending_amount or 0 }} <small>DA</small></h4>
                     </div>
+                    <i class="fas fa-exclamation-triangle"></i>
                 </div>
             </div>
         </div>
 
         <div class="col-xl-2 col-lg-3 col-md-4 col-6 mb-2">
-            <div class="card bg-gradient-info text-white h-100">
-                <div class="card-body p-2">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="card-title text-white-50 mb-1 small">زيارات اليوم</h6>
-                            <h4 class="mb-0">{{ daily_stats.visits_today or 0 }}</h4>
-                        </div>
-                        <i class="fas fa-stethoscope fa-lg"></i>
+            <div class="card dashboard-card card-visits text-white">
+                <div class="card-body">
+                    <div>
+                        <h6 class="card-title">Visites du jour</h6>
+                        <h4 class="mb-0">{{ daily_stats.visits_today or 0 }}</h4>
                     </div>
+                    <i class="fas fa-stethoscope"></i>
                 </div>
             </div>
         </div>
 
         <div class="col-xl-2 col-lg-3 col-md-4 col-6 mb-2">
-            <div class="card bg-gradient-secondary text-white h-100">
-                <div class="card-body p-2">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="card-title text-white-50 mb-1 small">مرضى جدد</h6>
-                            <h4 class="mb-0">{{ recent_patients|length or 0 }}</h4>
-                        </div>
-                        <i class="fas fa-user-plus fa-lg"></i>
+            <div class="card dashboard-card card-payments text-white">
+                <div class="card-body">
+                    <div>
+                        <h6 class="card-title">Paiements du jour</h6>
+                        <h4 class="mb-0">{{ daily_stats.total_paid_today or 0 }} <small>DA</small></h4>
+                        <small class="text-white-75">{{ daily_stats.paid_visits_count or 0 }} visites</small>
                     </div>
+                    <i class="fas fa-money-bill-wave"></i>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- إجراءات سريعة شاملة -->
+    <!-- Actions rapides complètes -->
     <div class="row">
         <div class="col-12">
-            <div class="card shadow-sm">
-                <div class="card-header bg-light">
-                    <h5 class="mb-0">
-                        <i class="fas fa-bolt me-2"></i>جميع المهام والصلاحيات
+            <div class="card shadow-lg border-0 actions-card">
+                <div class="card-header bg-gradient-primary text-white border-0">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="fas fa-bolt me-2"></i>Toutes les tâches et permissions
                     </h5>
                 </div>
-                <div class="card-body p-3">
-                    <!-- الصف الأول - إدارة المرضى -->
-                    <div class="row mb-3">
-                        <div class="col-12 mb-2">
-                            <h6 class="text-primary border-bottom pb-1 mb-2">
-                                <i class="fas fa-users me-1"></i>إدارة المرضى
+                <div class="card-body p-4">
+                    <!-- Section Gestion des patients -->
+                    <div class="action-section mb-4">
+                        <div class="section-header mb-3">
+                            <h6 class="text-primary fw-bold border-bottom border-primary pb-2 mb-3">
+                                <i class="fas fa-users me-2"></i>Gestion des patients
                             </h6>
                         </div>
-                        <div class="col-xl-2 col-lg-3 col-md-4 col-6 mb-2">
-                            <a href="{{ url_for('secretary.new_patient') }}" class="btn btn-outline-primary w-100 btn-sm d-flex flex-column align-items-center py-2">
-                                <i class="fas fa-user-plus fa-lg mb-1"></i>
-                                <span class="small">تسجيل مريض جديد</span>
-                            </a>
-                        </div>
-                        <div class="col-xl-2 col-lg-3 col-md-4 col-6 mb-2">
-                            <a href="{{ url_for('secretary.list_patients') }}" class="btn btn-outline-success w-100 btn-sm d-flex flex-column align-items-center py-2">
-                                <i class="fas fa-users fa-lg mb-1"></i>
-                                <span class="small">قائمة المرضى</span>
-                            </a>
-                        </div>
-                        <div class="col-xl-2 col-lg-3 col-md-4 col-6 mb-2">
-                            <a href="{{ url_for('secretary.waiting_queue') }}" class="btn btn-outline-warning w-100 btn-sm d-flex flex-column align-items-center py-2 position-relative">
-                                <i class="fas fa-list-alt fa-lg mb-1"></i>
-                                <span class="small">إدارة قائمة الانتظار</span>
-                                {% if waiting_tickets|length > 0 %}
-                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-warning">
-                                        {{ waiting_tickets|length }}
-                                    </span>
-                                {% endif %}
-                            </a>
-                        </div>
-                        <div class="col-xl-2 col-lg-3 col-md-4 col-6 mb-2">
-                            <button type="button" class="btn btn-outline-primary w-100 btn-sm d-flex flex-column align-items-center py-2" onclick="searchPatient()">
-                                <i class="fas fa-search fa-lg mb-1"></i>
-                                <span class="small">البحث عن مريض</span>
-                            </button>
-                        </div>
-                        <div class="col-xl-2 col-lg-3 col-md-4 col-6 mb-2">
-                            <a href="{{ url_for('secretary.create_ticket_page') }}" class="btn btn-outline-success w-100 btn-sm d-flex flex-column align-items-center py-2">
-                                <i class="fas fa-ticket-alt fa-lg mb-1"></i>
-                                <span class="small">إنشاء تذكرة سريعة</span>
-                            </a>
-                        </div>
-                        <div class="col-xl-2 col-lg-3 col-md-4 col-6 mb-2">
-                            <a href="{{ url_for('secretary.create_appointment') }}" class="btn btn-outline-primary w-100 btn-sm d-flex flex-column align-items-center py-2">
-                                <i class="fas fa-calendar-plus fa-lg mb-1"></i>
-                                <span class="small">حجز موعد جديد</span>
-                            </a>
-                        </div>
-                        <div class="col-xl-2 col-lg-3 col-md-4 col-6 mb-2">
-                            <a href="{{ url_for('secretary.upcoming_appointments') }}" class="btn btn-outline-warning w-100 btn-sm d-flex flex-column align-items-center py-2">
-                                <i class="fas fa-phone fa-lg mb-1"></i>
-                                <span class="small">الاتصال بالمواعيد</span>
-                            </a>
+                        <div class="row g-2">
+                            <div class="col-xl-2 col-lg-3 col-md-4 col-6">
+                                <a href="{{ url_for('secretary.new_patient') }}" class="btn btn-outline-primary w-100 action-btn d-flex flex-column align-items-center py-3">
+                                    <i class="fas fa-user-plus fa-lg mb-2 text-primary"></i>
+                                    <span class="small fw-medium">Nouveau patient</span>
+                                </a>
+                            </div>
+                            <div class="col-xl-2 col-lg-3 col-md-4 col-6">
+                                <a href="{{ url_for('secretary.list_patients') }}" class="btn btn-outline-success w-100 action-btn d-flex flex-column align-items-center py-3">
+                                    <i class="fas fa-users fa-lg mb-2 text-success"></i>
+                                    <span class="small fw-medium">Liste des patients</span>
+                                </a>
+                            </div>
+                            <div class="col-xl-2 col-lg-3 col-md-4 col-6">
+                                <a href="{{ url_for('secretary.waiting_queue') }}" class="btn btn-outline-warning w-100 action-btn d-flex flex-column align-items-center py-3 position-relative">
+                                    <i class="fas fa-list-alt fa-lg mb-2 text-warning"></i>
+                                    <span class="small fw-medium">Liste d'attente</span>
+                                    {% if waiting_tickets|length > 0 %}
+                                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-warning text-dark">
+                                            {{ waiting_tickets|length }}
+                                        </span>
+                                    {% endif %}
+                                </a>
+                            </div>
+                            <div class="col-xl-2 col-lg-3 col-md-4 col-6">
+                                <button type="button" class="btn btn-outline-info w-100 action-btn d-flex flex-column align-items-center py-3" onclick="searchPatient()">
+                                    <i class="fas fa-search fa-lg mb-2 text-info"></i>
+                                    <span class="small fw-medium">Rechercher patient</span>
+                                </button>
+                            </div>
+                            <div class="col-xl-2 col-lg-3 col-md-4 col-6">
+                                <a href="{{ url_for('secretary.create_ticket_page') }}" class="btn btn-outline-success w-100 action-btn d-flex flex-column align-items-center py-3">
+                                    <i class="fas fa-ticket-alt fa-lg mb-2 text-success"></i>
+                                    <span class="small fw-medium">Ticket rapide</span>
+                                </a>
+                            </div>
+                            <div class="col-xl-2 col-lg-3 col-md-4 col-6">
+                                <a href="{{ url_for('secretary.create_appointment') }}" class="btn btn-outline-primary w-100 action-btn d-flex flex-column align-items-center py-3">
+                                    <i class="fas fa-calendar-plus fa-lg mb-2 text-primary"></i>
+                                    <span class="small fw-medium">Nouveau RDV</span>
+                                </a>
+                            </div>
+                            <div class="col-xl-2 col-lg-3 col-md-4 col-6">
+                                <a href="{{ url_for('secretary.upcoming_appointments') }}" class="btn btn-outline-warning w-100 action-btn d-flex flex-column align-items-center py-3">
+                                    <i class="fas fa-phone fa-lg mb-2 text-warning"></i>
+                                    <span class="small fw-medium">Appeler RDV</span>
+                                </a>
+                            </div>
+                            <div class="col-xl-2 col-lg-3 col-md-4 col-6">
+                                <a href="{{ url_for('secretary.emergency_ticket') }}" class="btn btn-outline-danger w-100 action-btn d-flex flex-column align-items-center py-3 emergency-btn">
+                                    <i class="fas fa-exclamation-triangle fa-lg mb-2 text-danger"></i>
+                                    <span class="small fw-medium">Ticket d'urgence</span>
+                                </a>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- الصف الثالث - إدارة المدفوعات -->
-                    <div class="row mb-3">
-                        <div class="col-12 mb-2">
-                            <h6 class="text-danger border-bottom pb-1 mb-2">
-                                <i class="fas fa-money-bill-wave me-1"></i>إدارة المدفوعات
+                    <!-- Section Gestion des paiements -->
+                    <div class="action-section mb-4">
+                        <div class="section-header mb-3">
+                            <h6 class="text-danger fw-bold border-bottom border-danger pb-2 mb-3">
+                                <i class="fas fa-money-bill-wave me-2"></i>Gestion des paiements
                             </h6>
                         </div>
-                        <div class="col-xl-2 col-lg-3 col-md-4 col-6 mb-2">
-                            <a href="{{ url_for('secretary.payments') }}" class="btn btn-outline-danger w-100 btn-sm d-flex flex-column align-items-center py-2 position-relative">
-                                <i class="fas fa-money-bill-wave fa-lg mb-1"></i>
-                                <span class="small">إدارة المدفوعات</span>
-                                {% if pending_payments|length > 0 %}
-                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                                        {{ pending_payments|length }}
-                                    </span>
-                                {% endif %}
-                            </a>
+                        <div class="row g-2">
+                            <div class="col-xl-2 col-lg-3 col-md-4 col-6">
+                                <a href="{{ url_for('secretary.payments') }}" class="btn btn-outline-danger w-100 action-btn d-flex flex-column align-items-center py-3 position-relative">
+                                    <i class="fas fa-money-bill-wave fa-lg mb-2 text-danger"></i>
+                                    <span class="small fw-medium">Gérer paiements</span>
+                                    {% if pending_payments|length > 0 %}
+                                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                            {{ pending_payments|length }}
+                                        </span>
+                                    {% endif %}
+                                </a>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- الصف الثالث - تقارير وإحصائيات -->
-                    <div class="row mb-3">
-                        <div class="col-12 mb-2">
-                            <h6 class="text-success border-bottom pb-1 mb-2">
-                                <i class="fas fa-chart-line me-1"></i>التقارير والإحصائيات
+                    <!-- Section Rapports et statistiques -->
+                    <div class="action-section mb-4">
+                        <div class="section-header mb-3">
+                            <h6 class="text-success fw-bold border-bottom border-success pb-2 mb-3">
+                                <i class="fas fa-chart-line me-2"></i>Rapports et statistiques
                             </h6>
                         </div>
-                        <div class="col-xl-2 col-lg-3 col-md-4 col-6 mb-2">
-                            <button type="button" class="btn btn-outline-success w-100 btn-sm d-flex flex-column align-items-center py-2" onclick="showDailyReport()">
-                                <i class="fas fa-chart-bar fa-lg mb-1"></i>
-                                <span class="small">تقرير يومي</span>
-                            </button>
-                        </div>
-                        <div class="col-xl-2 col-lg-3 col-md-4 col-6 mb-2">
-                            <button type="button" class="btn btn-outline-info w-100 btn-sm d-flex flex-column align-items-center py-2" onclick="showPatientStats()">
-                                <i class="fas fa-users fa-lg mb-1"></i>
-                                <span class="small">إحصائيات المرضى</span>
-                            </button>
-                        </div>
-                        <div class="col-xl-2 col-lg-3 col-md-4 col-6 mb-2">
-                            <button type="button" class="btn btn-outline-warning w-100 btn-sm d-flex flex-column align-items-center py-2" onclick="showPaymentReport()">
-                                <i class="fas fa-money-check-alt fa-lg mb-1"></i>
-                                <span class="small">تقرير المدفوعات</span>
-                            </button>
+                        <div class="row g-2">
+                            <div class="col-xl-2 col-lg-3 col-md-4 col-6">
+                                <button type="button" class="btn btn-outline-success w-100 action-btn d-flex flex-column align-items-center py-3" onclick="showDailyReport()">
+                                    <i class="fas fa-chart-bar fa-lg mb-2 text-success"></i>
+                                    <span class="small fw-medium">Rapport quotidien</span>
+                                </button>
+                            </div>
+                            <div class="col-xl-2 col-lg-3 col-md-4 col-6">
+                                <button type="button" class="btn btn-outline-info w-100 action-btn d-flex flex-column align-items-center py-3" onclick="showPatientStats()">
+                                    <i class="fas fa-users fa-lg mb-2 text-info"></i>
+                                    <span class="small fw-medium">Stats patients</span>
+                                </button>
+                            </div>
+                            <div class="col-xl-2 col-lg-3 col-md-4 col-6">
+                                <button type="button" class="btn btn-outline-warning w-100 action-btn d-flex flex-column align-items-center py-3" onclick="showPaymentReport()">
+                                    <i class="fas fa-money-check-alt fa-lg mb-2 text-warning"></i>
+                                    <span class="small fw-medium">Rapport paiements</span>
+                                </button>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- الصف الرابع - أدوات إضافية -->
-                    <div class="row">
-                        <div class="col-12 mb-2">
-                            <h6 class="text-secondary border-bottom pb-1 mb-2">
-                                <i class="fas fa-tools me-1"></i>أدوات إضافية
+                    <!-- Section Outils supplémentaires -->
+                    <div class="action-section">
+                        <div class="section-header mb-3">
+                            <h6 class="text-secondary fw-bold border-bottom border-secondary pb-2 mb-3">
+                                <i class="fas fa-tools me-2"></i>Outils supplémentaires
                             </h6>
                         </div>
-                        <div class="col-xl-2 col-lg-3 col-md-4 col-6 mb-2">
-                            <button type="button" class="btn btn-outline-dark w-100 btn-sm d-flex flex-column align-items-center py-2" onclick="location.reload()">
-                                <i class="fas fa-sync-alt fa-lg mb-1"></i>
-                                <span class="small">تحديث البيانات</span>
-                            </button>
-                        </div>
-                        <div class="col-xl-2 col-lg-3 col-md-4 col-6 mb-2">
-                            <button type="button" class="btn btn-outline-primary w-100 btn-sm d-flex flex-column align-items-center py-2" onclick="printDashboard()">
-                                <i class="fas fa-print fa-lg mb-1"></i>
-                                <span class="small">طباعة التقرير</span>
-                            </button>
-                        </div>
-                        <div class="col-xl-2 col-lg-3 col-md-4 col-6 mb-2">
-                            <button type="button" class="btn btn-outline-info w-100 btn-sm d-flex flex-column align-items-center py-2" onclick="exportData()">
-                                <i class="fas fa-download fa-lg mb-1"></i>
-                                <span class="small">تصدير البيانات</span>
-                            </button>
-                        </div>
-                        <div class="col-xl-2 col-lg-3 col-md-4 col-6 mb-2">
-                            <button type="button" class="btn btn-outline-warning w-100 btn-sm d-flex flex-column align-items-center py-2" onclick="showHelp()">
-                                <i class="fas fa-question-circle fa-lg mb-1"></i>
-                                <span class="small">المساعدة</span>
-                            </button>
+                        <div class="row g-2">
+                            <div class="col-xl-2 col-lg-3 col-md-4 col-6">
+                                <button type="button" class="btn btn-outline-dark w-100 action-btn d-flex flex-column align-items-center py-3" onclick="location.reload()">
+                                    <i class="fas fa-sync-alt fa-lg mb-2 text-dark"></i>
+                                    <span class="small fw-medium">Actualiser</span>
+                                </button>
+                            </div>
+                            <div class="col-xl-2 col-lg-3 col-md-4 col-6">
+                                <button type="button" class="btn btn-outline-primary w-100 action-btn d-flex flex-column align-items-center py-3" onclick="printDashboard()">
+                                    <i class="fas fa-print fa-lg mb-2 text-primary"></i>
+                                    <span class="small fw-medium">Imprimer</span>
+                                </button>
+                            </div>
+                            <div class="col-xl-2 col-lg-3 col-md-4 col-6">
+                                <button type="button" class="btn btn-outline-info w-100 action-btn d-flex flex-column align-items-center py-3" onclick="exportData()">
+                                    <i class="fas fa-download fa-lg mb-2 text-info"></i>
+                                    <span class="small fw-medium">Exporter</span>
+                                </button>
+                            </div>
+                            <div class="col-xl-2 col-lg-3 col-md-4 col-6">
+                                <button type="button" class="btn btn-outline-warning w-100 action-btn d-flex flex-column align-items-center py-3" onclick="showHelp()">
+                                    <i class="fas fa-question-circle fa-lg mb-2 text-warning"></i>
+                                    <span class="small fw-medium">Aide</span>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -445,25 +446,30 @@
 {% block scripts %}
 <script>
 // تحديث الوقت الحالي
-function updateTime() {
+function updateDateTime() {
     const now = new Date();
-    const timeString = now.toLocaleTimeString('ar-SA', {
+    
+    // عرض التاريخ بالفرنسية
+    const dateString = now.toLocaleDateString('fr-FR', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    });
+    document.getElementById('current-date').textContent = dateString;
+    
+    // عرض الوقت
+    const timeString = now.toLocaleTimeString('fr-FR', {
         hour: '2-digit',
         minute: '2-digit',
         second: '2-digit'
     });
     document.getElementById('current-time').textContent = timeString;
-    
-    // تحديث وقت آخر تحديث
-    const lastUpdateElement = document.getElementById('last-update');
-    if (lastUpdateElement) {
-        lastUpdateElement.textContent = timeString;
-    }
 }
 
 // تحديث الوقت كل ثانية
-setInterval(updateTime, 1000);
-updateTime();
+setInterval(updateDateTime, 1000);
+updateDateTime();
 
 // تحديث الصفحة كل دقيقة للحصول على آخر التحديثات
 setInterval(function() {
@@ -506,7 +512,7 @@ document.querySelectorAll('a.btn').forEach(function(btn) {
 
 // وظائف الإجراءات السريعة
 function searchPatient() {
-    const patientName = prompt('أدخل اسم المريض أو رقم الهاتف:');
+    const patientName = prompt('Entrez le nom du patient ou le numéro de téléphone:');
     if (patientName && patientName.trim()) {
         window.location.href = `{{ url_for('secretary.list_patients') }}?search=${encodeURIComponent(patientName.trim())}`;
     }
@@ -543,19 +549,23 @@ function showDailyReport() {
             <div class="stats">
                 <div class="stat-box">
                     <div class="stat-number">{{ daily_stats.patients_today or 0 }}</div>
-                    <div>مرضى جدد اليوم</div>
+                    <div>Nouveaux patients اليوم</div>
                 </div>
                 <div class="stat-box">
                     <div class="stat-number">{{ waiting_tickets|length or 0 }}</div>
-                    <div>مرضى في الانتظار</div>
+                    <div>مرضى En attente</div>
                 </div>
                 <div class="stat-box">
                     <div class="stat-number">{{ daily_stats.visits_today or 0 }}</div>
-                    <div>زيارات اليوم</div>
+                    <div>Visites du jour</div>
                 </div>
                 <div class="stat-box">
-                    <div class="stat-number">{{ total_pending_amount or 0 }} ريال</div>
-                    <div>مدفوعات مستحقة</div>
+                    <div class="stat-number">{{ daily_stats.total_paid_today or 0 }} DA</div>
+                    <div>Paiements du jour</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number">{{ total_pending_amount or 0 }} DA</div>
+                    <div>Paiements en attente</div>
                 </div>
             </div>
             <button onclick="window.print()" style="margin: 20px auto; display: block; padding: 10px 20px;">طباعة</button>
@@ -565,21 +575,22 @@ function showDailyReport() {
 }
 
 function showPatientStats() {
-    alert(`إحصائيات المرضى:
+    alert(`Statistiques des patients:
     
-إجمالي المرضى: {{ daily_stats.total_patients or 0 }}
-مرضى جدد اليوم: {{ daily_stats.patients_today or 0 }}
-مرضى في الانتظار: {{ waiting_tickets|length or 0 }}
-زيارات اليوم: {{ daily_stats.visits_today or 0 }}`);
+Total des patients: {{ daily_stats.total_patients or 0 }}
+Nouveaux patients aujourd'hui: {{ daily_stats.patients_today or 0 }}
+Patients en attente: {{ waiting_tickets|length or 0 }}
+Visites du jour: {{ daily_stats.visits_today or 0 }}`);
 }
 
 function showPaymentReport() {
-    alert(`تقرير المدفوعات:
+    alert(`Rapport des paiements:
     
-عدد المدفوعات المستحقة: {{ pending_payments|length or 0 }}
-إجمالي المبلغ المستحق: {{ total_pending_amount or 0 }} ريال
+Paiements aujourd'hui: {{ daily_stats.total_paid_today or 0 }} DA ({{ daily_stats.paid_visits_count or 0 }} visites)
+Nombre de paiements en attente: {{ pending_payments|length or 0 }}
+Montant total en attente: {{ total_pending_amount or 0 }} DA
     
-للمزيد من التفاصيل، انتقل إلى صفحة إدارة المدفوعات.`);
+Pour plus de détails, allez à la page de gestion des paiements.`);
 }
 
 function printDashboard() {
@@ -587,7 +598,7 @@ function printDashboard() {
 }
 
 function exportData() {
-    alert('ميزة تصدير البيانات ستكون متاحة قريباً');
+    alert('La fonctionnalité d\'exportation des données sera bientôt disponible');
 }
 
 function markLastVisitAsPaid(visitId) {
@@ -595,17 +606,18 @@ function markLastVisitAsPaid(visitId) {
         // تغيير لون الكارت فوراً للإشارة للتحديث
         const card = document.getElementById(`unpaid-visit-card-${visitId}`);
         if (card) {
-            card.classList.remove('bg-gradient-orange');
-            card.classList.add('bg-gradient-success');
+            card.classList.remove('card-unpaid');
+            card.classList.add('card-revenue');
             card.innerHTML = `
-                <div class="card-body p-2">
-                    <div class="text-center">
-                        <h6 class="card-title text-white-50 mb-1 small">تم التحديث</h6>
-                        <div class="mb-2">
-                            <i class="fas fa-check-circle fa-2x text-white"></i>
-                        </div>
-                        <p class="mb-0 text-white">تم تحديد الزيارة كمدفوعة</p>
+                <div class="card-body">
+                    <div>
+                        <h6 class="card-title">جاري التحديث...</h6>
+                        <h4 class="mb-0">
+                            <i class="fas fa-spinner fa-spin"></i>
+                        </h4>
+                        <small class="text-white-75">يرجى الانتظار</small>
                     </div>
+                    <i class="fas fa-check-circle"></i>
                 </div>
             `;
             card.style.cursor = 'default';
@@ -614,7 +626,13 @@ function markLastVisitAsPaid(visitId) {
         
         // إرسال الطلب للخادم
         setTimeout(() => {
-            window.location.href = `/secretary/visit/${visitId}/mark_as_paid_get`;
+            try {
+                window.location.href = `{{ url_for('secretary.mark_visit_as_paid_get', visit_id=0) }}`.replace('0', visitId);
+            } catch (error) {
+                console.error('خطأ في التوجيه:', error);
+                alert('حدث خطأ، يرجى المحاولة مرة أخرى');
+                location.reload();
+            }
         }, 1000);
     }
 }
@@ -635,27 +653,27 @@ function showHelp() {
             <h1>دليل استخدام لوحة تحكم السكرتير</h1>
             
             <div class="help-section">
-                <div class="help-title">إدارة المرضى:</div>
+                <div class="help-title">Gestion des patients:</div>
                 <ul>
-                    <li>تسجيل مريض جديد: لإضافة مريض جديد للنظام</li>
-                    <li>قائمة المرضى: لعرض جميع المرضى المسجلين</li>
-                    <li>البحث عن مريض: للبحث السريع عن مريض معين</li>
+                    <li>Nouveau patient: Pour ajouter un nouveau patient au système</li>
+                    <li>Liste des patients: Pour afficher tous les patients enregistrés</li>
+                    <li>Rechercher patient: Pour rechercher rapidement un patient</li>
                 </ul>
             </div>
             
             <div class="help-section">
-                <div class="help-title">إدارة قائمة الانتظار:</div>
+                <div class="help-title">Gestion de la liste d'attente:</div>
                 <ul>
-                    <li>إدارة قائمة الانتظار: لإدارة المرضى المنتظرين</li>
-                    <li>إنشاء تذكرة سريعة: لإضافة مريض لقائمة الانتظار</li>
+                    <li>Liste d'attente: Pour gérer les patients en attente</li>
+                    <li>Ticket rapide: Pour ajouter un patient à la liste d'attente</li>
                 </ul>
             </div>
             
             <div class="help-section">
-                <div class="help-title">إدارة المدفوعات:</div>
+                <div class="help-title">Gestion des paiements:</div>
                 <ul>
-                    <li>إدارة المدفوعات: لمتابعة المدفوعات المستحقة</li>
-                    <li>تحديث حالة الدفع للزيارات</li>
+                    <li>Gérer paiements: Pour suivre les paiements en attente</li>
+                    <li>Mettre à jour le statut de paiement des visites</li>
                 </ul>
             </div>
         </body>
